@@ -30,12 +30,3 @@
 *.exe
 *.out
 *.app
-.vs/XRProject/v15/.suo
-.vs/XRProject/v15/Browse.VC.db
-.vs/XRProject/v15/Browse.VC.opendb
-.vs/XRProject/v15/Solution.VC.db
-.vs/XRProject/v15/Solution.VC.db-shm
-.vs/XRProject/v15/Solution.VC.db-wal
-Binaries/Win64/UE4Editor-XRProject.pdb
-Binaries/Win64/UE4Editor.modules
-Binaries/Win64/XRProjectEditor.target
