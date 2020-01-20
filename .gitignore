@@ -1,41 +1,6 @@
-# Prerequisites
-*.d
+.vs/
+Binaries/
+Intermediate/
+Saved/
+Content/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-.vs/XRProject/v15/.suo
-.vs/XRProject/v15/Browse.VC.db
-.vs/XRProject/v15/Browse.VC.opendb
-.vs/XRProject/v15/Solution.VC.db
-.vs/XRProject/v15/Solution.VC.db-shm
-.vs/XRProject/v15/Solution.VC.db-wal
-Binaries/Win64/UE4Editor-XRProject.pdb
-Binaries/Win64/UE4Editor.modules
-Binaries/Win64/XRProjectEditor.target
