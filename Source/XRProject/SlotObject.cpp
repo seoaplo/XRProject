@@ -1,0 +1,2 @@
+#include "SlotObject.h"
+
