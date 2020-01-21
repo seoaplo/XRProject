@@ -3,7 +3,7 @@
 
 #include "PlayerCharacter.h"
 
-void APlayerCharacter::ChangeEquipment(EEquipmentsType Types, UItem * Item)
+void APlayerCharacter::ChangeEquipment(EEquipmentsType Types, UItemEquipment * Item)
 {
 
 

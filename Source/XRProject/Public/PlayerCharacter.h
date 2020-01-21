@@ -6,6 +6,8 @@
 
 #include "CoreMinimal.h"
 #include "UserCharacter.h"
+#include "ItemEquipment.h"
+#include "ItemWeapon.h"
 #include "PlayerCharacter.generated.h"
 
 UENUM()
@@ -19,7 +21,7 @@ enum class EEquipmentsType : uint8
 	WEAPON,
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FEquipment
 {
 	GENERATED_USTRUCT_BODY()
