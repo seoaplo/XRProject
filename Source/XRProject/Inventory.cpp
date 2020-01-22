@@ -12,6 +12,28 @@ Inventory::~Inventory()
 {
 }
 
+int Inventory::GetInventoryHeight()
+{
+	return kInventoryHeight;
+}
+
+int Inventory::GetInventoryWidth()
+{
+	return kInventoryWidth;
+}
+
+int Inventory::GetInventorySize()
+{
+	return kMaxInventorySlotSize;
+}
+
+UItem * Inventory::GetItem(int index)
+{
+	if (index < 0 || index >= kMaxInventorySlotSize) return nullptr;
+	UItem* result = Slot[index];
+	return result;
+}
+
 bool Inventory::AddItem(UItem* item, int index)
 {
 	if (item == nullptr) return false;

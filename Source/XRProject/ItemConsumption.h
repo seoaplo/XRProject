@@ -27,7 +27,7 @@ public:
 		FString ToolTip;
 };
 
-struct ConsumptionInfo : public Initialization // 서버에서 보내주는 데이터
+struct ConsumptionInfo // 서버에서 보내주는 데이터
 {
 	int32_t ID;
 	int32_t Count;
