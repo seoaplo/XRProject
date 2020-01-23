@@ -7,11 +7,6 @@
 #include <memory>
 #include "SerializeInterface.h"
 #include "NetworkOpcode.h"
-/**
- * 
- */
-
-
 
 class InputStream
 {
@@ -25,6 +20,8 @@ public:
     InputStream();
     ~InputStream();
     uint16 ReadOpcode();
+	void operator>>(bool& value);
+	bool ReadBool();
     void operator>>(int8& value);
     int8 ReadInt8();
     void operator>>(int16& value);

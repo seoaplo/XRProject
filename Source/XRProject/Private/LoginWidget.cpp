@@ -1,49 +1,47 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "LoginWidget.h"
+#include "NetworkOpcode.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "NetworkGameInstance.h"
-#include "NetworkModule/Public/OutputStream.h"
+#include "XRGameInstance.h"
+#include "OutputStream.h"
 
-void ULoginWidget::LoginRequest(FText id, FText password)
+void ULoginWidget::LoginRequest(FText Id, FText Password)
 {
-	if (id.IsEmpty() || password.IsEmpty()) {
+	if (Id.IsEmpty() || Password.IsEmpty()) {
 		return;
 	}
 
-	std::wstring w_id(*id.ToString());
-	std::wstring w_pw(*password.ToString());
+	std::wstring w_id(*Id.ToString());
+	std::wstring w_pw(*Password.ToString());
 	std::string c_id(w_id.begin(), w_id.end());
 	std::string c_pw(w_pw.begin(), w_pw.end());
 
 	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::LoginRequest);
+	out.WriteOpcode(ENetworkCSOpcode::kLoginRequest);
 	out.WriteCString(c_id.c_str());
 	out.WriteCString(c_pw.c_str());
 	out.CompletePacketBuild();
 
-	GetNetworkManager().SendPacket(out);
+	GetNetMgr().SendPacket(out);
 }
 
-void ULoginWidget::SignUp(FText id, FText password)
+void ULoginWidget::SignUp(FText Id, FText Password)
 {
-	if (id.IsEmpty() || password.IsEmpty()) {
+	if (Id.IsEmpty() || Password.IsEmpty()) {
 		return;
 	}
-	std::wstring w_id(*id.ToString());
-	std::wstring w_pw(*password.ToString());
+	std::wstring w_id(*Id.ToString());
+	std::wstring w_pw(*Password.ToString());
 	std::string c_id(w_id.begin(), w_id.end());
 	std::string c_pw(w_pw.begin(), w_pw.end());
 
 	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::AccountCreateRequest);
+	out.WriteOpcode(ENetworkCSOpcode::kCreateAccountRequest);
 	out.WriteCString(c_id.c_str());
 	out.WriteCString(c_pw.c_str());
 	out.CompletePacketBuild();
 
-	GetNetworkManager().SendPacket(out);
+	GetNetMgr().SendPacket(out);
 }
 
 void ULoginWidget::Exit()

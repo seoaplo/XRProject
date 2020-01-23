@@ -16,7 +16,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FString Name;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
-		UTexture2D* Icon;
+		int32 IconResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 MaleMeshResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")

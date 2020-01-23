@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-#include "Components/InputComponent.h"
 #include "PlayerCharacter.h"
+#include "Components/InputComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {

@@ -20,9 +20,14 @@ public:
 		FString LoginPassword;
 public:
 	UFUNCTION(BlueprintCallable)
-		void LoginRequest(FText id, FText password);
+		void LoginRequest(FText Id, FText Password);
 	UFUNCTION(BlueprintCallable)
-		void SignUp(FText id, FText password);
+		void SignUp(FText Id, FText Password);
 	UFUNCTION(BlueprintCallable)
 		void Exit();
+	UFUNCTION(BlueprintImplementableEvent)
+		void LoginFail();
+	UFUNCTION(BlueprintImplementableEvent)
+		void SignUpResult(bool bResult);
+
 };
