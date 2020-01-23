@@ -3,4 +3,5 @@
 #include "XRProject.h"
 #include "Modules/ModuleManager.h"
 
+DEFINE_LOG_CATEGORY(XRProject);
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, XRProject, "XRProject" );
