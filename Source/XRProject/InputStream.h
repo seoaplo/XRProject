@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include <string>
 #include <memory>
-#include "Interface.h"
+#include "SerializeInterface.h"
 #include "NetworkOpcode.h"
 /**
  * 

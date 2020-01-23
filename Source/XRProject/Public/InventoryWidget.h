@@ -7,27 +7,33 @@
 #include "SlotWidget.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "InvertoryWidget.generated.h"
+#include "InventoryWidget.generated.h"
 
 
 
 UCLASS()
-class XRPROJECT_API UInvertoryWidget : public UUserWidget
+class XRPROJECT_API UInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UInvertoryWidget(const FObjectInitializer& ObjectInitializer);
-public:
+	UInventoryWidget(const FObjectInitializer& ObjectInitializer);
+private:
 	std::vector<USlotWidget*> list;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "MG_Info")
-		bool bIsVisible;
+	bool bIsVisible;
 public:
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void SetVisible(bool IsVisible);
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		bool GetVisible();
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void SwitchVisible();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		int GetWidthSize();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		int GetHeightSize();
-public:
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void SetUp();
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void AddList(USlotWidget* newslot);
 
 };
