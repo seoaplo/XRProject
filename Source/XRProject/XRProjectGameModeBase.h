@@ -14,4 +14,13 @@ class XRPROJECT_API AXRProjectGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
+public:
+    AXRProjectGameModeBase();
+
+    virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+    virtual void Tick(float DeltaSeconds) override;
+private:
+    void HandleCreateAccountResult(class InputStream& input);
+    void HandleLoginResult(class InputStream& input);
 };
