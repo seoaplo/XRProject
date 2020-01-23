@@ -8,7 +8,7 @@
 #include "Engine/AssetManager.h"
 
 #include "XRAssetMgr.generated.h"
-
+#define __out__ 
 /**
  * 
  */
@@ -21,14 +21,14 @@ public:
 	UXRAssetMgr();
 	//static UXRAssetMgr* GetInstnace();
 	bool ReadAssetDirectory(FString DirName);
-	void ASyncLoadAssetFromPath(FString ResourcePath, FStreamableDelegate CompleteDelegate);
+	void ASyncLoadAssetFromPath(FString ResourcePath, FSoftObjectPath __out__ DestSoftObj, FStreamableDelegate CompleteDelegate);
 
 	TMap<uint32,TArray<struct FAssetData>> AssetDatas;
 	TMap<FString,struct FSoftObjectPath> AssetSoftPathList;
 	 
 	class UDataTable* ResourceDataTable;
 	void ASyncLoadAssetComplete(FString LoadAssetName);
-	FString FindResourceFromDataTable(int32 ResousrceID);
+	FSoftObjectPath FindResourceFromDataTable(int32 ResousrceID);
 
 
 };

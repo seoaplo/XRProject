@@ -16,6 +16,7 @@ class XRPROJECT_API UTestGameInstance_AssetMgr : public UGameInstance
 	GENERATED_BODY()
 
 public:
+	void Init() override;
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 	UXRAssetMgr* XRAssetManager;
 	
