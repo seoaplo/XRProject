@@ -8,18 +8,29 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	RotateSpeed = 1.0f;
-	NextRotation = FRotator(0.0f, 0.0f, 0.0f);
-	SpringArmLocation = FVector(100.0f, 0.0f, 0.0f);
+	GetCapsuleComponent()->SetVisibility(true);
+	GetCapsuleComponent()->bHiddenInGame = false;
+
+	SpringArmLength = 300.0f;
+	RotateSpeed = 1000.0f;
+	MovementSpeed = 1000.0f;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArmComponent->SetRelativeLocation(SpringArmLocation);
 	SpringArmComponent->SetupAttachment(RootComponent);
-	SpringArmComponent->bInheritYaw = false;
-	SpringArmComponent->bInheritPitch = false;
+	SpringArmComponent->TargetArmLength = SpringArmLength;
+	SpringArmComponent->bUsePawnControlRotation = true;
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	bUseControllerRotationYaw = false; //컨트롤러 로테이션에 따라 캐릭터가 회전하는 bool. 해제해야 임의로 회전시킬 수 있음.
+	bUseControllerRotationPitch = false; //컨트롤러 로테이션에 따라 캐릭터가 회전하는 bool. 해제해야 임의로 회전시킬 수 있음.
+	bUseControllerRotationRoll = false; //컨트롤러 로테이션에 따라 캐릭터가 회전하는 bool. 해제해야 임의로 회전시킬 수 있음.
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, RotateSpeed, 0.0f);
+
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 
 #pragma region TESTCODE
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
@@ -32,52 +43,54 @@ APlayerCharacter::APlayerCharacter()
 
 APlayerCharacter::~APlayerCharacter()
 {
-}
-
-void APlayerCharacter::ChangeEquipment(EEquipmentsType Types, UItemEquipment * Item)
-{
-
-
 
 }
 
 void APlayerCharacter::Tick(float deltatime)
 {
-	DeltaRotation = NextRotation - GetActorRotation();
-	
-	if (DeltaRotation.IsNearlyZero() == false)
-	{
-		AdditionalRotationValue = DeltaRotation * deltatime * RotateSpeed + GetActorRotation();
-		SetActorRotation(AdditionalRotationValue.Quaternion()); //nextrotation * deltatime + current_rotation
-	}
+#pragma region TESTCODE
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+#pragma endregion
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("Forward", this, &APlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("Right", this, &APlayerCharacter::MoveRight);
 
 }
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	float sign = 1.0f;
-	if (Value < 0.0f)
-		sign = -1.0f;
 
-	if((FMath::IsNearlyZero(Value)  == false))
-		NextRotation = (CameraComponent->GetForwardVector() * sign).Rotation();
+	if ((Controller != NULL) && (Value != 0.0f))
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-	AddMovementInput(GetActorForwardVector(), Value);
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		AddMovementInput(Direction, Value);
+	}
 }
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	float sign = 1.0f;
-	if (Value < 0.0f)
-		sign = -1.0f;
 
-	if ((FMath::IsNearlyZero(Value) == false))
-		NextRotation = (CameraComponent->GetRightVector() * sign).Rotation();
-	AddMovementInput(GetActorRightVector(), Value);
+	if ((Controller != NULL) && (Value != 0.0f))
+	{
+		const FRotator Rotation = Controller->GetControlRotation();
+		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
+		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+		AddMovementInput(Direction, Value);
+	}
+}
+
+
+void APlayerCharacter::ChangeEquipment(EEquipmentsType Types, UItem * Item)
+{
+
+
+
 }

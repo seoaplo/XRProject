@@ -13,12 +13,13 @@
 UENUM()
 enum class EEquipmentsType : uint8
 {
-	FACE,
 	HAIR,
+	FACE,
 	BODY,
 	HANDS,
 	LEGS,
 	WEAPON,
+	SUBWEAPON,
 };
 
 USTRUCT(BlueprintType)
@@ -70,9 +71,12 @@ public:
 
 
 public:
-	FRotator NextRotation;
-	float RotateSpeed;
-
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float RotateSpeed;
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float SpringArmLength;
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float MovementSpeed;
 	UPROPERTY()
 		bool IsMale; //성별 체크를 위한 bool값.
 	UPROPERTY()
@@ -88,6 +92,7 @@ private:
 	FRotator DeltaRotation;
 	FRotator AdditionalRotationValue;
 	FVector SpringArmLocation;
+	bool bForwardKeyIsNeutral;
 public:
 	virtual void Tick(float deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -97,5 +102,5 @@ public:
 	void MoveRight(float Value);
 	
 	UFUNCTION()
-		void ChangeEquipment(EEquipmentsType Types, UItemEquipment* Item);
+		void ChangeEquipment(EEquipmentsType Types, UItem* Item);
 };
