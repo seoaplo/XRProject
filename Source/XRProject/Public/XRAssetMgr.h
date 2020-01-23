@@ -6,7 +6,7 @@
 #include "UObject/NoExportTypes.h"
 #include "Engine/DataTable.h"
 #include "Engine/AssetManager.h"
-
+#include "Optional.h"
 #include "XRAssetMgr.generated.h"
 #define __out__ 
 /**
@@ -20,17 +20,19 @@ class XRPROJECT_API UXRAssetMgr : public UObject
 public:
 	UXRAssetMgr();
 	//static UXRAssetMgr* GetInstnace();
-	bool ReadAssetDirectory(FString DirName);
-	void ASyncLoadAssetFromPath(FString ResourcePath, FSoftObjectPath __out__ DestSoftObj, FStreamableDelegate CompleteDelegate);
+	bool ReadAssetDirectory(FString DirName, UClass* baseClass);
+	void ASyncLoadAssetFromPath(FSoftObjectPath SoftObj, FStreamableDelegate CompleteDelegate);
 
-	TMap<uint32,TArray<struct FAssetData>> AssetDatas;
-	TMap<FString,struct FSoftObjectPath> AssetSoftPathList;
-	 
-	class UDataTable* ResourceDataTable;
+
+	class UDataTable* GetResourceDataTable() { return ResourceDataTable; }
 	void ASyncLoadAssetComplete(FString LoadAssetName);
 	FSoftObjectPath FindResourceFromDataTable(int32 ResousrceID);
 
 
+private:
+	TMap<uint32,TArray<struct FAssetData>> AssetDatas;
+	TMap<FString,struct FSoftObjectPath> AssetSoftPathList;
+	class UDataTable* ResourceDataTable;
 };
 
 USTRUCT(BlueprintType)
