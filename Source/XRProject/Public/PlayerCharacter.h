@@ -4,7 +4,7 @@
 */
 #pragma once
 
-#include "CoreMinimal.h"
+#include "EngineMinimal.h"
 #include "UserCharacter.h"
 #include "ItemEquipment.h"
 #include "ItemWeapon.h"
@@ -65,14 +65,37 @@ class XRPROJECT_API APlayerCharacter : public AUserCharacter
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
-		bool IsMale; //성별 체크를 위한 bool값.
+	APlayerCharacter();
+	virtual ~APlayerCharacter();
+
+
+public:
+	FRotator NextRotation;
+	float RotateSpeed;
 
 	UPROPERTY()
+		bool IsMale; //성별 체크를 위한 bool값.
+	UPROPERTY()
 		FEquipment Equipments;
+	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
+		class UCameraComponent* CameraComponent;
+	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
+		class USpringArmComponent* SpringArmComponent;
+
+	
+private:
+	/*TEST*/
+	FRotator DeltaRotation;
+	FRotator AdditionalRotationValue;
+	FVector SpringArmLocation;
+public:
+	virtual void Tick(float deltatime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+public:
+	void MoveForward(float Value);
+	void MoveRight(float Value);
 	
 	UFUNCTION()
 		void ChangeEquipment(EEquipmentsType Types, UItemEquipment* Item);
-
-	
 };

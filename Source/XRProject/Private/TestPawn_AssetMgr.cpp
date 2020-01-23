@@ -2,7 +2,7 @@
 
 
 #include "TestPawn_AssetMgr.h"
-#include "TestGameInstance_AssetMgr.h"
+#include "XRGameInstance.h"
 
 // Sets default values
 ATestPawn_AssetMgr::ATestPawn_AssetMgr()
@@ -18,9 +18,9 @@ ATestPawn_AssetMgr::ATestPawn_AssetMgr()
 void ATestPawn_AssetMgr::BeginPlay()
 {
 	Super::BeginPlay();
-	auto TestGameInstance = Cast<UTestGameInstance_AssetMgr>(GetGameInstance());
+	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
 	
-	FSoftObjectPath AssetPath = TestGameInstance->XRAssetManager->FindResourceFromDataTable(1000001);
+	FSoftObjectPath AssetPath = GameInstance->XRAssetManager->FindResourceFromDataTable(1000001);
 	
 	
 	FStreamableDelegate ResultCallback;
@@ -34,7 +34,7 @@ void ATestPawn_AssetMgr::BeginPlay()
 
 
 
-	TestGameInstance->XRAssetManager->ASyncLoadAssetFromPath(AssetPath.ToString(), AssetPath, ResultCallback);
+	GameInstance->XRAssetManager->ASyncLoadAssetFromPath(AssetPath.ToString(), AssetPath, ResultCallback);
 	
 
 	
