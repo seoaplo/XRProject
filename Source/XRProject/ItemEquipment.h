@@ -45,7 +45,7 @@ public:
 		FString ToolTip;
 };
 
-struct EquipmentInfo : public Initialization // 서버에서 보내주는 데이터
+struct EquipmentInfo // 서버에서 보내주는 데이터
 {
 	int32_t ID;
 	int32_t AddDEF;

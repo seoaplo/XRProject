@@ -11,4 +11,7 @@ class XRPROJECT_API USlotObject : public UObject
 	GENERATED_BODY()
 public:
 		USlotObject() {};
+public:
+		UTexture2D* GetIcon();
+		int GetCount();
 };

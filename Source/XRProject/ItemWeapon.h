@@ -43,7 +43,7 @@ public:
 		FString ToolTip;
 };
 
-struct WeaponInfo : public Initialization // 서버에서 보내주는 데이터
+struct WeaponInfo // 서버에서 보내주는 데이터
 {
 	int32_t ID;
 	int32_t AddATK;
