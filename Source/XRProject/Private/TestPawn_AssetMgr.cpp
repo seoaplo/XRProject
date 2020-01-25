@@ -31,7 +31,6 @@ void ATestPawn_AssetMgr::BeginPlay()
 	//해당 경로의 에셋이 로드가 완료됐을때, 이후 작업을 실행할 함수를 등록한다
 
 	//따로 함수를 작성하지 않고 람다로 하는 방법
-
 	//ResultCallback.BindLambda([AssetPath,this]()
 	//{ 
 	//	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);

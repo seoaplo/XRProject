@@ -20,18 +20,24 @@ class XRPROJECT_API UXRAssetMgr : public UObject
 public:
 	UXRAssetMgr();
 	//static UXRAssetMgr* GetInstnace();
+
+	UFUNCTION(BlueprintCallable)
 	bool ReadAssetDirectory(FString DirName, UClass* baseClass);
+
+
 	void ASyncLoadAssetFromPath(FSoftObjectPath SoftObj, FStreamableDelegate CompleteDelegate);
 
-
-	class UDataTable* GetResourceDataTable() { return ResourceDataTable; }
-	void ASyncLoadAssetComplete(FString LoadAssetName);
 	FSoftObjectPath FindResourceFromDataTable(int32 ResousrceID);
 
+	void ASyncLoadAssetComplete(FString LoadAssetName);
+	class UDataTable* GetResourceDataTable() { return ResourceDataTable; }
 
 private:
+
 	TMap<uint32,TArray<struct FAssetData>> AssetDatas;
 	TMap<FString,struct FSoftObjectPath> AssetSoftPathList;
+
+	UPROPERTY()
 	class UDataTable* ResourceDataTable;
 };
 
