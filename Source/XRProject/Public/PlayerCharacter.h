@@ -40,6 +40,8 @@ public:
 		USkeletalMeshComponent* LegsComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
 		USkeletalMeshComponent* WeaponComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
+		USkeletalMeshComponent* SubWeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* FaceItem;
@@ -53,6 +55,8 @@ public:
 		UItemEquipment* LegsItem;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemWeapon* WeaponItem;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
+		UItemWeapon* SubWeaponItem;
 
 };
 
@@ -78,7 +82,7 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float MovementSpeed;
 	UPROPERTY()
-		bool IsMale; //성별 체크를 위한 bool값.
+		bool bIsMale; //성별 체크를 위한 bool값.
 	UPROPERTY()
 		FEquipment Equipments;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
@@ -96,11 +100,12 @@ private:
 public:
 	virtual void Tick(float deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
 
 public:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	
 	UFUNCTION()
-		void ChangeEquipment(EEquipmentsType Types, UItem* Item);
+		void ChangeEquipment(int32 NumTypes, UItem* Item, USkeletalMesh* SkMesh);
 };

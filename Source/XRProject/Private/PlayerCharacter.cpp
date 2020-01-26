@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Components/InputComponent.h"
 #include "PlayerCharacter.h"
+#include "ItemManager.h"
+#include "Components/InputComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -61,6 +62,13 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 
 }
 
+void APlayerCharacter::BeginPlay()
+{
+	ITEM_MGR.SetPlayerCharacter(this);
+	ITEM_MGR.BuildItem(1010001, GetWorld());
+
+}
+
 void APlayerCharacter::MoveForward(float Value)
 {
 
@@ -88,9 +96,75 @@ void APlayerCharacter::MoveRight(float Value)
 }
 
 
-void APlayerCharacter::ChangeEquipment(EEquipmentsType Types, UItem * Item)
+void APlayerCharacter::ChangeEquipment(int32 NumTypes, UItem * Item, USkeletalMesh* SkMesh)
 {
+	
+	/*
+	HAIR = 0,FACE,BODY,HANDS,LEGS,WEAPON,SUBWEAPON,
+	*/
+	EEquipmentsType Types;
 
+	switch (NumTypes)
+	{
+		case 0: { Types = EEquipmentsType::HAIR; break; }
+		case 1: { Types = EEquipmentsType::FACE; break; }
+		case 2: { Types = EEquipmentsType::BODY; break; }
+		case 3: { Types = EEquipmentsType::HANDS; break; }
+		case 4: { Types = EEquipmentsType::LEGS; break; }
+		case 5: { Types = EEquipmentsType::WEAPON; break; }
+		case 6: { Types = EEquipmentsType::SUBWEAPON; break; }
+	}
+
+	//클라의 아이템빌더에서 아이템이 이미 빌드되어 나왔다고 가정
+	//현재 캐릭터가 남/여인지는 아마 GetPawn같은걸로 가져오면 될 듯
+	//아이템빌더에서 애셋로드까지 되면 이 함수가 실행됨
+	//웨폰이면 차라리 함수를 다르게 할까
+
+	bool IsWeapon = false;
+
+	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
+	UItemWeapon* WeaponItem = nullptr;
+
+	if (EquipItem == nullptr)
+	{
+		IsWeapon = true;
+		WeaponItem = Cast<UItemWeapon>(Item);
+	}
+
+	if (EquipItem == nullptr && WeaponItem == nullptr)
+		check(false);
+
+	switch (Types)
+	{
+		case EEquipmentsType::HAIR:
+			Equipments.HairItem = EquipItem;
+			Equipments.HairComponent->SkeletalMesh = SkMesh;
+			break;
+		case EEquipmentsType::FACE:
+			Equipments.FaceItem = EquipItem;
+			Equipments.FaceComponent->SkeletalMesh = SkMesh;
+			break;
+		case EEquipmentsType::BODY:
+			Equipments.BodyItem = EquipItem;
+			Equipments.BodyComponent->SkeletalMesh = SkMesh;
+			break;
+		case EEquipmentsType::HANDS:
+			Equipments.HandsItem = EquipItem;
+			Equipments.HandsComponent->SkeletalMesh = SkMesh;
+			break;
+		case EEquipmentsType::LEGS:
+			Equipments.LegsItem = EquipItem;
+			Equipments.LegsComponent->SkeletalMesh = SkMesh;
+			break;
+		case EEquipmentsType::WEAPON:
+			Equipments.WeaponItem = WeaponItem;
+			Equipments.WeaponComponent->SkeletalMesh = SkMesh;
+			break;
+		case EEquipmentsType::SUBWEAPON:
+			Equipments.SubWeaponItem = WeaponItem;
+			Equipments.SubWeaponComponent->SkeletalMesh = SkMesh;
+			break;
+	}
 
 
 }
