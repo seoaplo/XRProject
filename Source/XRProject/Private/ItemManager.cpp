@@ -11,11 +11,6 @@ UItemManager::UItemManager()
 	if (DT_EQUIPITEM.Succeeded())
 		EquipmentItemDataTable = DT_EQUIPITEM.Object;
 
-	//주의 : 로드 안됨
-	//EquipmentItemDataTable = LoadObject<UDataTable>(NULL, *EquipmentDataPath, NULL, LOAD_None, NULL);
-
-	bItemLoaded = false;
-
 }
 
 UItemManager::~UItemManager()
@@ -69,7 +64,6 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 	{
 		RetItem = ItemOptional.GetValue();
 		CurrentItemId = ID;
-		bItemLoaded = true;
 	}
 
 	FSoftObjectPath AssetPath = nullptr;
@@ -104,7 +98,6 @@ void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* 
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
 	CurrentPlayerCharacter->ChangeEquipment(Item, LoadedMesh.Get());
-	bItemLoaded = false;
 
 
 }

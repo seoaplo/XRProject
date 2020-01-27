@@ -36,7 +36,6 @@ private:
 	APlayerCharacter* CurrentPlayerCharacter;
 	UItem* RetItem;
 	int32 CurrentItemId;
-	bool bItemLoaded;
 public:
 	/*주의 : Type는 원래 장비인지, 소비인지 등이어야 하나 Xrproject.h를 건드려야 하므로
 	합의하에 진행할 것
@@ -46,7 +45,7 @@ public:
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
 	void BuildItem(EItemType Type, int32 ID, UWorld* World);
 	bool SetPlayerCharacter(APlayerCharacter* Character);
-	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* testitem);
+	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item);
 	
 };
 
