@@ -64,10 +64,10 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 	TOptional<UItem*> ItemOptional = GetItemFromId(Type, ID);
 	//is valid
 
-	UItem* testitem = nullptr;
+	UItem* RetItem = nullptr;
 	if (ItemOptional.IsSet())
 	{
-		testitem = ItemOptional.GetValue();
+		RetItem = ItemOptional.GetValue();
 		CurrentItemId = ID;
 		bItemLoaded = true;
 	}
@@ -75,26 +75,17 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 	FSoftObjectPath AssetPath = nullptr;
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(World));
 
-	if (testitem->GetItemType() == EItemType::EQUIPMENT)
+	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
 	{
-		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(testitem);
+		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
 		if(CurrentPlayerCharacter->bIsMale)
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.MaleMeshResourceID);
 		else
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 	FStreamableDelegate AssetLoadDelegate;
-	//AssetLoadDelegate.BindUObject(this, &ItemManager::LoadItemSkMeshAssetComplete, AssetPath);
-	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath, testitem);
+	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath, RetItem);
 
-	/*AssetLoadDelegate = FStreamableDelegate::CreateLambda([testitem,AssetPath, this]() {
-		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
-		if (bItemLoaded == true)
-		{
-			CurrentPlayerCharacter->ChangeEquipment(testitem, LoadedMesh.Get());
-			bItemLoaded = false;
-		}
-	});*/
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
@@ -108,15 +99,12 @@ bool UItemManager::SetPlayerCharacter(APlayerCharacter * Character)
 	return true;
 }
 
-void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* testitem)
+void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
-	//if (bItemLoaded == true)
-	{
-		
-		CurrentPlayerCharacter->ChangeEquipment(testitem, LoadedMesh.Get());
-		bItemLoaded = false;
-	}
+	CurrentPlayerCharacter->ChangeEquipment(Item, LoadedMesh.Get());
+	bItemLoaded = false;
+
 
 }
