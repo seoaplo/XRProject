@@ -46,7 +46,7 @@ public:
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
 	void BuildItem(EItemType Type, int32 ID, UWorld* World);
 	bool SetPlayerCharacter(APlayerCharacter* Character);
-	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath);
+	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* testitem);
 	
 };
 

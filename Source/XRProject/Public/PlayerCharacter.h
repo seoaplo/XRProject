@@ -83,7 +83,7 @@ public:
 		float MovementSpeed;
 	UPROPERTY()
 		bool bIsMale; //성별 체크를 위한 bool값.
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class UCameraComponent* CameraComponent;
