@@ -8,15 +8,13 @@ enum class ENetworkCSOpcode : uint16_t
     kLoginRequest,
 
     // LobbyServer
+    kLobbyConfirmRequest,
     kCharacterListRequest,
     kCharacterCreateRequest,
     kCharacterDeleteRequest,
     kCharacterSelectionRequest,
 
-	//ZoneServer
-	kRequestSpawn,
-	kNotifyPosition,
-	kEventNotify,
+
 };
 
 
@@ -27,12 +25,9 @@ enum class ENetworkSCOpcode : uint16_t
     kLoginResult,
 
     // LobbyServer
+    kConfirmFailNotify,
+    kCharacterSlotNotify,
     kCharacterListNotify,
     kMigrateZoneNotify,
 
-    // ZoneServer
-	kCharacterSpawn,
-	kPossessCharacter,
-	kCharacterPos,
-	kEventRecv,
 };
