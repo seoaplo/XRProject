@@ -8,7 +8,6 @@ void UXRGameInstance::Init()
     NetworkManager = NewObject<UNetworkManager>();
     NetworkManager->StartThread();
 	XRAssetManager = NewObject<UXRAssetMgr>();
-	ItemManager = NewObject<UItemManager>();
 }
 
 void UXRGameInstance::Shutdown()
