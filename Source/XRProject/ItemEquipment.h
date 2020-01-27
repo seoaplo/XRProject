@@ -16,7 +16,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FString Name;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
-		UTexture2D* Icon;
+		int32 Icon;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 MaleMeshResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
@@ -27,6 +27,8 @@ public:
 		int32 SubType;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 ReqLEV;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
+		int32 ATK;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 DEF;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")

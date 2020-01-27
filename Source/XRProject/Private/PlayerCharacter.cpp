@@ -2,6 +2,7 @@
 
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
+#include "XRGameInstance.h"
 #include "Components/InputComponent.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -64,8 +65,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 
 void APlayerCharacter::BeginPlay()
 {
-	ITEM_MGR.SetPlayerCharacter(this);
-	ITEM_MGR.BuildItem(1010001, GetWorld());
+	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
+	GameInstance->ItemManager->SetPlayerCharacter(this);
+	GameInstance->ItemManager->BuildItem(3000001, GetWorld());
 
 }
 

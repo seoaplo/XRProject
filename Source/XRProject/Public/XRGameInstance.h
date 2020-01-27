@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "NetworkManager.h"
 #include "XRAssetMgr.h"
+#include "ItemManager.h"
 #include "XRGameInstance.generated.h"
 
 /**
@@ -26,6 +27,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UXRAssetMgr* XRAssetManager;
 
+public:
+	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		UItemManager* ItemManager;
 private:
     UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
     UNetworkManager* NetworkManager;

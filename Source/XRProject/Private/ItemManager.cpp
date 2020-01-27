@@ -2,67 +2,67 @@
 
 
 #include "ItemManager.h"
+#include "XRGameInstance.h"
 
-
-ItemManager::ItemManager()
+UItemManager::UItemManager()
 {
-	FString EquipmentDataPath = TEXT(""); //아이템테이블 - 장비
-	//static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
-	//if (DT_EQUIPITEM.Succeeded())
-	//	EquipmentItemDataTable = DT_EQUIPITEM.Object;
+	FString EquipmentDataPath = TEXT("DataTable'/Game/EquipTable.EquipTable'"); //아이템테이블 - 장비
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
+	if (DT_EQUIPITEM.Succeeded())
+		EquipmentItemDataTable = DT_EQUIPITEM.Object;
 
 	//주의 : 로드 안됨
-	EquipmentItemDataTable = LoadObject<UDataTable>(NULL, *EquipmentDataPath, NULL, LOAD_None, NULL);
+	//EquipmentItemDataTable = LoadObject<UDataTable>(NULL, *EquipmentDataPath, NULL, LOAD_None, NULL);
 
 	bItemLoaded = false;
 
 }
 
-ItemManager::~ItemManager()
+UItemManager::~UItemManager()
 {
 }
 
-TOptional<UItem*> ItemManager::GetItemFromId(int32 Type, int32 ID)
+TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
 {
 	if (EquipmentItemDataTable == nullptr)
 		check(false);
 
 	if (Type == 0)
 	{
-		FEquipmentDefaultInfo* Table = EquipmentItemDataTable->FindRow<FEquipmentDefaultInfo>(*(FString::FromInt(ID)), TEXT(""));
-		
+		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
+
 		if (Table == nullptr)
 			check(false);
 
 		UItemEquipment* Item = NewObject<UItemEquipment>();
 
 		Item->DefaultInfo.ID = ID;
-		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshResourceID;
-		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshResourceID;
+		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshId;
+		Item->DefaultInfo.MaleMeshResourceID = Table->FemaleMeshId;
 		Item->DefaultInfo.Name = Table->Name;
-		Item->DefaultInfo.Icon = Table->Icon;
+		Item->DefaultInfo.Icon = Table->IconID;
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
-		Item->DefaultInfo.ReqLEV = Table->ReqLEV;
+		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
 		Item->DefaultInfo.DEF = Table->DEF;
 		Item->DefaultInfo.STR = Table->STR;
 		Item->DefaultInfo.DEX = Table->DEX;
 		Item->DefaultInfo.INT = Table->INT;
-		Item->DefaultInfo.ReqSTR = Table->ReqSTR;
-		Item->DefaultInfo.ReqDEX = Table->ReqDEX;
-		Item->DefaultInfo.ReqINT = Table->ReqINT;
+		Item->DefaultInfo.ReqSTR = Table->RequiredSTR;
+		Item->DefaultInfo.ReqDEX = Table->RequiredDEX;
+		Item->DefaultInfo.ReqINT = Table->RequiredINT;
 		Item->DefaultInfo.ToolTip = Table->ToolTip;
-		
+
 		return Item;
 	}
 	return nullptr;
 }
 
-void ItemManager::BuildItem(int32 ID, UWorld* World)
+void UItemManager::BuildItem(int32 ID, UWorld* World)
 {
 	TOptional<UItem*> ItemOptional = GetItemFromId(0, ID);
 	//is valid
-	
+
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
@@ -70,18 +70,18 @@ void ItemManager::BuildItem(int32 ID, UWorld* World)
 		bItemLoaded = true;
 	}
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(World));
-	FSoftObjectPath AssetPath = GameInstance->XRAssetManager->FindResourceFromDataTable(ID);
+	FSoftObjectPath AssetPath = GameInstance->XRAssetManager->FindResourceFromDataTable(RetItem.id);
 
 
 	FStreamableDelegate AssetLoadDelegate;
 	//AssetLoadDelegate.BindUObject(this, &ItemManager::LoadItemSkMeshAssetComplete, AssetPath);
-	AssetLoadDelegate.BindRaw(this, &ItemManager::LoadItemSkMeshAssetComplete, AssetPath);
+	AssetLoadDelegate.BindUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath);
 	GameInstance->XRAssetManager->ASyncLoadAssetFromPath(AssetPath.ToString(), AssetPath, AssetLoadDelegate);
 }
 
-bool ItemManager::SetPlayerCharacter(APlayerCharacter * Character)
+bool UItemManager::SetPlayerCharacter(APlayerCharacter * Character)
 {
-	if(Character == nullptr)
+	if (Character == nullptr)
 		return false;
 
 	CurrentPlayerCharacter = Character;
@@ -89,7 +89,7 @@ bool ItemManager::SetPlayerCharacter(APlayerCharacter * Character)
 	return true;
 }
 
-void ItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath)
+void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
