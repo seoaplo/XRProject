@@ -6,7 +6,7 @@
 
 UItemManager::UItemManager()
 {
-	FString EquipmentDataPath = TEXT("DataTable'/Game/EquipTable.EquipTable'"); //아이템테이블 - 장비
+	FString EquipmentDataPath = TEXT("DataTable'/Game/Resources/DataTable/EquipTable.EquipTable'"); //아이템테이블 - 장비
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
 	if (DT_EQUIPITEM.Succeeded())
 		EquipmentItemDataTable = DT_EQUIPITEM.Object;
@@ -22,12 +22,12 @@ UItemManager::~UItemManager()
 {
 }
 
-TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
+TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 {
 	if (EquipmentItemDataTable == nullptr)
 		check(false);
 
-	if (Type == 0)
+	if (Type == EItemType::EQUIPMENT)
 	{
 		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
 
@@ -38,7 +38,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
 
 		Item->DefaultInfo.ID = ID;
 		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshId;
-		Item->DefaultInfo.MaleMeshResourceID = Table->FemaleMeshId;
+		Item->DefaultInfo.FemaleMeshResourceID = Table->FemaleMeshId;
 		Item->DefaultInfo.Name = Table->Name;
 		Item->DefaultInfo.Icon = Table->IconID;
 		Item->DefaultInfo.Type = Table->Type;
@@ -59,9 +59,9 @@ TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
 	return nullptr;
 }
 
-void UItemManager::BuildItem(int32 ID, UWorld* World)
+void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 {
-	TOptional<UItem*> ItemOptional = GetItemFromId(0, ID);
+	TOptional<UItem*> ItemOptional = GetItemFromId(Type, ID);
 	//is valid
 
 	if (ItemOptional.IsSet())
@@ -77,7 +77,10 @@ void UItemManager::BuildItem(int32 ID, UWorld* World)
 	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
 	{
 		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
-		AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.ID);
+		if(CurrentPlayerCharacter->bIsMale)
+			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.MaleMeshResourceID);
+		else
+			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 
 	FStreamableDelegate AssetLoadDelegate;
@@ -102,7 +105,8 @@ void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath)
 
 	if (bItemLoaded == true)
 	{
-		CurrentPlayerCharacter->ChangeEquipment(CurrentItemId, RetItem, LoadedMesh.Get());
+		
+		CurrentPlayerCharacter->ChangeEquipment(RetItem, LoadedMesh.Get());
 		bItemLoaded = false;
 	}
 

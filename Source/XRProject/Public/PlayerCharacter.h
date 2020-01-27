@@ -116,6 +116,7 @@ public:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 	
+
 	UFUNCTION()
-		void ChangeEquipment(int32 NumTypes, UItem* Item, USkeletalMesh* SkMesh);
+		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 };

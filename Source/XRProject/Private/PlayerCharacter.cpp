@@ -38,13 +38,35 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 
 	CameraComponent->bUsePawnControlRotation = false;
+	
+	
+	Equipments.HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
+	Equipments.FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
+	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
+	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
+	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
+	Equipments.BodyComponent->SetupAttachment(RootComponent);
+	Equipments.LegsComponent->SetupAttachment(RootComponent);
+	Equipments.HandsComponent->SetupAttachment(RootComponent);
+	Equipments.FaceComponent->SetupAttachment(RootComponent);
+	Equipments.HairComponent->SetupAttachment(RootComponent);
+
+
+
+	
 
 #pragma region TESTCODE
-	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
-	Equipments.BodyComponent->SetupAttachment(RootComponent);
-	auto Mesh = 
-		ConstructorHelpers::FObjectFinder<USkeletalMesh>(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_human_body_newbie_male.SK_human_body_newbie_male'"));
-	Equipments.BodyComponent->SetSkeletalMesh(Mesh.Object);
+
+	/* 주의 : 남자임을 가정하고 테스트 중 */
+	bIsMale = true;
+
+	//Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
+	//Equipments.BodyComponent->SetupAttachment(RootComponent);
+	auto Hair = 
+		ConstructorHelpers::FObjectFinder
+		<USkeletalMesh>
+		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
+	//Equipments.BodyComponent->SetSkeletalMesh(Mesh.Object);
 #pragma endregion
 }
 
@@ -94,7 +116,9 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
 	GameInstance->ItemManager->SetPlayerCharacter(this);
-	GameInstance->ItemManager->BuildItem(3000001, GetWorld());
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld());
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld());
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld());
 
 }
 
@@ -125,23 +149,45 @@ void APlayerCharacter::MoveRight(float Value)
 }
 
 
-void APlayerCharacter::ChangeEquipment(int32 NumTypes, UItem * Item, USkeletalMesh* SkMesh)
+void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 {
 	
+	bool bIsWeapon = false;
+
+	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
+	UItemWeapon* WeaponItem = nullptr;
+	
+	if (EquipItem == nullptr)
+	{
+		bIsWeapon = true;
+		WeaponItem = Cast<UItemWeapon>(Item);
+	}
+
+	if (EquipItem == nullptr && WeaponItem == nullptr)
+		check(false);
+
+
 	/*
 	HAIR = 0,FACE,BODY,HANDS,LEGS,WEAPON,SUBWEAPON,
 	*/
-	EEquipmentsType Types;
 
-	switch (NumTypes)
+	EEquipmentsType Types;
+	if (bIsWeapon == false)
 	{
-		case 0: { Types = EEquipmentsType::HAIR; break; }
-		case 1: { Types = EEquipmentsType::FACE; break; }
-		case 2: { Types = EEquipmentsType::BODY; break; }
-		case 3: { Types = EEquipmentsType::HANDS; break; }
-		case 4: { Types = EEquipmentsType::LEGS; break; }
-		case 5: { Types = EEquipmentsType::WEAPON; break; }
-		case 6: { Types = EEquipmentsType::SUBWEAPON; break; }
+		switch (EquipItem->DefaultInfo.Type)
+		{
+			case 0: { Types = EEquipmentsType::BODY; break; }
+			case 1: { Types = EEquipmentsType::HANDS; break; }
+			case 2: { Types = EEquipmentsType::LEGS; break; }
+		}
+	}
+	else
+	{
+		switch (EquipItem->DefaultInfo.Type)
+		{
+			case 3: { Types = EEquipmentsType::WEAPON; break; }
+			case 4: { Types = EEquipmentsType::SUBWEAPON; break; }
+		}
 	}
 
 	//클라의 아이템빌더에서 아이템이 이미 빌드되어 나왔다고 가정
@@ -149,49 +195,35 @@ void APlayerCharacter::ChangeEquipment(int32 NumTypes, UItem * Item, USkeletalMe
 	//아이템빌더에서 애셋로드까지 되면 이 함수가 실행됨
 	//웨폰이면 차라리 함수를 다르게 할까
 
-	bool IsWeapon = false;
-
-	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
-	UItemWeapon* WeaponItem = nullptr;
-
-	if (EquipItem == nullptr)
-	{
-		IsWeapon = true;
-		WeaponItem = Cast<UItemWeapon>(Item);
-	}
-
-	if (EquipItem == nullptr && WeaponItem == nullptr)
-		check(false);
-
 	switch (Types)
 	{
 		case EEquipmentsType::HAIR:
 			Equipments.HairItem = EquipItem;
-			Equipments.HairComponent->SkeletalMesh = SkMesh;
+			Equipments.HairComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::FACE:
 			Equipments.FaceItem = EquipItem;
-			Equipments.FaceComponent->SkeletalMesh = SkMesh;
+			Equipments.FaceComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::BODY:
 			Equipments.BodyItem = EquipItem;
-			Equipments.BodyComponent->SkeletalMesh = SkMesh;
+			Equipments.BodyComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::HANDS:
 			Equipments.HandsItem = EquipItem;
-			Equipments.HandsComponent->SkeletalMesh = SkMesh;
+			Equipments.HandsComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::LEGS:
 			Equipments.LegsItem = EquipItem;
-			Equipments.LegsComponent->SkeletalMesh = SkMesh;
+			Equipments.LegsComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::WEAPON:
 			Equipments.WeaponItem = WeaponItem;
-			Equipments.WeaponComponent->SkeletalMesh = SkMesh;
+			Equipments.WeaponComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::SUBWEAPON:
 			Equipments.SubWeaponItem = WeaponItem;
-			Equipments.SubWeaponComponent->SkeletalMesh = SkMesh;
+			Equipments.SubWeaponComponent->SetSkeletalMesh(SkMesh);
 			break;
 	}
 
