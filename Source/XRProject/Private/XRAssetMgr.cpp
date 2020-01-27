@@ -69,7 +69,10 @@ FSoftObjectPath UXRAssetMgr::FindResourceFromDataTable(int32 ResousrceID)
 		if (ResourceTableRow)
 		{
 			XRLOG(Warning, TEXT("Finded Resource ID : %d  Path : %s  Name : %s "), ResousrceID, *ResourceTableRow->ResourcePath, *ResourceTableRow->ResourceName);
-			AssetSoftPathList.Add(ResourceTableRow->ResourceName, FSoftObjectPath(ResourceTableRow->ResourcePath));
+			if (!AssetSoftPathList.Contains(ResourceTableRow->ResourceName))
+			{
+				AssetSoftPathList.Add(ResourceTableRow->ResourceName, FSoftObjectPath(ResourceTableRow->ResourcePath));
+			}
 			return AssetSoftPathList[ResourceTableRow->ResourceName];
 		}
 	}

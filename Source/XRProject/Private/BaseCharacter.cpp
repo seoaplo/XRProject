@@ -3,9 +3,9 @@
 
 #include "BaseCharacter.h"
 #include "Engine.h"
-#include "TestGameInstance_AssetMgr.h"
+#include "XRGameInstance.h"
 #include "XRAssetMgr.h"
-#include "EnermyAIController.h"
+#include "XRAIController.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -59,46 +59,20 @@ void ABaseCharacter::SetCharacterLoadState(ECharacterLoadState NewLoadState)
 	case ECharacterLoadState::LOADING:
 	{
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : LOADING")));
-
-		auto TestGameInstance = Cast<UTestGameInstance_AssetMgr>(GetGameInstance());
-
-		FSoftObjectPath AssetPath =
-			TestGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(1000001);
-		FStreamableDelegate ResultCallback;
-		ResultCallback.BindLambda([AssetPath, this]()
-		{
-			TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
-			GetMesh()->SetSkeletalMesh(LoadedMesh.Get());
-			XRLOG(Warning, TEXT("MeshLoadComplete"));
-			SetCharacterLoadState(ECharacterLoadState::READY);
-		});
-		TestGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, ResultCallback);
-
-
-		FSoftObjectPath AssetPath2 =
-			TestGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(3000001);
-		FStreamableDelegate ResultCallback2;
-		ResultCallback2.BindLambda([AssetPath2, this]()
-		{
-			//애니메이션 블루프린트의 경우엔 TSoftClassPtr로 변환한다
-			TSoftClassPtr<UAnimInstance> LoadedAnim(AssetPath2);
-			GetMesh()->SetAnimInstanceClass(LoadedAnim.Get());
-			XRLOG(Warning, TEXT("AnimBlueprint Load Complete"));
-			//*** 클래스로 사용하는 에셋의 경우 에셋 경로 끝에 반드시  _C가 붙어야한다 ***///
-		});
-		TestGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath2, ResultCallback2);
+		
+		int32 SkeletalID = 1000001;
+		int32 AnimBPID = 3000001;
+		
+		SetSkelResource(SkeletalID, AnimBPID);
 		break;
 	}
 	case ECharacterLoadState::READY:
 	{
 
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : READY")));
-
-		AIControllerClass = AEnermyAIController::StaticClass();
+		AIControllerClass = AXRAIController::StaticClass();
 		GetController()->Possess(this);
-
 		break;
-
 	}
 	default:
 		break;
@@ -135,5 +109,46 @@ void ABaseCharacter::SetCharacterLifeState(ECharacterLifeState NewLifeState)
 		break;
 	}
 
+}
+
+void ABaseCharacter::SetSkelResource(int32 SkeletalID, int32 AnimBPID)
+{
+	FSoftObjectPath AssetPath =
+		GetAssetMgr()->FindResourceFromDataTable(SkeletalID);
+	FStreamableDelegate ResultCallback;
+	ResultCallback.BindLambda([AssetPath, this]()
+	{
+		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
+		GetMesh()->SetSkeletalMesh(LoadedMesh.Get());
+		XRLOG(Warning, TEXT("MeshLoadComplete"));
+		SetCharacterLoadState(ECharacterLoadState::READY);
+	});
+	GetAssetMgr()->ASyncLoadAssetFromPath(AssetPath, ResultCallback);
+
+
+	FSoftObjectPath AssetPath2 =
+		GetAssetMgr()->FindResourceFromDataTable(AnimBPID);
+	FStreamableDelegate ResultCallback2;
+	ResultCallback2.BindLambda([AssetPath2, this]()
+	{
+		//애니메이션 블루프린트의 경우엔 TSoftClassPtr로 변환한다
+		TSoftClassPtr<UAnimInstance> LoadedAnim(AssetPath2);
+		GetMesh()->SetAnimInstanceClass(LoadedAnim.Get());
+		XRLOG(Warning, TEXT("AnimBlueprint Load Complete"));
+		//*** 클래스로 사용하는 에셋의 경우 에셋 경로 끝에 반드시  _C가 붙어야한다 ***///
+	});
+	GetAssetMgr()->ASyncLoadAssetFromPath(AssetPath2, ResultCallback2);
+
+
+}
+
+void ABaseCharacter::SetRemoteLocation(FVector remoteLocation)
+{
+	RemoteLocation = remoteLocation;
+}
+
+void ABaseCharacter::SetRemoteRotation(FRotator remoteRotator)
+{
+	RemoteRotator = remoteRotator;
 }
 

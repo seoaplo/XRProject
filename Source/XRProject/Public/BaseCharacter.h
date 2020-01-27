@@ -44,13 +44,24 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable)
-		void SetCharacterLoadState(ECharacterLoadState NewLoadState);
+	virtual	void SetCharacterLoadState(ECharacterLoadState NewLoadState);
 	UFUNCTION(BlueprintCallable)
-		void SetCharacterLifeState(ECharacterLifeState NewLifeState);
+	virtual	void SetCharacterLifeState(ECharacterLifeState NewLifeState);
 	UFUNCTION(BlueprintCallable)
-		UCharacterStatComponent* GetCharacterStat() { return StatComponent; };
+	virtual	UCharacterStatComponent* GetCharacterStat() { return StatComponent; };
 	UFUNCTION(BlueprintCallable)
-		void OnDead() { SetCharacterLifeState(ECharacterLifeState::DEAD); };
+	virtual	void OnDead() { SetCharacterLifeState(ECharacterLifeState::DEAD); };
+
+
+	UFUNCTION(BlueprintCallable)
+	virtual	void SetSkelResource(int32 SkeletalID, int32 AnimBPID);
+
+
+	UFUNCTION(BlueprintCallable)
+	virtual	void SetRemoteLocation(FVector remoteLocation);
+	UFUNCTION(BlueprintCallable)
+	virtual	void SetRemoteRotation(FRotator remoteRotator);
+
 
 
 private:
@@ -60,6 +71,12 @@ private:
 		ECharacterLoadState			CurrentLoadState;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		ECharacterLifeState			CurrentLifeState;
+
+
+	UPROPERTY()
+		FVector RemoteLocation;
+	UPROPERTY()
+		FRotator RemoteRotator;
 
 };
 

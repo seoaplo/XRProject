@@ -12,6 +12,11 @@ enum class ENetworkCSOpcode : uint16_t
     kCharacterCreateRequest,
     kCharacterDeleteRequest,
     kCharacterSelectionRequest,
+
+	//ZoneServer
+	kRequestSpawn,
+	kNotifyPosition,
+	kEventNotify,
 };
 
 
@@ -26,4 +31,8 @@ enum class ENetworkSCOpcode : uint16_t
     kMigrateZoneNotify,
 
     // ZoneServer
+	kCharacterSpawn,
+	kPossessCharacter,
+	kCharacterPos,
+	kEventRecv,
 };

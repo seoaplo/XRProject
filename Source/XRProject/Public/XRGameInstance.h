@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "NetworkManager.h"
+#include "XRAssetMgr.h"
 #include "XRGameInstance.generated.h"
 
 /**
@@ -21,9 +22,14 @@ public:
     FORCEINLINE UNetworkManager& GetNetworkManager() {
         return *NetworkManager;
     }
+	FORCEINLINE UXRAssetMgr* GetXRAssetMgr() { return XRAssetManager; }
 private:
     UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
     UNetworkManager* NetworkManager;
+	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		UXRAssetMgr* XRAssetManager;
+
 };
 
 #define GetNetMgr Cast<UXRGameInstance>(GetGameInstance())->GetNetworkManager
+#define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr
