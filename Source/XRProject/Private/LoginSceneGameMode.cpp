@@ -2,7 +2,7 @@
 #include "PlayerCharacter.h"
 #include "XRGameInstance.h"
 #include "InputStream.h"
-
+#include "AccountManager.h"
 
 
 ALoginSceneGameMode::ALoginSceneGameMode()
@@ -52,6 +52,13 @@ void ALoginSceneGameMode::HandleLoginResult(InputStream& input)
 	input >> bResult;
 	if (bResult)
 	{
+		string LobbyIP;
+		int16 LobbyPort;
+		LobbyIP = input.ReadCString();
+		input >> LobbyPort;
+		AccountManager::GetInstance().SetLobbyIP(LobbyIP);
+		AccountManager::GetInstance().SetLobbyPort(LobbyPort);
+
 		GetNetMgr().Close();
 		UGameplayStatics::OpenLevel(this, TEXT("LEVEL_CharacterSelect"));
 	}

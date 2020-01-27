@@ -14,17 +14,14 @@ class XRPROJECT_API ULoginWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
-		FString LoginID;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
-		FString LoginPassword;
-public:
 	UFUNCTION(BlueprintCallable)
 		void LoginRequest(FText Id, FText Password);
 	UFUNCTION(BlueprintCallable)
 		void SignUp(FText Id, FText Password);
 	UFUNCTION(BlueprintCallable)
 		void Exit();
+	UFUNCTION(BlueprintImplementableEvent)
+		void BlockButton();
 	UFUNCTION(BlueprintImplementableEvent)
 		void LoginFail();
 	UFUNCTION(BlueprintImplementableEvent)

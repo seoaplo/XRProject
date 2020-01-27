@@ -3,6 +3,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "XRGameInstance.h"
+#include "AccountManager.h"
 #include "OutputStream.h"
 
 void ULoginWidget::LoginRequest(FText Id, FText Password)
@@ -22,7 +23,10 @@ void ULoginWidget::LoginRequest(FText Id, FText Password)
 	out.WriteCString(c_pw.c_str());
 	out.CompletePacketBuild();
 
+	AccountManager::GetInstance().SetAccountID(Id.ToString());
+
 	GetNetMgr().SendPacket(out);
+	BlockButton();
 }
 
 void ULoginWidget::SignUp(FText Id, FText Password)
@@ -42,6 +46,7 @@ void ULoginWidget::SignUp(FText Id, FText Password)
 	out.CompletePacketBuild();
 
 	GetNetMgr().SendPacket(out);
+	BlockButton();
 }
 
 void ULoginWidget::Exit()
