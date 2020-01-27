@@ -29,6 +29,7 @@ enum class ENetworkSCOpcode : uint16_t
 
     // LobbyServer
     kConfirmFailNotify,
+    kCharacterSlotNotify,
     kCharacterListNotify,
     kMigrateZoneNotify,
 
