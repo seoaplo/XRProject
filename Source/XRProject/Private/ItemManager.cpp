@@ -52,6 +52,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
 		Item->DefaultInfo.ReqDEX = Table->RequiredDEX;
 		Item->DefaultInfo.ReqINT = Table->RequiredINT;
 		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->ItemType = EItemType::EQUIPMENT;
 
 		return Item;
 	}
@@ -69,14 +70,20 @@ void UItemManager::BuildItem(int32 ID, UWorld* World)
 		CurrentItemId = ID;
 		bItemLoaded = true;
 	}
-	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(World));
-	FSoftObjectPath AssetPath = GameInstance->XRAssetManager->FindResourceFromDataTable(RetItem.id);
 
+	FSoftObjectPath AssetPath = nullptr;
+	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(World));
+
+	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
+	{
+		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
+		AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.ID);
+	}
 
 	FStreamableDelegate AssetLoadDelegate;
 	//AssetLoadDelegate.BindUObject(this, &ItemManager::LoadItemSkMeshAssetComplete, AssetPath);
 	AssetLoadDelegate.BindUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath);
-	GameInstance->XRAssetManager->ASyncLoadAssetFromPath(AssetPath.ToString(), AssetPath, AssetLoadDelegate);
+	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
 bool UItemManager::SetPlayerCharacter(APlayerCharacter * Character)

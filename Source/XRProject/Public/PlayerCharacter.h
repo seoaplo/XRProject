@@ -5,7 +5,7 @@
 #pragma once
 
 #include "EngineMinimal.h"
-#include "UserCharacter.h"
+#include "BaseCharacter.h"
 #include "ItemEquipment.h"
 #include "ItemWeapon.h"
 #include "PlayerCharacter.generated.h"
@@ -65,7 +65,7 @@ public:
  * 
  */
 UCLASS()
-class XRPROJECT_API APlayerCharacter : public AUserCharacter
+class XRPROJECT_API APlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -89,7 +89,12 @@ public:
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 	
 private:
 	/*TEST*/
@@ -98,13 +103,18 @@ private:
 	FVector SpringArmLocation;
 	bool bForwardKeyIsNeutral;
 public:
-	virtual void Tick(float deltatime) override;
+	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* controller) override;
+
+
 
 public:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
 	
 	UFUNCTION()
 		void ChangeEquipment(int32 NumTypes, UItem* Item, USkeletalMesh* SkMesh);

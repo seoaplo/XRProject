@@ -10,6 +10,9 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
+	BaseTurnRate = 45.f;
+	BaseLookUpRate = 45.f;
+
 	GetCapsuleComponent()->SetVisibility(true);
 	GetCapsuleComponent()->bHiddenInGame = false;
 
@@ -31,8 +34,10 @@ APlayerCharacter::APlayerCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, RotateSpeed, 0.0f);
-
+	GetCharacterMovement()->AirControl = 0.5f;
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+
+	CameraComponent->bUsePawnControlRotation = false;
 
 #pragma region TESTCODE
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
@@ -50,6 +55,7 @@ APlayerCharacter::~APlayerCharacter()
 
 void APlayerCharacter::Tick(float deltatime)
 {
+	ABaseCharacter::Tick(deltatime);
 #pragma region TESTCODE
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 #pragma endregion
@@ -60,12 +66,33 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("Forward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("Right", this, &APlayerCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);
 
 }
 
+void APlayerCharacter::PossessedBy(AController* controller)
+{
+	Super::PossessedBy(controller);
+}
+
+void APlayerCharacter::TurnAtRate(float Rate)
+{
+	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::LookUpAtRate(float Rate)
+{
+	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+
 void APlayerCharacter::BeginPlay()
 {
-	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
+	ABaseCharacter::BeginPlay();
+	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
 	GameInstance->ItemManager->SetPlayerCharacter(this);
 	GameInstance->ItemManager->BuildItem(3000001, GetWorld());
 

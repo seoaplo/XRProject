@@ -18,12 +18,13 @@ AXRProjectGameModeBase::AXRProjectGameModeBase()
 
 void AXRProjectGameModeBase::BeginPlay()
 {
+	//
     // LoginServer
-    GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCreateAccountResult)->BindUObject(
-        this, &AXRProjectGameModeBase::HandleCreateAccountResult);
-
-    GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kLoginResult)->BindUObject(
-        this, &AXRProjectGameModeBase::HandleCreateAccountResult);
+    //GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCreateAccountResult)->BindUObject(
+    //    this, &AXRProjectGameModeBase::HandleCreateAccountResult);
+	//
+    //GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kLoginResult)->BindUObject(
+    //    this, &AXRProjectGameModeBase::HandleCreateAccountResult);
 
 
     // LobbyServer
@@ -31,24 +32,24 @@ void AXRProjectGameModeBase::BeginPlay()
     //GetNetMgr().Connect("127.0.0.1", 12221, nullptr);
 
 
-	GetNetMgr().Connect("127.0.0.1", 12221,
-		[this]() {
-		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kRequestSpawn);
-		out.CompletePacketBuild();
-		GetNetMgr().SendPacket(out);
-	});
+	//GetNetMgr().Connect("127.0.0.1", 12221,
+	//	[this]() {
+	//	/*OutputStream out;
+	//	out.WriteOpcode(ENetworkCSOpcode::kRequestSpawn);
+	//	out.CompletePacketBuild();
+	//	GetNetMgr().SendPacket(out);*/
+	//});
 
 
-	//ZoneServer
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSpawn)->BindUObject(
-		this, &AXRProjectGameModeBase::HandleCharacterSpawn);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kPossessCharacter)->BindUObject(
-		this, &AXRProjectGameModeBase::HandlePossess);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterPos)->BindUObject(
-		this, &AXRProjectGameModeBase::HandleCharacterMove);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kEventRecv)->BindUObject(
-		this, &AXRProjectGameModeBase::EventRecv);
+	////ZoneServer
+	//GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSpawn)->BindUObject(
+	//	this, &AXRProjectGameModeBase::HandleCharacterSpawn);
+	//GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kPossessCharacter)->BindUObject(
+	//	this, &AXRProjectGameModeBase::HandlePossess);
+	//GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterPos)->BindUObject(
+	//	this, &AXRProjectGameModeBase::HandleCharacterMove);
+	//GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kEventRecv)->BindUObject(
+	//	this, &AXRProjectGameModeBase::EventRecv);
 
 
 
