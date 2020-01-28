@@ -10,6 +10,7 @@
 #include "Engine/DataTable.h"
 #include "PlayerCharacter.h"
 #include "XRAssetMgr.h"
+#include "AccountManager.h"
 #include "UObject/NoExportTypes.h"
 #include "ItemManager.generated.h"
 
@@ -33,7 +34,6 @@ public:
 
 	//±‚≈∏≈€
 private:
-	APlayerCharacter* CurrentPlayerCharacter;
 	UItem* RetItem;
 	int32 CurrentItemId;
 public:
@@ -44,7 +44,6 @@ public:
 	*/
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
 	void BuildItem(EItemType Type, int32 ID, UWorld* World);
-	bool SetPlayerCharacter(APlayerCharacter* Character);
 	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item);
 	
 };

@@ -47,8 +47,8 @@ public:
 	virtual	void SetCharacterLoadState(ECharacterLoadState NewLoadState);
 	UFUNCTION(BlueprintCallable)
 	virtual	void SetCharacterLifeState(ECharacterLifeState NewLifeState);
-	UFUNCTION(BlueprintCallable)
-	virtual	UCharacterStatComponent* GetCharacterStat() { return StatComponent; };
+	//UFUNCTION(BlueprintCallable)
+	//virtual	UCharacterStatComponent* GetCharacterStat() { return StatComponent; };
 	UFUNCTION(BlueprintCallable)
 	virtual	void OnDead() { SetCharacterLifeState(ECharacterLifeState::DEAD); };
 
@@ -65,8 +65,8 @@ public:
 
 
 private:
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Meta=(AllowPrivateAccess = true))
-		UCharacterStatComponent*	StatComponent;
+	//UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Meta=(AllowPrivateAccess = true))
+	//	UCharacterStatComponent*	StatComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		ECharacterLoadState			CurrentLoadState;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))

@@ -3,12 +3,16 @@
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
 #include "XRGameInstance.h"
+#include "AccountManager.h"
 #include "Components/InputComponent.h"
 
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+
+	PlayerStatComp = CreateDefaultSubobject<UPlayerCharacterStatComponent>(TEXT("CharacterStat"));
+	PlayerStatComp->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -40,16 +44,16 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = false;
 	
 	
-	Equipments.HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
-	Equipments.FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
+	HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
+	FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
 	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
 	Equipments.BodyComponent->SetupAttachment(RootComponent);
 	Equipments.LegsComponent->SetupAttachment(RootComponent);
 	Equipments.HandsComponent->SetupAttachment(RootComponent);
-	Equipments.FaceComponent->SetupAttachment(RootComponent);
-	Equipments.HairComponent->SetupAttachment(RootComponent);
+	FaceComponent->SetupAttachment(RootComponent);
+	HairComponent->SetupAttachment(RootComponent);
 
 
 
@@ -68,6 +72,7 @@ APlayerCharacter::APlayerCharacter()
 		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
 	//Equipments.BodyComponent->SetSkeletalMesh(Mesh.Object);
 #pragma endregion
+
 }
 
 APlayerCharacter::~APlayerCharacter()
@@ -115,7 +120,8 @@ void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
 	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
-	GameInstance->ItemManager->SetPlayerCharacter(this);
+	bool Ret = AccountManager::GetInstance().SetCurrentPlayerCharacter(this);
+	check(Ret);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld());
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld());
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld());
@@ -137,7 +143,7 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-
+	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -166,11 +172,6 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 	if (EquipItem == nullptr && WeaponItem == nullptr)
 		check(false);
 
-
-	/*
-	HAIR = 0,FACE,BODY,HANDS,LEGS,WEAPON,SUBWEAPON,
-	*/
-
 	EEquipmentsType Types;
 	if (bIsWeapon == false)
 	{
@@ -197,14 +198,6 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 
 	switch (Types)
 	{
-		case EEquipmentsType::HAIR:
-			Equipments.HairItem = EquipItem;
-			Equipments.HairComponent->SetSkeletalMesh(SkMesh);
-			break;
-		case EEquipmentsType::FACE:
-			Equipments.FaceItem = EquipItem;
-			Equipments.FaceComponent->SetSkeletalMesh(SkMesh);
-			break;
 		case EEquipmentsType::BODY:
 			Equipments.BodyItem = EquipItem;
 			Equipments.BodyComponent->SetSkeletalMesh(SkMesh);
@@ -228,4 +221,16 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 	}
 
 
+}
+
+void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh * PartsMesh)
+{
+	if (Type == EPartsType::HAIR)
+	{
+		HairComponent->SetSkeletalMesh(PartsMesh);
+	}
+	else if (Type == EPartsType::FACE)
+	{
+		FaceComponent->SetSkeletalMesh(PartsMesh);
+	}
 }

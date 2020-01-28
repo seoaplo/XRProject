@@ -72,7 +72,7 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
 	{
 		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
-		if(CurrentPlayerCharacter->bIsMale)
+		if(AccountManager::GetInstance().GetCurrentPlayerCharacter()->bIsMale)
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.MaleMeshResourceID);
 		else
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
@@ -83,21 +83,14 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
-bool UItemManager::SetPlayerCharacter(APlayerCharacter * Character)
-{
-	if (Character == nullptr)
-		return false;
-
-	CurrentPlayerCharacter = Character;
-
-	return true;
-}
 
 void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
-	CurrentPlayerCharacter->ChangeEquipment(Item, LoadedMesh.Get());
+	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
 
 
 }
+
+
