@@ -6,15 +6,11 @@
 
 UItemManager::UItemManager()
 {
-	FString EquipmentDataPath = TEXT("DataTable'/Game/EquipTable.EquipTable'"); //아이템테이블 - 장비
+	FString EquipmentDataPath = TEXT("DataTable'/Game/Resources/DataTable/EquipTable.EquipTable'");
+
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
 	if (DT_EQUIPITEM.Succeeded())
 		EquipmentItemDataTable = DT_EQUIPITEM.Object;
-
-	//주의 : 로드 안됨
-	//EquipmentItemDataTable = LoadObject<UDataTable>(NULL, *EquipmentDataPath, NULL, LOAD_None, NULL);
-
-	bItemLoaded = false;
 
 }
 
@@ -22,12 +18,12 @@ UItemManager::~UItemManager()
 {
 }
 
-TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
+TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 {
 	if (EquipmentItemDataTable == nullptr)
 		check(false);
 
-	if (Type == 0)
+	if (Type == EItemType::EQUIPMENT)
 	{
 		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
 
@@ -38,7 +34,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
 
 		Item->DefaultInfo.ID = ID;
 		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshId;
-		Item->DefaultInfo.MaleMeshResourceID = Table->FemaleMeshId;
+		Item->DefaultInfo.FemaleMeshResourceID = Table->FemaleMeshId;
 		Item->DefaultInfo.Name = Table->Name;
 		Item->DefaultInfo.Icon = Table->IconID;
 		Item->DefaultInfo.Type = Table->Type;
@@ -59,16 +55,16 @@ TOptional<UItem*> UItemManager::GetItemFromId(int32 Type, int32 ID)
 	return nullptr;
 }
 
-void UItemManager::BuildItem(int32 ID, UWorld* World)
+void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 {
-	TOptional<UItem*> ItemOptional = GetItemFromId(0, ID);
+	TOptional<UItem*> ItemOptional = GetItemFromId(Type, ID);
 	//is valid
 
+	UItem* RetItem = nullptr;
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
 		CurrentItemId = ID;
-		bItemLoaded = true;
 	}
 
 	FSoftObjectPath AssetPath = nullptr;
@@ -77,33 +73,25 @@ void UItemManager::BuildItem(int32 ID, UWorld* World)
 	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
 	{
 		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
-		AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.ID);
+		if(AccountManager::GetInstance().GetCurrentPlayerCharacter()->bIsMale)
+			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.MaleMeshResourceID);
+		else
+			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
-
 	FStreamableDelegate AssetLoadDelegate;
-	//AssetLoadDelegate.BindUObject(this, &ItemManager::LoadItemSkMeshAssetComplete, AssetPath);
-	AssetLoadDelegate.BindUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath);
+	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath, RetItem);
+
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
-bool UItemManager::SetPlayerCharacter(APlayerCharacter * Character)
-{
-	if (Character == nullptr)
-		return false;
 
-	CurrentPlayerCharacter = Character;
-
-	return true;
-}
-
-void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath)
+void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
-	if (bItemLoaded == true)
-	{
-		CurrentPlayerCharacter->ChangeEquipment(CurrentItemId, RetItem, LoadedMesh.Get());
-		bItemLoaded = false;
-	}
+	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
+
 
 }
+
+

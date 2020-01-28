@@ -11,13 +11,14 @@
 AXRProjectGameModeBase::AXRProjectGameModeBase()
 {
     PrimaryActorTick.bCanEverTick = true;
-
 	DefaultPawnClass = APlayerCharacter::StaticClass();
 
 }
 
 void AXRProjectGameModeBase::BeginPlay()
 {
+	
+
 	//
     // LoginServer
     //GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCreateAccountResult)->BindUObject(
