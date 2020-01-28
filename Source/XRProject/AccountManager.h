@@ -14,6 +14,8 @@ private:
 	std::string AccountID;
 	std::string LobbyIP;
 	int16 LobbyPort;
+	std::string InGameIP;
+	int16 InGamePort;
 public:
 	std::string GetAccountID() { return AccountID; };
 	std::string GetLobbyIP() { return LobbyIP; };
@@ -21,4 +23,8 @@ public:
 	void SetAccountID(std::string NewAccountID) { AccountID = NewAccountID; };
 	void SetLobbyIP(std::string NewLobbyIP) { LobbyIP = NewLobbyIP; };
 	void SetLobbyPort(int16 NewLobbyPort) { LobbyPort = NewLobbyPort; };
+	std::string GetInGameIP() { return InGameIP; };
+	int16 GetInGamePort() { return InGamePort; };
+	void SetInGameIP(std::string NewInGameIP) { InGameIP = NewInGameIP; };
+	void SetInGamePort(int16 NewInGamePort) { InGamePort = NewInGamePort; };
 };

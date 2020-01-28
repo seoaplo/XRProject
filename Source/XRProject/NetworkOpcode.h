@@ -14,10 +14,7 @@ enum class ENetworkCSOpcode : uint16_t
     kCharacterDeleteRequest,
     kCharacterSelectionRequest,
 
-    // ZoneServer
-    kZoneConrifmRequest,
-    kZoneInitializeRequest,
-    kNotifyCurrentChrPosition,
+
 };
 
 
@@ -33,8 +30,4 @@ enum class ENetworkSCOpcode : uint16_t
     kCharacterListNotify,
     kMigrateZoneNotify,
 
-    // ZoneServer
-    kUserConfirmResult,
-    kUserEnterZone,
-    kBroadCastChrPosition,
 };

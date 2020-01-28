@@ -60,7 +60,7 @@ void ALoginSceneGameMode::HandleLoginResult(InputStream& input)
 		AccountManager::GetInstance().SetLobbyPort(LobbyPort);
 
 		GetNetMgr().Close();
-		UGameplayStatics::OpenLevel(this, TEXT("LEVEL_CharacterSelect"));
+		UGameplayStatics::OpenLevel(GetWorld(), TEXT("LEVEL_CharacterSelect"));
 	}
 	else
 	{

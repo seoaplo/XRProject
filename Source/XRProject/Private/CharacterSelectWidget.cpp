@@ -5,7 +5,7 @@
 #include "XRGameInstance.h"
 #include "OutputStream.h"
 
-void UCharacterSelectWidget::AddCharacter(AUserCharacter* Character)
+void UCharacterSelectWidget::AddCharacter(APlayerCharacter* Character)
 {
 	CharacterList.push_back(Character);
 	CharacterCount = CharacterList.size();
@@ -23,7 +23,7 @@ void UCharacterSelectWidget::DeleteCharacter(int Num)
 	UpdateList();
 }
 
-AUserCharacter* UCharacterSelectWidget::GetCharacter(int Num)
+APlayerCharacter* UCharacterSelectWidget::GetCharacter(int Num)
 {
 	if (Num < CharacterList.size() || Num >= 0)
 	{
@@ -32,41 +32,60 @@ AUserCharacter* UCharacterSelectWidget::GetCharacter(int Num)
 	return nullptr;
 }
 
-void UCharacterSelectWidget::CharacterSelectionRequest(int32 Numder)
+void UCharacterSelectWidget::CharacterSelectionRequest(int Numder)
 {
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterSelectionRequest);
-	out << Numder;
+	out << (int32_t)Numder;
 	out.CompletePacketBuild();
 
 	GetNetMgr().SendPacket(out);
 	BlockButton();
 }
 
-void UCharacterSelectWidget::CharacterCreateRequest(FText Name, int32 Sex)
+void UCharacterSelectWidget::CharacterCreateRequest(int SlotNum, FText Name, int FaceID, int HairID, int Gender)
 {
 	if (Name.IsEmpty())
 	{
 		return;
 	}
-	std::wstring w_id(*Name.ToString());
-	std::string c_id(w_id.begin(), w_id.end());
+
+	std::wstring w_Name(*Name.ToString());
+	std::string c_Name(w_Name.begin(), w_Name.end());
 
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterCreateRequest);
-	out.WriteCString(c_id.c_str());
-	out << Sex;
+	int32_t Zero = 0;
+	out << (int32_t)SlotNum;
+	out.WriteCString(c_Name.c_str());
+	out << Zero; // ·¹º§
+	out << Zero; // Èû
+	out << Zero; // ¹Î
+	out << Zero; // Áö
+	out << Zero; // Àâ
+	out << (int32_t)FaceID; // ¾ó±¼
+	out << (int32_t)HairID; // ¸Ó¸®
+	out << Zero; // µ·
+	out << Zero; // Á¸
+	out << Zero; // x
+	out << Zero; // y
+	out << Zero; // z
+	out << Zero; // ¾Æ¸Óid
+	out << Zero; // ÇÚµåid
+	out << Zero; // ½´Áîid
+	out << Zero; // ¿þÆùid
+	out << Zero; // ¼­ºê¿þÆùid
+	out << (int32_t)Gender; // ¼ºº°
 	out.CompletePacketBuild();
 
 	GetNetMgr().SendPacket(out);
-	BlockButton();
 }
 
-void UCharacterSelectWidget::CharacterDeleteRequest(int32 Numder)
+void UCharacterSelectWidget::CharacterDeleteRequest(int Numder)
 {
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterDeleteRequest);
-	out << Numder;
+	out << (int32_t)Numder;
 	out.CompletePacketBuild();
 
 	GetNetMgr().SendPacket(out);

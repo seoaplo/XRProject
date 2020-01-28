@@ -17,7 +17,11 @@ public:
 	~Inventory();
 private:
 	UItem* Slot[kMaxInventorySlotSize];
+	int64 Gold;
 public:
+	int64 GetGold();
+	void SetGold(int64 Money);
+	void AddGold(int64 Money);
 	int GetInventoryHeight();
 	int GetInventoryWidth();
 	int GetInventorySize();

@@ -20,4 +20,19 @@ public:
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void Tick(float DeltaSeconds) override;
+private:
+    void HandleCreateAccountResult(class InputStream& input);
+    void HandleLoginResult(class InputStream& input);
+
+
+	void HandleCharacterSpawn(class InputStream& input);
+	void HandlePossess(class InputStream& input);
+	void HandleCharacterMove(class InputStream& input);
+	void EventRecv(class InputStream& input);
+
+	TMap<FString, class AXRPlayerCharacter*> Players;
+
+	FString my_uuid;
+
+
 };

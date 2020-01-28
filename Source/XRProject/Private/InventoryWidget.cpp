@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "InventoryWidget.h"
+#include <string>
 
 UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
@@ -13,11 +11,11 @@ void UInventoryWidget::SetVisible(bool IsVisible)
 	bIsVisible = IsVisible;
 	if (bIsVisible)
 	{
-		Visibility = ESlateVisibility::Visible;
+		SetVisibility(ESlateVisibility::Visible);
 	}
 	else
 	{
-		Visibility = ESlateVisibility::Hidden;
+		SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -28,15 +26,7 @@ bool UInventoryWidget::GetVisible()
 
 void UInventoryWidget::SwitchVisible()
 {
-	bIsVisible = !bIsVisible;
-	if (bIsVisible)
-	{
-		Visibility = ESlateVisibility::Visible;
-	}
-	else
-	{
-		Visibility = ESlateVisibility::Hidden;
-	}
+	SetVisible(!bIsVisible);
 }
 
 int UInventoryWidget::GetWidthSize()
@@ -56,6 +46,41 @@ void UInventoryWidget::SetUp()
 	{
 		list[i]->SlotObject = Inventory::GetInstance().GetItem(i);
 	}
+}
+
+FString UInventoryWidget::GetGlod()
+{
+	int Money = Inventory::GetInstance().GetGold();
+	std::string str = std::to_string(Money);
+	int Length = str.length();
+	int Remain = Length % 3;
+
+	int Flag = 0;
+	int SicleFlag = 0;
+
+	std::string Result;
+	for (int i = 0; i < Remain; i++)
+	{
+		Result += str[Flag];
+		Flag++;
+		if (Flag == Remain)
+		{
+			Result += ',';
+		}
+	}
+	while (true)
+	{
+		if (Flag == Length) break;
+		if (SicleFlag == 3)
+		{
+			Result += ',';
+			SicleFlag = 0;
+		}
+		SicleFlag++;
+		Result += str[Flag++];
+	}
+	FString ReturnValue(Result.c_str());
+	return ReturnValue;
 }
 
 void UInventoryWidget::AddList(USlotWidget * newslot)

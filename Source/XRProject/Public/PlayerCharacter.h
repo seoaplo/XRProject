@@ -5,7 +5,7 @@
 #pragma once
 
 #include "EngineMinimal.h"
-#include "UserCharacter.h"
+#include "BaseCharacter.h"
 #include "ItemEquipment.h"
 #include "ItemWeapon.h"
 #include "PlayerCharacter.generated.h"
@@ -13,12 +13,13 @@
 UENUM()
 enum class EEquipmentsType : uint8
 {
-	FACE,
 	HAIR,
+	FACE,
 	BODY,
 	HANDS,
 	LEGS,
 	WEAPON,
+	SUBWEAPON,
 };
 
 USTRUCT(BlueprintType)
@@ -39,6 +40,8 @@ public:
 		USkeletalMeshComponent* LegsComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
 		USkeletalMeshComponent* WeaponComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
+		USkeletalMeshComponent* SubWeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* FaceItem;
@@ -52,6 +55,8 @@ public:
 		UItemEquipment* LegsItem;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemWeapon* WeaponItem;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
+		UItemWeapon* SubWeaponItem;
 
 };
 
@@ -60,7 +65,7 @@ public:
  * 
  */
 UCLASS()
-class XRPROJECT_API APlayerCharacter : public AUserCharacter
+class XRPROJECT_API APlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
@@ -70,32 +75,47 @@ public:
 
 
 public:
-	FRotator NextRotation;
-	float RotateSpeed;
-
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float RotateSpeed;
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float SpringArmLength;
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float MovementSpeed;
 	UPROPERTY()
-		bool IsMale; //성별 체크를 위한 bool값.
+		bool bIsMale; //성별 체크를 위한 bool값.
 	UPROPERTY()
 		FEquipment Equipments;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseTurnRate;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
+		float BaseLookUpRate;
 	
 private:
 	/*TEST*/
 	FRotator DeltaRotation;
 	FRotator AdditionalRotationValue;
 	FVector SpringArmLocation;
+	bool bForwardKeyIsNeutral;
 public:
-	virtual void Tick(float deltatime) override;
+	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void BeginPlay() override;
+	virtual void PossessedBy(AController* controller) override;
+
+
 
 public:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
 	
 	UFUNCTION()
-		void ChangeEquipment(EEquipmentsType Types, UItemEquipment* Item);
+		void ChangeEquipment(int32 NumTypes, UItem* Item, USkeletalMesh* SkMesh);
 };

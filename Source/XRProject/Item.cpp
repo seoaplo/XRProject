@@ -12,3 +12,8 @@ int UItem::GetCount()
 {
 	return 1;
 }
+
+EItemType UItem::GetItemType()
+{
+	return ItemType;
+}

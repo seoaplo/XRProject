@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "UserCharacter.h"
+#include "PlayerCharacter.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterSlotWidget.generated.h"
@@ -15,6 +15,16 @@ class XRPROJECT_API UCharacterSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-		AUserCharacter* TargetCharacter;
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
+		APlayerCharacter* TargetCharacter;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
+		int64 MySlotNumber;
+public:
+	UFUNCTION(BlueprintCallable)
+		void SendCurrentSelectSlot();
+	UFUNCTION(BlueprintCallable)
+		int64 GetCharacterLevel();
+	UFUNCTION(BlueprintCallable)
+		FString GetCharacterName();
+
 };

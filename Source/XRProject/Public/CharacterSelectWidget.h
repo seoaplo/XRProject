@@ -3,7 +3,7 @@
 #pragma once
 
 #include <vector>
-#include "UserCharacter.h"
+#include "PlayerCharacter.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterSelectWidget.generated.h"
@@ -16,22 +16,22 @@ class XRPROJECT_API UCharacterSelectWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	std::vector<AUserCharacter*> CharacterList;
+	std::vector<APlayerCharacter*> CharacterList;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
 		int64 CharacterCount;
 public:
 	UFUNCTION(BlueprintCallable)
-		void AddCharacter(AUserCharacter* Character);
+		void AddCharacter(APlayerCharacter* Character);
 	UFUNCTION(BlueprintCallable)
 		void DeleteCharacter(int Num);
 	UFUNCTION(BlueprintCallable)
-		AUserCharacter* GetCharacter(int Num);
+		APlayerCharacter* GetCharacter(int Num);
 	UFUNCTION(BlueprintCallable)
-		void CharacterSelectionRequest(int32 Numder);
+		void CharacterSelectionRequest(int Numder);
 	UFUNCTION(BlueprintCallable)
-		void CharacterCreateRequest(FText Name, int32 Sex);
+		void CharacterCreateRequest(int SlotNum, FText Name, int FaceID, int HairID, int Gender);
 	UFUNCTION(BlueprintCallable)
-		void CharacterDeleteRequest(int32 Numder);
+		void CharacterDeleteRequest(int Numder);
 	UFUNCTION(BlueprintCallable)
 		void ReturnLoginServer();
 	UFUNCTION(BlueprintImplementableEvent)
