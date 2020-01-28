@@ -6,10 +6,26 @@ Inventory::Inventory()
 	{
 		Slot[i] = nullptr;
 	}
+	Gold = 0;
 }
 
 Inventory::~Inventory()
 {
+}
+
+int64 Inventory::GetGold()
+{
+	return Gold;
+}
+
+void Inventory::SetGold(int64 Money)
+{
+	Gold = Money;
+}
+
+void Inventory::AddGold(int64 Money)
+{
+	Gold += Money;
 }
 
 int Inventory::GetInventoryHeight()

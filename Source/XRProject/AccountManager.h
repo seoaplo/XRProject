@@ -19,7 +19,6 @@ private:
 	std::string InGameIP;
 	int16 InGamePort;
 	APlayerCharacter* CurrentPlayerCharacter;
-
 public:
 	std::string GetAccountID() { return AccountID; };
 	std::string GetLobbyIP() { return LobbyIP; };
@@ -40,4 +39,5 @@ public:
 			return true;
 	};
 	APlayerCharacter* GetCurrentPlayerCharacter() { return CurrentPlayerCharacter; };
+
 };

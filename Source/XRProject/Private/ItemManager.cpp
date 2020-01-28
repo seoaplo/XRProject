@@ -6,7 +6,8 @@
 
 UItemManager::UItemManager()
 {
-	FString EquipmentDataPath = TEXT("DataTable'/Game/Resources/DataTable/EquipTable.EquipTable'"); //아이템테이블 - 장비
+	FString EquipmentDataPath = TEXT("DataTable'/Game/Resources/DataTable/EquipTable.EquipTable'");
+
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
 	if (DT_EQUIPITEM.Succeeded())
 		EquipmentItemDataTable = DT_EQUIPITEM.Object;
