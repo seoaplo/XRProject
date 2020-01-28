@@ -11,14 +11,14 @@ private:
 public:
 	~AccountManager() {};
 private:
-	FString AccountID;
-	string LobbyIP;
+	std::string AccountID;
+	std::string LobbyIP;
 	int16 LobbyPort;
 public:
-	FString GetAccountID() { return AccountID; };
-	string GetLobbyIP() { return LobbyIP; };
+	std::string GetAccountID() { return AccountID; };
+	std::string GetLobbyIP() { return LobbyIP; };
 	int16 GetLobbyPort() { return LobbyPort; };
-	void SetAccountID(FString NewAccountID) { AccountID = NewAccountID; };
-	void SetLobbyIP(string NewLobbyIP) { LobbyIP = NewLobbyIP; };
+	void SetAccountID(std::string NewAccountID) { AccountID = NewAccountID; };
+	void SetLobbyIP(std::string NewLobbyIP) { LobbyIP = NewLobbyIP; };
 	void SetLobbyPort(int16 NewLobbyPort) { LobbyPort = NewLobbyPort; };
 };

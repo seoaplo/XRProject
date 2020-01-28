@@ -3,6 +3,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "UserCharacter.h"
 #include "CharacterSelectWidget.h"
 #include "CoreMinimal.h"
@@ -30,7 +31,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 public:
-	void HandleCharacterCreateResult(class InputStream& input);
-	void HandleCharacterSelectionResult(class InputStream& input);
+	void HandleCharacterCreateFail(class InputStream& input);
 	void HandleCharacterList(class InputStream& input);
+	void HandleCharacterSlot(class InputStream& input);
 };

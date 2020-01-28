@@ -20,15 +20,27 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	}
 
 	// 인스턴스에서 로비서버의 IP, port를 중계하는 방식으로 바꾸기 & 옵코드 유효한 옵코드로 변경
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCreateAccountResult)->BindUObject(
-		this, &ACharacterSelectSceneGameMode::HandleCharacterCreateResult);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kLoginResult)->BindUObject(
-		this, &ACharacterSelectSceneGameMode::HandleCharacterSelectionResult);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kConfirmFailNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleCharacterCreateFail);
 
-	string ip = AccountManager::GetInstance().GetLobbyIP();
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterListNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleCharacterList);
+
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleCharacterSlot);
+
+	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
 	int16 Port = AccountManager::GetInstance().GetLobbyPort();
-	GetNetMgr().Connect(ip.c_str(), Port, nullptr);
+	GetNetMgr().Connect(Ip.c_str(), Port,
+		[this]() {
+		std::string ID = AccountManager::GetInstance().GetAccountID();
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kLobbyConfirmRequest);
+		out.WriteCString(ID.c_str());
+		GetNetMgr().SendPacket(out);
+	});
+
 }
 
 void ACharacterSelectSceneGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -43,14 +55,14 @@ void ACharacterSelectSceneGameMode::Tick(float DeltaSeconds)
 	GetNetMgr().Update();
 }
 
-void ACharacterSelectSceneGameMode::HandleCharacterCreateResult(InputStream& input)
-{
-}
-
-void ACharacterSelectSceneGameMode::HandleCharacterSelectionResult(InputStream& input)
+void ACharacterSelectSceneGameMode::HandleCharacterCreateFail(InputStream& input)
 {
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
+{
+}
+
+void ACharacterSelectSceneGameMode::HandleCharacterSlot(InputStream& input)
 {
 }

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "UserCharacter.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "CharacterSlotWidget.generated.h"
@@ -13,5 +14,7 @@ UCLASS()
 class XRPROJECT_API UCharacterSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
+		AUserCharacter* TargetCharacter;
 	
 };

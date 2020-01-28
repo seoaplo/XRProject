@@ -23,7 +23,7 @@ void ULoginWidget::LoginRequest(FText Id, FText Password)
 	out.WriteCString(c_pw.c_str());
 	out.CompletePacketBuild();
 
-	AccountManager::GetInstance().SetAccountID(Id.ToString());
+	AccountManager::GetInstance().SetAccountID(c_id);
 
 	GetNetMgr().SendPacket(out);
 	BlockButton();
