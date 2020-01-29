@@ -7,6 +7,7 @@
 #include "NetworkManager.h"
 #include "XRAssetMgr.h"
 #include "ItemManager.h"
+#include "MapManager.h"
 #include "XRGameInstance.generated.h"
 
 /**
@@ -26,6 +27,7 @@ public:
 
     }
 	FORCEINLINE UXRAssetMgr* GetXRAssetMgr() { return XRAssetManager; }
+	FORCEINLINE UMapManager& GetMapManager() { return *MapManager; }
 
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UXRAssetMgr* XRAssetManager;
@@ -36,11 +38,13 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UNetworkManager* NetworkManager;
+	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		UMapManager* MapManager;
 
 
 };
 
-//³Ö¾ú´Âµ¥ ¹®Á¦ÀÖÀ¸¸é ¸»¾¸ÇÏ½Ê¼î -¼öÂù-
+//ï¿½Ö¾ï¿½ï¿½Âµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï½Ê¼ï¿½ -ï¿½ï¿½ï¿½ï¿½-
 USTRUCT(BlueprintType)
 struct FPartsResource : public FTableRowBase
 {
@@ -55,4 +59,4 @@ public:
 
 #define GetNetMgr Cast<UXRGameInstance>(GetGameInstance())->GetNetworkManager
 #define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr
-
+#define GetMapMgr Cast<UXRGameInstance>(GetGameInstance())->GetMapManager
