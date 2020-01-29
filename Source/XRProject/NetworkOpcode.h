@@ -4,30 +4,39 @@
 enum class ENetworkCSOpcode : uint16_t
 {
     // LoginServer
-    kCreateAccountRequest,
+    kCreateAccountRequest = 0,
     kLoginRequest,
 
     // LobbyServer
-    kLobbyConfirmRequest,
+    kLobbyConfirmRequest = 100,
     kCharacterListRequest,
     kCharacterCreateRequest,
     kCharacterDeleteRequest,
     kCharacterSelectionRequest,
 
-
+    // ZoneServer
+    kZoneConrifmRequest = 1000,
+    kZoneInitializeRequest,
+    kNotifyCurrentChrPosition,
 };
 
 
 enum class ENetworkSCOpcode : uint16_t
 {
     // LoginServer
-    kCreateAccountResult,
+    kCreateAccountResult = 0,
     kLoginResult,
 
     // LobbyServer
-    kConfirmFailNotify,
+    kConfirmFailNotify = 100,
     kCharacterSlotNotify,
     kCharacterListNotify,
     kMigrateZoneNotify,
 
+    // ZoneServer
+    kUserConfirmResult = 1000,
+    kUserEnterZone,
+    kBroadCastChrPosition,
+    kInventoryUpdate,
+    kQuickSlotUpdate,
 };
