@@ -55,12 +55,13 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 	return nullptr;
 }
 
-void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
+void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter)
 {
 	TOptional<UItem*> ItemOptional = GetItemFromId(Type, ID);
 	//is valid
 
 	UItem* RetItem = nullptr;
+	APlayerCharacter* CurrentTargetCharacter = TargetCharacter;
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
@@ -79,19 +80,25 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World)
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 	FStreamableDelegate AssetLoadDelegate;
-	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, AssetPath, RetItem);
+	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, 
+		AssetPath, RetItem, CurrentTargetCharacter);
 
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
 
-void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item)
+void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item, APlayerCharacter* Character)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
-	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
-
-
+	if (Character == nullptr)
+	{
+		AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
+	}
+	else
+	{
+		Character->ChangeEquipment(Item, LoadedMesh.Get());
+	}
 }
 
 
