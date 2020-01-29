@@ -40,5 +40,19 @@ private:
 
 };
 
+//넣었는데 문제있으면 말씀하십쇼 -수찬-
+USTRUCT(BlueprintType)
+struct FPartsResource : public FTableRowBase
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_Resource")
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_Resource")
+	int32 ResourceID;
+};
+
+
 #define GetNetMgr Cast<UXRGameInstance>(GetGameInstance())->GetNetworkManager
 #define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr
+
