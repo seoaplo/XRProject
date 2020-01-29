@@ -35,18 +35,15 @@ enum class ENetworkSCOpcode : uint16_t
     kMigrateZoneNotify,
 
     // ZoneServer
-    kUserConfirmResult = 1000,
-    kMapInitialize,
-    kSpawnLocalPlayer,
-    kSpawnRemotePlayer,
-    kExitRemotePlayer,
+    kUserEnterTheMap = 1000,
+    kSpawnCharacter,
+    kExitCharacter,
+    kUpdateCharacterPosition,
+
 
     kSpawnMonster,
-    kSpawnPlayer,
 
 
-    kBroadCastChrPosition,
     kInventoryUpdate,
     kQuickSlotUpdate,
-
 };
