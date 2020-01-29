@@ -27,7 +27,7 @@ public:
 
     }
 	FORCEINLINE UXRAssetMgr* GetXRAssetMgr() { return XRAssetManager; }
-	FORCEINLINE UMapManager& GetMapManager() { return *MapManager; }
+	FORCEINLINE UMapManager& GetMapMgr() { return *MapManager; }
 
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UXRAssetMgr* XRAssetManager;
@@ -41,10 +41,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UMapManager* MapManager;
 
-
 };
 
-//�־��µ� ���������� �����Ͻʼ� -����-
+//넣었는데 문제있으면 말씀하십쇼 -수찬-
 USTRUCT(BlueprintType)
 struct FPartsResource : public FTableRowBase
 {
