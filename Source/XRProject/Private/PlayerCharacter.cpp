@@ -44,18 +44,20 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = false;
 	
 	
+	FName HairSocket("HairSocket");
+	FName FaceSocket("FaceSocket");
+	
 	HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
 	FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
+
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
 	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
 	Equipments.BodyComponent->SetupAttachment(RootComponent);
 	Equipments.LegsComponent->SetupAttachment(RootComponent);
 	Equipments.HandsComponent->SetupAttachment(RootComponent);
-	FaceComponent->SetupAttachment(RootComponent);
-	HairComponent->SetupAttachment(RootComponent);
-
-
+	HairComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
+	FaceComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, FaceSocket);
 
 	
 

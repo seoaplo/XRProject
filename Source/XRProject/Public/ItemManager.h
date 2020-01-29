@@ -43,10 +43,14 @@ public:
 	범용적으로 사용할 수 없음
 	*/
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
-	void BuildItem(EItemType Type, int32 ID, UWorld* World);
-	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item);
+	void BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter = nullptr);
+	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item, APlayerCharacter* Character);
 	
 };
+
+
+
+
 
 USTRUCT(BlueprintType)
 struct FEquipmentTableResource : public FTableRowBase
