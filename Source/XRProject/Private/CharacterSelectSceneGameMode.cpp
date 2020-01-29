@@ -85,8 +85,15 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterListNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleCharacterList);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->BindUObject(
-		this, &ACharacterSelectSceneGameMode::HandleCharacterSlot);
+
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterCreateNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleCharacterCreate);
+
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterDeleteNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleCharacterDelete);
+
+	//GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->BindUObject(
+	//	this, &ACharacterSelectSceneGameMode::HandleCharacterSlot);
 
 	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
 	int16 Port = AccountManager::GetInstance().GetLobbyPort();
@@ -132,7 +139,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreateFail(InputStream& input
 
 void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 {
-
+	//Connect하고 캐릭터 리스트 띄우기 
 	int32_t SlotSize;
 	input >> SlotSize;
 
@@ -156,59 +163,41 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		CreatePlayerCharacter(Character, Info);
 		Character->SetActorHiddenInGame(true);
 		CharacterList[SlotNumber] = Character;
-		
 	}
 
 	
 }
 
-void ACharacterSelectSceneGameMode::HandleCharacterSlot(InputStream& input)
+void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 {
-	int32_t SlotNum;
-	string Name;
-	int32_t Level;
-	int32_t Str;
-	int32_t Dex;
-	int32_t Int;
-	int32_t Job;
-	int32_t Face;
-	int32_t Hair;
-	int32_t Gold;
-	int32_t Zone;
-	float x, y, z;
-	int32_t armor_itemid;
-	int32_t hand_itemid;
-	int32_t shoes_itemid;;
-	int32_t weapon_itemid;
-	int32_t sub_weapon_itemid;
-	int32_t gender;
-
-	input >> SlotNum;
-	if (SlotNum == -1)
+	int SlotNumber = input.ReadInt32();
+	if (SlotNumber == -1)
 	{
 		CurrentWidget->CharacterCreateResult(false);
 		return;
 	}
-	else
-	{
-		Name = input.ReadCString();
-		input >> Level;
-		input >> Str;
-		input >> Dex;
-		input >> Int;
-		input >> Job;
-		input >> Face;
-		input >> Hair;
-		input >> Gold;
-		input >> Zone;
-		input >> x;
-		input >> y;
-		input >> z;
-		input >> armor_itemid;
-		input >> hand_itemid;
-		input >> shoes_itemid;;
-		input >> weapon_itemid;
-		input >> sub_weapon_itemid;
-		input >> gender;
-	}
+
+	FCharacterSelectInfo Info;
+	Info.Name = input.ReadCString();
+	input >> Info.Level; input >> Info.Str; input >> Info.Dex;
+	input >> Info.Int;	input >> Info.Job;  input >> Info.Face;
+	input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
+	input >> Info.x; input >> Info.y; input >> Info.z;
+	input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
+	input >> Info.weapon_itemid; input >> Info.sub_weapon_itemid; input >> Info.gender;
+
+	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
+		CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
+
+	CreatePlayerCharacter(Character, Info);
+	Character->SetActorHiddenInGame(true);
+	CharacterList[SlotNumber] = Character;
+}
+
+void ACharacterSelectSceneGameMode::HandleCharacterDelete(InputStream & input)
+{
+	int SlotNumber = input.ReadInt32();
+	CurrentWidget->DeleteCharacter(SlotNumber);
+	CharacterList[SlotNumber]->Destroy();
+	CharacterList[SlotNumber] = nullptr;
 }
