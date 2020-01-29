@@ -85,8 +85,8 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterListNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleCharacterList);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->BindUObject(
-		this, &ACharacterSelectSceneGameMode::HandleCharacterSlot);
+	//GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->BindUObject(
+	//	this, &ACharacterSelectSceneGameMode::HandleCharacterSlot);
 
 	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
 	int16 Port = AccountManager::GetInstance().GetLobbyPort();
