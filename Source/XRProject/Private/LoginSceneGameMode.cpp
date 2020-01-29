@@ -1,9 +1,4 @@
 #include "LoginSceneGameMode.h"
-#include "PlayerCharacter.h"
-#include "XRGameInstance.h"
-#include "InputStream.h"
-#include "AccountManager.h"
-
 
 ALoginSceneGameMode::ALoginSceneGameMode()
 {

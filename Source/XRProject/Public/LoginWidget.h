@@ -6,6 +6,7 @@
 #include "InputStream.h"
 #include "OutputStream.h"
 #include "CoreMinimal.h"
+#include "AccountManager.h"
 #include "Blueprint/UserWidget.h"
 #include "LoginWidget.generated.h"
 
