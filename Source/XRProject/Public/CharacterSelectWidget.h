@@ -8,20 +8,20 @@
 #include "Blueprint/UserWidget.h"
 #include "CharacterSelectWidget.generated.h"
 
-/**
- * 
- */
+const int kMaxCharacterSlot = 5;
+
 UCLASS()
 class XRPROJECT_API UCharacterSelectWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UCharacterSelectWidget(const FObjectInitializer& ObjectInitializer);
 	std::vector<APlayerCharacter*> CharacterList;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
 		int64 CharacterCount;
 public:
 	UFUNCTION(BlueprintCallable)
-		void AddCharacter(APlayerCharacter* Character);
+		void AddCharacter(int Num, APlayerCharacter* Character);
 	UFUNCTION(BlueprintCallable)
 		void DeleteCharacter(int Num);
 	UFUNCTION(BlueprintCallable)

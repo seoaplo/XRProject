@@ -31,6 +31,8 @@ public:
 		virtual bool Use();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual int GetCount();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual int GetID();
 
 public:
 	EItemType GetItemType();

@@ -5,27 +5,31 @@
 #include "XRGameInstance.h"
 #include "OutputStream.h"
 
-void UCharacterSelectWidget::AddCharacter(APlayerCharacter* Character)
+
+UCharacterSelectWidget::UCharacterSelectWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
-	CharacterList.push_back(Character);
-	CharacterCount = CharacterList.size();
+	CharacterList.resize(kMaxCharacterSlot);
+	for (int i = 0; i < kMaxCharacterSlot; i++)
+	{
+		CharacterList[i] == nullptr;
+	}
+}
+
+void UCharacterSelectWidget::AddCharacter(int Num, APlayerCharacter* Character)
+{
+	CharacterList[Num] = Character;
 	UpdateList();
 }
 
 void UCharacterSelectWidget::DeleteCharacter(int Num)
 {
-	for (int i = Num; i < CharacterCount - 1; i++)
-	{
-		CharacterList[i] = CharacterList[i + 1];
-	}
-	CharacterList.pop_back();
-	CharacterCount = CharacterList.size();
+	CharacterList[Num] == nullptr;
 	UpdateList();
 }
 
 APlayerCharacter* UCharacterSelectWidget::GetCharacter(int Num)
 {
-	if (Num < CharacterList.size() || Num >= 0)
+	if (Num < kMaxCharacterSlot || Num >= 0)
 	{
 		return CharacterList[Num];
 	}

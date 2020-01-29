@@ -9,3 +9,8 @@ int UItemConsumption::GetCount()
 {
 	return AddInfo.Count;
 }
+
+int UItemConsumption::GetID()
+{
+	return DefaultInfo.ID;
+}

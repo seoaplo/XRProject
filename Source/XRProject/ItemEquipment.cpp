@@ -7,3 +7,8 @@ UItemEquipment::UItemEquipment()
 {
 
 }
+
+int UItemEquipment::GetID()
+{
+	return DefaultInfo.ID;
+}

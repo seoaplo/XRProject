@@ -1,6 +1,6 @@
 #pragma once
-
 #include "CoreMinimal.h"
+#include "PlayerCharacter.h"
 #include <string>
 #include "CustomSingleton.h"
 
@@ -18,6 +18,7 @@ private:
 	int16 LobbyPort;
 	std::string InGameIP;
 	int16 InGamePort;
+	APlayerCharacter* CurrentPlayerCharacter;
 public:
 	std::string GetAccountID() { return AccountID; };
 	std::string GetLobbyIP() { return LobbyIP; };
@@ -29,4 +30,14 @@ public:
 	int16 GetInGamePort() { return InGamePort; };
 	void SetInGameIP(std::string NewInGameIP) { InGameIP = NewInGameIP; };
 	void SetInGamePort(int16 NewInGamePort) { InGamePort = NewInGamePort; };
+	bool SetCurrentPlayerCharacter(APlayerCharacter* Character)
+	{
+		CurrentPlayerCharacter = Character;
+		if (CurrentPlayerCharacter == nullptr)
+			return false;
+		else
+			return true;
+	};
+	APlayerCharacter* GetCurrentPlayerCharacter() { return CurrentPlayerCharacter; };
+
 };

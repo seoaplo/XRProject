@@ -35,5 +35,6 @@ public:
 	void HandleCharacterCreateFail(class InputStream& input);
 	void HandleCharacterList(class InputStream& input);
 	void HandleCharacterSlot(class InputStream& input);
+	void HandleMigrateZone(class InputStream& input);
 	void SendConfirmRequest();
 };

@@ -43,6 +43,23 @@ int Inventory::GetInventorySize()
 	return kMaxInventorySlotSize;
 }
 
+int Inventory::GetItemCount(int64 ID)
+{
+	int Count = 0;
+	for (int i = 0; i < kMaxInventorySlotSize; i++)
+	{
+		if (Slot[i])
+		{
+			if (Slot[i]->GetID() == ID)
+			{
+				Count += Slot[i]->GetCount();
+			}
+		}
+
+	}
+	return Count;
+}
+
 UItem * Inventory::GetItem(int index)
 {
 	if (index < 0 || index >= kMaxInventorySlotSize) return nullptr;

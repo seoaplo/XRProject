@@ -38,6 +38,9 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleCharacterSlot);
 
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kMigrateZoneNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
+
 	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
 	int16 Port = AccountManager::GetInstance().GetLobbyPort();
 	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&ACharacterSelectSceneGameMode::SendConfirmRequest, this));
@@ -112,6 +115,19 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> sub_weapon_itemid;
 		input >> gender;
 	}
+}
+
+void ACharacterSelectSceneGameMode::HandleMigrateZone(InputStream& input)
+{
+	string InGameIP;
+	int16 InGamePort;
+	InGameIP = input.ReadCString();
+	input >> InGamePort;
+	AccountManager::GetInstance().SetInGameIP(InGameIP);
+	AccountManager::GetInstance().SetInGamePort(InGamePort);
+
+	GetNetMgr().Close();
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("LEVEL_Village"));
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterSlot(InputStream& input)

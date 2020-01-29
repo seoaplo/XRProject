@@ -12,15 +12,15 @@ ABaseCharacter::ABaseCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	StatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CharacterStat"));
-
+	//StatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CharacterStat"));
+	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
 }
 
 // Called when the game starts or when spawned 
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	StatComponent->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
+	//StatComponent->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
 	SetCharacterLoadState(ECharacterLoadState::PREINIT);
 }
 
