@@ -29,14 +29,24 @@ enum class ENetworkSCOpcode : uint16_t
 
     // LobbyServer
     kConfirmFailNotify = 100,
-    kCharacterSlotNotify,
+    kCharacterCreateNotify,
+    kCharacterDeleteNotify,
     kCharacterListNotify,
     kMigrateZoneNotify,
 
     // ZoneServer
     kUserConfirmResult = 1000,
-    kUserEnterZone,
+    kMapInitialize,
+    kSpawnLocalPlayer,
+    kSpawnRemotePlayer,
+    kExitRemotePlayer,
+
+    kSpawnMonster,
+    kSpawnPlayer,
+
+
     kBroadCastChrPosition,
     kInventoryUpdate,
     kQuickSlotUpdate,
+
 };
