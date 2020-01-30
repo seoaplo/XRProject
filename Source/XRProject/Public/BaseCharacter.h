@@ -44,6 +44,12 @@ public:
 
 public:
 	UFUNCTION(BlueprintCallable)
+		const ECharacterLoadState GetCharacterLoadState() { return CurrentLoadState; }
+	UFUNCTION(BlueprintCallable)
+		const ECharacterLifeState GetCharacterLifeState() { return CurrentLifeState; }
+
+
+	UFUNCTION(BlueprintCallable)
 	virtual	void SetCharacterLoadState(ECharacterLoadState NewLoadState);
 	UFUNCTION(BlueprintCallable)
 	virtual	void SetCharacterLifeState(ECharacterLifeState NewLifeState);
@@ -64,21 +70,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual	void SetRemoteRotation(FRotator remoteRotator);
 
-
-
-private:
-	//UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Meta=(AllowPrivateAccess = true))
-	//	UCharacterStatComponent*	StatComponent;
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		ECharacterLoadState			CurrentLoadState;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		ECharacterLifeState			CurrentLifeState;
 
-
 	UPROPERTY()
 		FVector RemoteLocation;
 	UPROPERTY()
 		FRotator RemoteRotator;
+
+private:
+	//UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Meta=(AllowPrivateAccess = true))
+	//	UCharacterStatComponent*	StatComponent;
+
 
 };
 
