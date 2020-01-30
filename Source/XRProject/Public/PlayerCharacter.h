@@ -8,6 +8,7 @@
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
 #include "ItemWeapon.h"
+#include "Engine/BlueprintGeneratedClass.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
@@ -97,7 +98,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
 		USkeletalMeshComponent* HairComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
-		UPlayerCharacterAnimInstance* AnimInstance;
+		TSubclassOf<UAnimInstance> AnimInstance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		UPlayerCharacterAnimInstance* MyAnimInstance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		UAnimBlueprintGeneratedClass* AnimBPClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
 
@@ -107,14 +112,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
 
-private:
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
 		bool bIsAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
 		bool bSavedCombo; //콤보 진행중이며, 다음콤보를 진행할 수 있음
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
 		int32 ComboCount;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+		bool bIsMove;
 	/*TEST*/
+private:
 	FRotator DeltaRotation;
 	FRotator AdditionalRotationValue;
 	FVector SpringArmLocation;
@@ -141,4 +149,8 @@ public:
 		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //헤어, 페이스 등 파츠 교환
 	UFUNCTION()
 		void Attack();
+	UFUNCTION()
+		void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+		void ContinueCombo();
 };

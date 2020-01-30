@@ -3,6 +3,7 @@
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
 #include "XRGameInstance.h"
+#include "Animation/AnimBlueprint.h"
 #include "AccountManager.h"
 #include "Components/InputComponent.h"
 
@@ -13,6 +14,18 @@ APlayerCharacter::APlayerCharacter()
 
 	PlayerStatComp = CreateDefaultSubobject<UPlayerCharacterStatComponent>(TEXT("CharacterStat"));
 	PlayerStatComp->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
+		(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
+
+	GetMesh()->SetAnimInstanceClass(AnimBP.Class);
+
+  	if (AnimBP.Succeeded())
+	{
+		AnimInstance = AnimBP.Class;
+	}
+	else
+		check(false);
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -50,6 +63,18 @@ APlayerCharacter::APlayerCharacter()
 	HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
 	FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
 
+	
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
+		INVISIBLE_MESH
+		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/CommonSkeleton/SK_Character_human_male_skeleton.SK_Character_human_male_skeleton'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
+		TESTMESH
+		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
+
+
+	//GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
+	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
+	
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
 	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
@@ -59,7 +84,14 @@ APlayerCharacter::APlayerCharacter()
 	HairComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
 	FaceComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, FaceSocket);
 
-	
+	Equipments.BodyComponent->SetMasterPoseComponent(GetMesh());
+	Equipments.LegsComponent->SetMasterPoseComponent(GetMesh());
+	Equipments.HandsComponent->SetMasterPoseComponent(GetMesh());
+	HairComponent->SetMasterPoseComponent(GetMesh());
+	FaceComponent->SetMasterPoseComponent(GetMesh());
+
+	ComboCount = 0;
+	bIsMove = false;
 
 #pragma region TESTCODE
 
@@ -105,8 +137,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 
 void APlayerCharacter::PostInitializeComponents()
 {
-	AnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
-	//AnimInstance->Delegate_CheckNextCombo.AddDynamic(this, )
+	Super::PostInitializeComponents();
+	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
 
 }
 
@@ -132,9 +166,9 @@ void APlayerCharacter::BeginPlay()
 	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
 	bool Ret = AccountManager::GetInstance().SetCurrentPlayerCharacter(this);
 	check(Ret);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld());
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld());
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld());
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
 
 }
 
@@ -148,6 +182,12 @@ void APlayerCharacter::MoveForward(float Value)
 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
+
+		bIsMove = true;
+	}
+	else
+	{
+		bIsMove = false;
 	}
 }
 
@@ -160,6 +200,7 @@ void APlayerCharacter::MoveRight(float Value)
 		
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
+
 	}
 }
 
@@ -246,11 +287,37 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 
 void APlayerCharacter::Attack()
 {
-	if (bIsAttack == false)
+	//first
+	//if (bIsAttack == false)
+	//{
+	//	bIsAttack = true;
+	//	bSavedCombo = true;
+	//	MyAnimInstance->PlayAttackMontage();
+	//}
+	//else
+	//	bSavedCombo = true;
+}
+
+void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	bIsAttack = false;
+	bSavedCombo = false;
+	ComboCount = 1;
+}
+
+void APlayerCharacter::ContinueCombo()
+{
+	if (bSavedCombo)
 	{
-		bIsAttack = true;
-		//AnimInstance->
+		if (ComboCount >= kMaxComboCount)
+		{
+			ComboCount = 1;
+			return;
+		}
 
+		ComboCount++;
+		MyAnimInstance->JumpToComboMontageSection(ComboCount);
+		bSavedCombo = false;
+		XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
 	}
-
 }

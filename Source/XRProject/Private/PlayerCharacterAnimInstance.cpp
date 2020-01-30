@@ -26,18 +26,21 @@ UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
 
 void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
+	Super::NativeUpdateAnimation(DeltaSeconds);
 	MyCharacter = AccountManager::GetInstance().GetCurrentPlayerCharacter();
 
-	if (MyCharacter)
+	if (IsValid(MyCharacter))
 	{
-		CharacterSpeed = MyCharacter->GetVelocity().Size();
+		//CharacterSpeed = MyCharacter->GetVelocity().Size();
+		bIsMove = MyCharacter->bIsMove;
 	}
 
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 {
-	Delegate_CheckNextCombo.Broadcast();
+	if(Delegate_CheckNextCombo.IsBound())
+		Delegate_CheckNextCombo.Execute();
 
 }
 
@@ -46,14 +49,18 @@ void UPlayerCharacterAnimInstance::PlayAttackMontage()
 	Montage_Play(AttackMontage, 1.f);
 }
 
+void UPlayerCharacterAnimInstance::StopAttackMontage()
+{
+}
+
 void UPlayerCharacterAnimInstance::JumpToComboMontageSection(int32 Section)
 {
 	check((Section <= 4));
-	Montage_JumpToSection(FName(*FString::Printf(TEXT("Combo%d"), Section)));
+	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%d"), Section)));
 }
 
 void UPlayerCharacterAnimInstance::JumpToReloadMontageSection(int32 Section)
 {
 	check((Section <= 4));
-	Montage_JumpToSection(FName(*FString::Printf(TEXT("Combo%dR"), Section)));
+	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%dR"), Section)));
 }

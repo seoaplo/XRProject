@@ -9,7 +9,7 @@
 class APlayerCharacter;
 
 
-DECLARE_MULTICAST_DELEGATE(FCheckNextComboValid)
+DECLARE_DELEGATE(FCheckNextComboValid)
 
 /**
  * 
@@ -28,10 +28,12 @@ public:
 
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		float CharacterSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsMove;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		APlayerCharacter* MyCharacter;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
@@ -45,6 +47,7 @@ public:
 		void AnimNotify_CheckNextComboValid();
 
 	void PlayAttackMontage();
+	void StopAttackMontage();
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToReloadMontageSection(int32 Section);
 
