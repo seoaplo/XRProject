@@ -78,6 +78,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void SetCharacterName(FString NewName) { CharacterName = NewName; }
+	UFUNCTION(BlueprintCallable)
+		FString GetCharacterName() { return CharacterName; }
 
 
 	UPROPERTY(BlueprintAssignable)

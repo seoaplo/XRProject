@@ -19,7 +19,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 {
 	UPlayerCharacterStatComponent* MyComponent = Character->PlayerStatComp;
 
-	MyComponent->CharacterName = Info.Name.c_str();
+	MyComponent->SetCharacterName(Info.Name.c_str());
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
