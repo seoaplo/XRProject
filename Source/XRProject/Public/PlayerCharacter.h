@@ -7,7 +7,6 @@
 #include "EngineMinimal.h"
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
-#include "ItemWeapon.h"
 #include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
 
@@ -18,7 +17,6 @@ enum class EEquipmentsType : uint8
 	HANDS,
 	LEGS,
 	WEAPON,
-	SUBWEAPON,
 };
 UENUM()
 enum class EPartsType : uint8
@@ -42,8 +40,6 @@ public:
 		USkeletalMeshComponent* LegsComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
 		USkeletalMeshComponent* WeaponComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* SubWeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* BodyItem;
@@ -52,9 +48,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* LegsItem;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
-		UItemWeapon* WeaponItem;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
-		UItemWeapon* SubWeaponItem;
+		UItemEquipment* WeaponItem;
 
 };
 

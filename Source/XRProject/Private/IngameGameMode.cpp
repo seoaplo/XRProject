@@ -2,6 +2,8 @@
 
 
 #include "IngameGameMode.h"
+#include "Inventory.h"
+#include "XRGameInstance.h"
 
 AIngameGameMode::AIngameGameMode()
 {
@@ -19,25 +21,122 @@ void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	MapMgr.Init(GetWorld(), GetNetMgr());
-	/*GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->
-		BindUObject(this, &AIngameGameMode::PlayerCharacterInitializeFromServer);*/
 
-	//GetNetMgr().Connect("192.168.0.118", 8181, nullptr);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
+		this, &AIngameGameMode::HandleEnterZone);
+
+	std::string Ip = AccountManager::GetInstance().GetInGameIP();
+	int16 Port = AccountManager::GetInstance().GetInGamePort();
+	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&AIngameGameMode::SendConfirmRequest, this));
 }
 
 void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
-	//GetNetMgr().Update();
+	GetNetMgr().Update();
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	MapMgr.Clear();
-	//GetNetMgr().Close();
+	GetNetMgr().Close();
 }
 
+void AIngameGameMode::SendConfirmRequest()
+{
+	std::string ID = AccountManager::GetInstance().GetAccountID();
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kZoneConrifmRequest);
+	out.WriteCString(ID.c_str());
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+}
+
+void AIngameGameMode::HandleEnterZone(InputStream & input)
+{
+	ReadBaseCharacterInfo(input);
+	ReadInventoryInfo(input);
+	ReadQuickSlot(input);
+	ReadMapData(input);
+}
+
+void AIngameGameMode::ReadBaseCharacterInfo(InputStream & input)
+{
+	int64 Id = input.ReadInt64();
+	FVector Location = input.ReadFVector();
+	FRotator Rotation = input.ReadFRotator();
+	float HP = input.ReadFloat32();
+	float MAXHP = input.ReadFloat32();
+	float AttackMin = input.ReadFloat32();
+	float AttackMax = input.ReadFloat32();
+	float AttackRange = input.ReadFloat32();
+	float AttackSpeed = input.ReadFloat32();
+	float Defense = input.ReadFloat32();
+	float Speed = input.ReadFloat32();
+	std::string Name = input.ReadCString();
+	int Level = input.ReadInt32();
+	int Gender = input.ReadInt32();
+	int FaceID = input.ReadInt32();
+	int HairID = input.ReadInt32();
+	int Str = input.ReadInt32();
+	int Dex = input.ReadInt32();
+	int Intel = input.ReadInt32();
+	float Stamina = input.ReadFloat32();
+	float MaxStamina = input.ReadFloat32();
+
+	int EquipmentSize = 4;
+	for (int i = 0; i < EquipmentSize; i++)
+	{
+		int Type = input.ReadInt32();
+		if (Type)
+		{
+			if (Type == 3)
+			{
+				int ID = input.ReadInt32();
+				int AddATK = input.ReadInt32();
+				int AddDEF = input.ReadInt32();
+				int AddSTR = input.ReadInt32();
+				int AddDex = input.ReadInt32();
+				int AddInt = input.ReadInt32();
+			}
+			int Count = input.ReadInt32();
+		}
+	}
+}
+
+void AIngameGameMode::ReadInventoryInfo(InputStream & input)
+{
+	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (GameInstance == nullptr) return;
+	UItemManager;
+	int Glod = input.ReadInt32();
+	Inventory::GetInstance().SetGold(Glod);
+	for (int i = 0; i < Inventory::GetInstance().GetInventorySize(); i++)
+	{
+		UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+		if (newItem)
+		{
+			Inventory::GetInstance().AddItem(newItem, i);
+		}
+	}
+}
+
+void AIngameGameMode::ReadQuickSlot(InputStream & input)
+{
+	for (int i = 0; i < 10; i++)
+	{
+		int Type = input.ReadInt8();
+		if (Type)
+		{
+			int ID = input.ReadInt32();
+		}
+	}
+}
+
+void AIngameGameMode::ReadMapData(InputStream & input)
+{
+}
 
 void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
 {

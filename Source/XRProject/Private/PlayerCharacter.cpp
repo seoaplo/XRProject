@@ -158,39 +158,21 @@ void APlayerCharacter::MoveRight(float Value)
 
 void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 {
-	
-	bool bIsWeapon = false;
-
 	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
-	UItemWeapon* WeaponItem = nullptr;
-	
-	if (EquipItem == nullptr)
-	{
-		bIsWeapon = true;
-		WeaponItem = Cast<UItemWeapon>(Item);
-	}
 
-	if (EquipItem == nullptr && WeaponItem == nullptr)
+	if (EquipItem == nullptr)
 		check(false);
 
 	EEquipmentsType Types;
-	if (bIsWeapon == false)
+
+	switch (EquipItem->DefaultInfo.Type)
 	{
-		switch (EquipItem->DefaultInfo.Type)
-		{
-			case 0: { Types = EEquipmentsType::BODY; break; }
-			case 1: { Types = EEquipmentsType::HANDS; break; }
-			case 2: { Types = EEquipmentsType::LEGS; break; }
-		}
+	case 0: { Types = EEquipmentsType::BODY; break; }
+	case 1: { Types = EEquipmentsType::HANDS; break; }
+	case 2: { Types = EEquipmentsType::LEGS; break; }
+	case 3: { Types = EEquipmentsType::WEAPON; break; }
 	}
-	else
-	{
-		switch (EquipItem->DefaultInfo.Type)
-		{
-			case 3: { Types = EEquipmentsType::WEAPON; break; }
-			case 4: { Types = EEquipmentsType::SUBWEAPON; break; }
-		}
-	}
+
 
 	//클라의 아이템빌더에서 아이템이 이미 빌드되어 나왔다고 가정
 	//현재 캐릭터가 남/여인지는 아마 GetPawn같은걸로 가져오면 될 듯
@@ -212,12 +194,8 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 			Equipments.LegsComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::WEAPON:
-			Equipments.WeaponItem = WeaponItem;
+			Equipments.WeaponItem = EquipItem;
 			Equipments.WeaponComponent->SetSkeletalMesh(SkMesh);
-			break;
-		case EEquipmentsType::SUBWEAPON:
-			Equipments.SubWeaponItem = WeaponItem;
-			Equipments.SubWeaponComponent->SetSkeletalMesh(SkMesh);
 			break;
 	}
 

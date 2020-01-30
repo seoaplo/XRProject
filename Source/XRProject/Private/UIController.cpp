@@ -5,8 +5,9 @@
 
 AUIController::AUIController()
 {
+	bShowMouseCursor = true;
 	bEnableClickEvents = true;
-	bEnableTouchEvents = true;
+	//bEnableTouchEvents = true;
 	bEnableMouseOverEvents = true;
-	bEnableTouchOverEvents = true;
+	//bEnableTouchOverEvents = true;
 }

@@ -7,3 +7,8 @@ int UItemETC::GetCount()
 {
 	return AddInfo.Count;
 }
+
+int UItemETC::GetID()
+{
+	return DefaultInfo.ID;
+}

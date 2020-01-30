@@ -13,6 +13,11 @@ int UItem::GetCount()
 	return 1;
 }
 
+int UItem::GetID()
+{
+	return 0;
+}
+
 EItemType UItem::GetItemType()
 {
 	return ItemType;
