@@ -12,7 +12,7 @@ ABaseCharacter::ABaseCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	StatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CharacterStat"));
+	//StatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CharacterStat"));
 
 }
 
@@ -20,7 +20,7 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	StatComponent->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
+	//StatComponent->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
 	SetCharacterLoadState(ECharacterLoadState::PREINIT);
 }
 
@@ -93,7 +93,7 @@ void ABaseCharacter::SetCharacterLifeState(ECharacterLifeState NewLifeState)
 		
 		break;
 	}
-	case ECharacterLifeState::PLAY:
+	case ECharacterLifeState::ALIVE:
 	{	
 		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Play")));
 		

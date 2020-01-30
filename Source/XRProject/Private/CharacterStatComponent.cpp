@@ -103,7 +103,6 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
 void UCharacterStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 	// ...
 }
 
