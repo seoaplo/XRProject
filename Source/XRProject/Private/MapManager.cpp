@@ -22,14 +22,12 @@ bool UMapManager::Clear()
 }
 
 // ¸Ê¿¡ ÀÔÀå
-void UMapManager::WriteMapDataFromServer(InputStream& input)
+void UMapManager::ReadMapDataFromServer(InputStream& input)
 {
 	int32_t characterlistsize = 0;
 	int32_t monsterlistsize = 0;
 
 	input >> characterlistsize;
-	input >> monsterlistsize;
-
 	for (int iCount = 0; iCount < characterlistsize; iCount++)
 	{
 		int64_t ObjectID;
@@ -42,6 +40,7 @@ void UMapManager::WriteMapDataFromServer(InputStream& input)
 		SpawnPlayer(ObjectID, PlayerLocation, PlayerRotator);
 	}
 
+	input >> monsterlistsize;
 	for (int iCount = 0; iCount < characterlistsize; iCount++)
 	{
 		int64_t ObjectID;

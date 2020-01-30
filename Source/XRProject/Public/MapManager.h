@@ -26,7 +26,7 @@ public:
 	bool Clear();
 
 	// ∏ ø° ¿‘¿Â
-	void WriteMapDataFromServer(InputStream& input);
+	void ReadMapDataFromServer(InputStream& input);
 	bool SpawnPlayer(int64_t objectid, FVector position, FRotator rotator);
 	bool PossessPlayer(int64_t objectid, FVector position, FRotator rotator);
 

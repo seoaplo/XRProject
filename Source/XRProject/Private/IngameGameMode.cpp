@@ -84,6 +84,9 @@ void AIngameGameMode::ReadBaseCharacterInfo(InputStream & input)
 	int Intel = input.ReadInt32();
 	float Stamina = input.ReadFloat32();
 	float MaxStamina = input.ReadFloat32();
+	
+	MapMgr.SpawnPlayer(Id, Location, Rotation);
+	MapMgr.PossessPlayer(Id, Location, Rotation);
 
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
@@ -136,6 +139,7 @@ void AIngameGameMode::ReadQuickSlot(InputStream & input)
 
 void AIngameGameMode::ReadMapData(InputStream & input)
 {
+	MapMgr.ReadMapDataFromServer(input);
 }
 
 void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
