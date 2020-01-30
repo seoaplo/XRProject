@@ -9,7 +9,8 @@ bool UMapManager::Init(UWorld* world, UNetworkManager& networkmanager)
 	if (world == nullptr) return false;
 
 	World = world;
-
+	//SpawnPlayer(1, FVector(-6370.0, 850.0, 480.0), FRotator(0, 0, 0));
+	//PossessPlayer(1, FVector(-6370.0, 850.0, 480.0), FRotator(0, 0, 0));
 	return true;
 }
 bool UMapManager::Clear()
@@ -78,6 +79,13 @@ bool UMapManager::SpawnMonster(int64_t objectid, FVector position, FRotator rota
 	}
 	else return false;
 }
+bool UMapManager::PossessPlayer(int64_t objectid, FVector position, FRotator rotator)
+{
+	APlayerCharacter* CheckPlayer = CharacterList.FindRef(objectid);
+	if (CheckPlayer == nullptr) return false;
+	World->GetPlayerControllerIterator()->Get()->Possess(CheckPlayer);
+	return true;
+}
 
 bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotator)
 {
@@ -88,16 +96,16 @@ bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotat
 	APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
 	if (Player)
 	{
-		APlayerCharacter* CheckPlayer = CharacterList.FindOrAdd(objectid);
-		if (CheckPlayer == nullptr)
+		APlayerCharacter** CheckPlayer = &CharacterList.FindOrAdd(objectid);
+		if (*CheckPlayer == nullptr)
 		{
-			CheckPlayer = Player;
+			*CheckPlayer = Player;
 		}
 		else
 		{
 			Player->Destroy();
-			CheckPlayer->SetActorLocation(position);
-			CheckPlayer->SetActorRotation(rotator);
+			(*CheckPlayer)->SetActorLocation(position);
+			(*CheckPlayer)->SetActorRotation(rotator);
 		}
 		return true;
 	}

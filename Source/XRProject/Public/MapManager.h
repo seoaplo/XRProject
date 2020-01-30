@@ -28,6 +28,7 @@ public:
 	// 맵에 입장
 	void WriteMapDataFromServer(InputStream& input);
 	bool SpawnPlayer(int64_t objectid, FVector position, FRotator rotator);
+	bool PossessPlayer(int64_t objectid, FVector position, FRotator rotator);
 
 	// 몬스터 스폰 함수
 	bool SpawnMonster(int64_t objectid, FVector position, FRotator rotator);
