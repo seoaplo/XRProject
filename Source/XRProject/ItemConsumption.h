@@ -16,7 +16,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FString Name;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
-		UTexture2D* Icon;
+		int32 IconResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 Type;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
@@ -47,5 +47,5 @@ public:
 	virtual int GetCount() override;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		UTexture2D* GetIcon() { return DefaultInfo.Icon; };
+		UTexture2D* GetIcon() { return nullptr; };
 };

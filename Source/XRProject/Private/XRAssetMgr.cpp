@@ -9,6 +9,7 @@
 
 UXRAssetMgr::UXRAssetMgr()
 {
+	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
 	static ConstructorHelpers::FObjectFinder<UDataTable> DataTable(TEXT("DataTable'/Game/Resources/DataTable/ResourceTable.ResourceTable'"));
 	if(DataTable.Succeeded())
 	{

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Interface.h"
+#include "SerializeInterface.h"
 #include <string>
 #include "NetworkOpcode.h"
 

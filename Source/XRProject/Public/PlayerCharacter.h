@@ -8,18 +8,23 @@
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
 #include "ItemWeapon.h"
+#include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
 
 UENUM()
 enum class EEquipmentsType : uint8
 {
-	HAIR,
-	FACE,
 	BODY,
 	HANDS,
 	LEGS,
 	WEAPON,
 	SUBWEAPON,
+};
+UENUM()
+enum class EPartsType : uint8
+{
+	HAIR,
+	FACE,
 };
 
 USTRUCT(BlueprintType)
@@ -28,10 +33,7 @@ struct FEquipment
 	GENERATED_USTRUCT_BODY()
 public:
 	/*  */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* FaceComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* HairComponent;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
 		USkeletalMeshComponent* BodyComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
@@ -43,10 +45,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
 		USkeletalMeshComponent* SubWeaponComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
-		UItemEquipment* FaceItem;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
-		UItemEquipment* HairItem;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* BodyItem;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
@@ -83,12 +81,17 @@ public:
 		float MovementSpeed;
 	UPROPERTY()
 		bool bIsMale; //성별 체크를 위한 bool값.
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
+		USkeletalMeshComponent* FaceComponent;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
+		USkeletalMeshComponent* HairComponent;
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
@@ -96,6 +99,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
+		UPlayerCharacterStatComponent* PlayerStatComp;
+
 private:
 	/*TEST*/
 	FRotator DeltaRotation;
@@ -116,6 +122,9 @@ public:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 	
+
 	UFUNCTION()
-		void ChangeEquipment(int32 NumTypes, UItem* Item, USkeletalMesh* SkMesh);
+		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
+	UFUNCTION()
+		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //헤어, 페이스 등 파츠 교환
 };

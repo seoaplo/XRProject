@@ -54,6 +54,19 @@ uint16 InputStream::ReadOpcode()
     return InputStream::ReadInt16();
 }
 
+void InputStream::operator>>(bool& value)
+{
+	value = ReadBool();
+}
+
+bool InputStream::ReadBool()
+{
+	BufferOverRunCheck(sizeof(int8));
+	int8 value = *reinterpret_cast<int8*>(buffer_ + access_offset_);
+	access_offset_ += sizeof(int8);
+	return (bool)value;
+}
+
 void InputStream::operator>>(int8& value)
 {
     value = ReadInt8();
