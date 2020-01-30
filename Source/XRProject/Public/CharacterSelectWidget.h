@@ -29,9 +29,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void CharacterSelectionRequest(int Numder);
 	UFUNCTION(BlueprintCallable)
-		void CharacterCreateRequest(int SlotNum, FText Name, int FaceID, int HairID, int Gender);
+		void CharacterCreateRequest(FText Name, int FaceID, int HairID, int Gender);
 	UFUNCTION(BlueprintCallable)
-		void CharacterDeleteRequest(int Numder);
+		void CharacterDeleteRequest();
 	UFUNCTION(BlueprintCallable)
 		void ReturnLoginServer();
 	UFUNCTION(BlueprintImplementableEvent)

@@ -4,14 +4,14 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "XRGameInstance.h"
 #include "OutputStream.h"
-
+#include "CharacterSelectSceneGameMode.h"
 
 UCharacterSelectWidget::UCharacterSelectWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
 	CharacterList.resize(kMaxCharacterSlot);
 	for (int i = 0; i < kMaxCharacterSlot; i++)
 	{
-		CharacterList[i] == nullptr;
+		CharacterList[i] = nullptr;
 	}
 }
 
@@ -23,7 +23,7 @@ void UCharacterSelectWidget::AddCharacter(int Num, APlayerCharacter* Character)
 
 void UCharacterSelectWidget::DeleteCharacter(int Num)
 {
-	CharacterList[Num] == nullptr;
+	CharacterList[Num] = nullptr;
 	UpdateList();
 }
 
@@ -47,15 +47,29 @@ void UCharacterSelectWidget::CharacterSelectionRequest(int Numder)
 	BlockButton();
 }
 
-void UCharacterSelectWidget::CharacterCreateRequest(int SlotNum, FText Name, int FaceID, int HairID, int Gender)
+void UCharacterSelectWidget::CharacterCreateRequest(FText Name, int FaceID, int HairID, int Gender)
 {
+	int SlotNum = 0;
+	while (true)
+	{
+		if (SlotNum >= kMaxCharacterSlot) return;
+		if (CharacterList[SlotNum] == nullptr)
+		{
+			break;
+		}
+		else
+		{
+			SlotNum++;
+		}
+	}
+
 	if (Name.IsEmpty())
 	{
 		return;
 	}
 
 	std::wstring w_Name(*Name.ToString());
-	std::string c_Name(w_Name.begin(), w_Name.end());
+	std::string c_Name = wcs_to_mbs(w_Name, std::locale("kor"));
 
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterCreateRequest);
@@ -85,15 +99,21 @@ void UCharacterSelectWidget::CharacterCreateRequest(int SlotNum, FText Name, int
 	GetNetMgr().SendPacket(out);
 }
 
-void UCharacterSelectWidget::CharacterDeleteRequest(int Numder)
+void UCharacterSelectWidget::CharacterDeleteRequest()
 {
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterDeleteRequest);
-	out << (int32_t)Numder;
-	out.CompletePacketBuild();
+	AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(GetWorld());
+	ACharacterSelectSceneGameMode* CSSGM = Cast<ACharacterSelectSceneGameMode>(GameModeBase);
+	if (CSSGM != nullptr)
+	{
+		int Number = CSSGM->BeforeSlotNumber;
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterDeleteRequest);
+		out << (int32_t)Number;
+		out.CompletePacketBuild();
 
-	GetNetMgr().SendPacket(out);
-	BlockButton();
+		GetNetMgr().SendPacket(out);
+		BlockButton();
+	}
 }
 
 void UCharacterSelectWidget::ReturnLoginServer()

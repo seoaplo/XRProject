@@ -16,7 +16,7 @@
 struct FCharacterSelectInfo
 {
 public:
-	string Name;
+	std::wstring Name;
 	int32 Level;
 	int32 Str;
 	int32 Dex;
@@ -57,6 +57,7 @@ private:
 	FVector MainCameraLocation;
 	FVector CharacterActorLocation;
 	class UDataTable* PartsDataTable; //Hair, Face 데이터테이블
+public:
 	int64 BeforeSlotNumber;
 public:
 	virtual void BeginPlay() override;
@@ -66,8 +67,9 @@ public:
 	void ChangeSelectedCharacter(int64 SlotNumber);
 	void HandleCharacterCreateFail(class InputStream& input);
 	void HandleCharacterList(class InputStream& input);
-	void HandleCharacterSlot(class InputStream& input);
 	void HandleMigrateZone(class InputStream& input);
+	void HandleCharacterCreate(class InputStream& input);
+	void HandleCharacterDelete(class InputStream& input);
 	void SendConfirmRequest();
 	void CreatePlayerCharacter(APlayerCharacter* Character, FCharacterSelectInfo& Info);
 	void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type, APlayerCharacter* Character);
