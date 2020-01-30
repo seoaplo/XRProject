@@ -29,6 +29,7 @@ public:
 	void PlayerCharacterItemChange(InputStream& input);
 	/*Hair나 Face같은 아이템이 아닌 파츠들을 교체할 때 사용하는 코드. 패킷에 의해 제어됨*/
 	void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
+	
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltatime) override;
