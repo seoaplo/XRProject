@@ -29,6 +29,9 @@ public:
 
 public:
 	class UDataTable* EquipmentItemDataTable;
+	class UDataTable* ConsumptionItemDataTable;
+	class UDataTable* ETCItemDataTable;
+
 	FEquipmentDefaultInfo* EquipmentItemData;
 
 	//소비템
@@ -43,6 +46,7 @@ public:
 	일반적으로 근데 타입을 전해줄 방법이 없을텐데.. 서버가 타입도 정해주지 않으면 장비,소비,기타 테이블이 따로있으므로
 	범용적으로 사용할 수 없음
 	*/
+	void GetIcon(UTexture2D* OutTexture, int ID);
 	TOptional<UItem*> CreateItem(class InputStream& input);
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
 	void BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter = nullptr);
