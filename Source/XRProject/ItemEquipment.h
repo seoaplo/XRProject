@@ -66,7 +66,6 @@ public:
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FEquipmentDefaultInfo DefaultInfo; // 아이템 기본 속성
-private:
 	EquipmentInfo AddInfo; // 아이템 추가 능력치 및 서버 전송용
 public:
 	virtual bool Use() override { return false; };

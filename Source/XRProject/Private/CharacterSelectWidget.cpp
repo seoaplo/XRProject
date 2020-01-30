@@ -36,15 +36,22 @@ APlayerCharacter* UCharacterSelectWidget::GetCharacter(int Num)
 	return nullptr;
 }
 
-void UCharacterSelectWidget::CharacterSelectionRequest(int Numder)
+void UCharacterSelectWidget::CharacterSelectionRequest()
 {
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterSelectionRequest);
-	out << (int32_t)Numder;
-	out.CompletePacketBuild();
+	AGameModeBase* GameModeBase = UGameplayStatics::GetGameMode(GetWorld());
+	ACharacterSelectSceneGameMode* CSSGM = Cast<ACharacterSelectSceneGameMode>(GameModeBase);
+	if (CSSGM != nullptr)
+	{
+		int Number = CSSGM->BeforeSlotNumber;
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterSelectionRequest);
 
-	GetNetMgr().SendPacket(out);
-	BlockButton();
+		out << (int32_t)Number;
+		out.CompletePacketBuild();
+
+		GetNetMgr().SendPacket(out);
+		BlockButton();
+	}
 }
 
 void UCharacterSelectWidget::CharacterCreateRequest(FText Name, int FaceID, int HairID, int Gender)

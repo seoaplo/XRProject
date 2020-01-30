@@ -24,7 +24,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	MyComponent->DEX = Info.Dex;
 	MyComponent->INT = Info.Int;
 
-	MyComponent->CharacterName = Info.Name.c_str();
+	MyComponent->SetCharacterName(FString(Info.Name.c_str()));
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
@@ -95,6 +95,9 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterDeleteNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleCharacterDelete);
+
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kMigrateZoneNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
 
 	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
 	int16 Port = AccountManager::GetInstance().GetLobbyPort();

@@ -14,9 +14,10 @@
 UENUM()
 enum class EItemType : uint8
 {
-	EQUIPMENT,
-	CONSUMPTION,
+	NONE,
 	ETC,
+	CONSUMPTION,
+	EQUIPMENT,
 };
 
 UCLASS()

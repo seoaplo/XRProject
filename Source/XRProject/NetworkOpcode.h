@@ -16,7 +16,6 @@ enum class ENetworkCSOpcode : uint16_t
 
     // ZoneServer
     kZoneConrifmRequest = 1000,
-    kZoneInitializeRequest,
     kNotifyCurrentChrPosition,
 };
 

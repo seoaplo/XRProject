@@ -29,7 +29,15 @@ public:
 	void PlayerCharacterItemChange(InputStream& input);
 	/*Hair나 Face같은 아이템이 아닌 파츠들을 교체할 때 사용하는 코드. 패킷에 의해 제어됨*/
 	void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
-	
+private:
+	void SendConfirmRequest(); /*존 입장 확인용*/
+	void HandleEnterZone(class InputStream& input); /*첫 입장시 초기화 패킷*/
+	/* 아래 4개의 함수는 HandleEnterZone에서 사용 될 함수로 각자 구현 요망*/
+	void ReadBaseCharacterInfo(class InputStream& input); /*캐릭터 정보 읽기*/
+	void ReadInventoryInfo(class InputStream& input); /*인벤토리 정보 읽기*/
+	void ReadQuickSlot(class InputStream& input); /*퀵 슬롯 정보 읽기*/
+	void ReadMapData(class InputStream& input); /*맵 데이터 정보 읽기*/
+	void FuckingDelegate(class InputStream& input) {};
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltatime) override;

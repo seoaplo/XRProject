@@ -27,7 +27,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		APlayerCharacter* GetCharacter(int Num);
 	UFUNCTION(BlueprintCallable)
-		void CharacterSelectionRequest(int Numder);
+		void CharacterSelectionRequest();
 	UFUNCTION(BlueprintCallable)
 		void CharacterCreateRequest(FText Name, int FaceID, int HairID, int Gender);
 	UFUNCTION(BlueprintCallable)

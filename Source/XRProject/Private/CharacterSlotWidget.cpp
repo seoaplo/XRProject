@@ -35,7 +35,7 @@ FString UCharacterSlotWidget::GetCharacterName()
 {
 	if (TargetCharacter)
 	{
-		FString Name = TargetCharacter->PlayerStatComp->CharacterName;
+		FString Name = TargetCharacter->PlayerStatComp->GetCharacterName();
 		return Name;
 	}
 	return FString();
