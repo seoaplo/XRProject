@@ -8,8 +8,12 @@
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
 #include "ItemWeapon.h"
+#include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
+
+
+
 
 UENUM()
 enum class EEquipmentsType : uint8
@@ -70,8 +74,8 @@ class XRPROJECT_API APlayerCharacter : public ABaseCharacter
 public:
 	APlayerCharacter();
 	virtual ~APlayerCharacter();
-
-
+	
+	const int32 kMaxComboCount = 4;
 public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
@@ -81,6 +85,7 @@ public:
 		float MovementSpeed;
 	UPROPERTY()
 		bool bIsMale; //성별 체크를 위한 bool값.
+
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
@@ -91,8 +96,8 @@ public:
 		USkeletalMeshComponent* FaceComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
 		USkeletalMeshComponent* HairComponent;
-
-public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		UPlayerCharacterAnimInstance* AnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
 
@@ -103,6 +108,12 @@ public:
 		UPlayerCharacterStatComponent* PlayerStatComp;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+		bool bIsAttack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+		bool bSavedCombo; //콤보 진행중이며, 다음콤보를 진행할 수 있음
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+		int32 ComboCount;
 	/*TEST*/
 	FRotator DeltaRotation;
 	FRotator AdditionalRotationValue;
@@ -111,6 +122,7 @@ private:
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* controller) override;
 
@@ -127,4 +139,6 @@ public:
 		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	UFUNCTION()
 		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //헤어, 페이스 등 파츠 교환
+	UFUNCTION()
+		void Attack();
 };

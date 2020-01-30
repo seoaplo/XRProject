@@ -99,6 +99,14 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	PlayerInputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed,this, &APlayerCharacter::Attack);
+
+}
+
+void APlayerCharacter::PostInitializeComponents()
+{
+	AnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	//AnimInstance->Delegate_CheckNextCombo.AddDynamic(this, )
 
 }
 
@@ -145,7 +153,6 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -235,4 +242,15 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 	{
 		FaceComponent->SetSkeletalMesh(PartsMesh);
 	}
+}
+
+void APlayerCharacter::Attack()
+{
+	if (bIsAttack == false)
+	{
+		bIsAttack = true;
+		//AnimInstance->
+
+	}
+
 }
