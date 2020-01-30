@@ -42,7 +42,7 @@ void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
 	int32 UnusedData = 0;
 	int32 TempData = 0; //ID등 필요한 정보 임시 기입
 	input >> UnusedData; //slot
-	MyComponent->CharacterName = input.ReadCString().c_str();
+	MyComponent->SetCharacterName(input.ReadCString().c_str());
 	input >> MyComponent->Level; input >> MyComponent->STR; input >> MyComponent->DEX; input >> MyComponent->INT;
 	input >> UnusedData; //Job
 	input >> TempData;
