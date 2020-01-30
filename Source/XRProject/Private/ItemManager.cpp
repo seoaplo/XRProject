@@ -6,6 +6,7 @@
 
 UItemManager::UItemManager()
 {
+
 	FString EquipmentDataPath = TEXT("DataTable'/Game/Resources/DataTable/EquipTable.EquipTable'");
 
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
