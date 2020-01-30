@@ -5,6 +5,7 @@
 #include "XRProject.h"
 #include "BaseCharacter.h"
 #include "CharacterStatComponent.h"
+#include "Engine/DataTable.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "NonePlayerCharacter.generated.h"
 
@@ -14,6 +15,36 @@ enum class NPCType : uint8
 	Alli,
 	Enermy,
 };
+
+
+USTRUCT(BlueprintType)
+struct FMonsterTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		FString MonsterName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		int32 MonsterSkeletalID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		int32 MonsterAnimBP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterMaxHP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterAttackMin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterAttackMax;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterAttackRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterAttackSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterAttackDefence;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float MonsterSpeed;
+};
+
+
 
 /**
  * 
@@ -35,7 +66,7 @@ public:
 	virtual void	Tick(float DeltaTime)	override;
 	virtual void	PossessedBy(AController* Cntr) override;
 	virtual float	TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
+	
 protected:
 private:
 
@@ -45,8 +76,13 @@ private:
 	///사용자 정의 함수///
 public:
 	UFUNCTION()
-		void DetectTarget(const TArray<AActor*>& DetectingPawn);
-
+	void DetectTarget(const TArray<AActor*>& DetectingPawn);
+	void SetCharacterLoadState(ECharacterLoadState NewState) override;
+	void SetCharacterLifeState(ECharacterLifeState NewState) override;
+	void OnDead() override;
+	virtual void GetNPCInfoFromTable(int32 NpcID);
+	UFUNCTION(BlueprintCallable)
+		void NpcLoadStart(int32 npcID);
 protected:
 private:
 
@@ -56,6 +92,8 @@ private:
 
 	///사용자 정의 변수///
 public:
+	UPROPERTY()
+		class UDataTable* NPCDataTable;
 	UFUNCTION(BlueprintCallable)
 	ABaseCharacter* GetTarget() const { return Target; }
 	UFUNCTION(BlueprintCallable)
@@ -72,9 +110,19 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UAIPerceptionComponent*		EnermyPerceptionComponent;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
-	bool bIsAttacking;
 
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		int32 SkelID;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		int32 AnimBPID;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		class AXRAIController* AICon;
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
+		bool bIsAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Sight* SightConfig;
 
