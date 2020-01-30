@@ -4,14 +4,16 @@
 
 #include "CoreMinimal.h"
 #include <vector>
-#include "UObject/NoExportTypes.h"
+#include "NetworkOpcode.h"
+#include "MapPacketHelper.h"
+#include "NetworkManager.h"
 #include "PlayerCharacter.h"
 #include "NonePlayerCharacter.h"
-#include "NetworkOpcode.h"
+#include "UObject/NoExportTypes.h"
 #include "MapManager.generated.h"
 
 /**
- * 
+ * 작성자 : 서승석
  */
 UCLASS()
 class XRPROJECT_API UMapManager : public UObject
@@ -20,35 +22,18 @@ class XRPROJECT_API UMapManager : public UObject
 public:
 	int64_t GetPlayerID() { return PlayerID; }
 public:
-	bool Init(UWorld* world);
+	bool Init(UWorld* world, UNetworkManager& networkmanager);
 	bool Clear();
+
+	// 맵에 입장
+	void WriteMapDataFromServer(InputStream& input);
 	bool SpawnPlayer(int64_t objectid, FVector position, FRotator rotator);
+
+	// 몬스터 스폰 함수
+	bool SpawnMonster(int64_t objectid, FVector position, FRotator rotator);
 private:
 	int64_t PlayerID;
 	UWorld* World;
 	TMap<int64_t, APlayerCharacter*> CharacterList;
 	TMap<int64_t, ANonePlayerCharacter*> MonsterList;
 };
-
-
-/*
-
-CS
-	// ZoneServer
-	kZoneConrifmRequest = 1000,
-	kZoneInitializeRequest,
-	kNotifyCurrentChrPosition,
-
-SC
-	kUserEnterTheMap = 1000,
-    kSpawnCharacter,
-    kExitCharacter,
-    kUpdateCharacterPosition,
-
-
-    kSpawnMonster,
-
-
-    kInventoryUpdate,
-    kQuickSlotUpdate,
-*/

@@ -3,18 +3,15 @@
 
 #include "MapManager.h"
 
-bool UMapManager::Init(UWorld* world)
+bool UMapManager::Init(UWorld* world, UNetworkManager& networkmanager)
 {
-	/*GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->
-	BindUObject(this, &AIngameGameMode::PlayerCharacterInitializeFromServer);*/
 
 	if (world == nullptr) return false;
 
 	World = world;
-	SpawnPlayer(0, FVector(-6350.0, 690.0, 540.0), FRotator(0, 0, 0));
+
 	return true;
 }
-
 bool UMapManager::Clear()
 {
 	CharacterList.Reset();
@@ -22,6 +19,66 @@ bool UMapManager::Clear()
 
 	return true;
 }
+
+// ¸Ê¿¡ ÀÔÀå
+void UMapManager::WriteMapDataFromServer(InputStream& input)
+{
+	int32_t characterlistsize = 0;
+	int32_t monsterlistsize = 0;
+
+	input >> characterlistsize;
+	input >> monsterlistsize;
+
+	for (int iCount = 0; iCount < characterlistsize; iCount++)
+	{
+		int64_t ObjectID;
+		FVector PlayerLocation;
+		FRotator PlayerRotator;
+		input >> ObjectID;
+		input >> PlayerLocation;
+		input >> PlayerRotator;
+
+		SpawnPlayer(ObjectID, PlayerLocation, PlayerRotator);
+	}
+
+	for (int iCount = 0; iCount < characterlistsize; iCount++)
+	{
+		int64_t ObjectID;
+		FVector MonsterLocation;
+		FRotator MonsterRotator;
+		input >> ObjectID;
+		input >> MonsterLocation;
+		input >> MonsterRotator;
+
+		SpawnMonster(ObjectID, MonsterLocation, MonsterRotator);
+	}
+}
+
+bool UMapManager::SpawnMonster(int64_t objectid, FVector position, FRotator rotator)
+{
+	AActor* actor =
+		World->SpawnActor
+		(ANonePlayerCharacter::StaticClass(), &position, &rotator);
+
+	ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
+	if (Monster)
+	{
+		ANonePlayerCharacter* CheckMonster = MonsterList.FindOrAdd(objectid);
+		if (CheckMonster == nullptr)
+		{
+			CheckMonster = Monster;
+		}
+		else
+		{
+			Monster->Destroy();
+			CheckMonster->SetActorLocation(position);
+			CheckMonster->SetActorRotation(rotator);
+		}
+		return true;
+	}
+	else return false;
+}
+
 bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotator)
 {
 	AActor* actor = 
@@ -40,6 +97,7 @@ bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotat
 		{
 			Player->Destroy();
 			CheckPlayer->SetActorLocation(position);
+			CheckPlayer->SetActorRotation(rotator);
 		}
 		return true;
 	}

@@ -124,9 +124,9 @@ void APlayerCharacter::BeginPlay()
 	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
 	bool Ret = AccountManager::GetInstance().SetCurrentPlayerCharacter(this);
 	check(Ret);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld());
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld());
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld());
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
 
 }
 

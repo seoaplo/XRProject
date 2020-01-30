@@ -18,7 +18,7 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	MapMgr.Init(GetWorld());
+	MapMgr.Init(GetWorld(), GetNetMgr());
 	/*GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->
 		BindUObject(this, &AIngameGameMode::PlayerCharacterInitializeFromServer);*/
 
