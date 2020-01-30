@@ -18,6 +18,7 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	MapMgr.Init(GetWorld());
 	/*GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterSlotNotify)->
 		BindUObject(this, &AIngameGameMode::PlayerCharacterInitializeFromServer);*/
 
@@ -33,6 +34,7 @@ void AIngameGameMode::Tick(float deltatime)
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	MapMgr.Clear();
 	//GetNetMgr().Close();
 }
 
