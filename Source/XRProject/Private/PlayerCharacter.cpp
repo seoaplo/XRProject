@@ -145,7 +145,6 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();

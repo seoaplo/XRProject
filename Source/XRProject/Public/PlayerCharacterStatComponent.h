@@ -29,8 +29,7 @@ public:
 		int32 INT;
 	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		int32 Gender; //0 : Male , 1 : Female
-	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
-		FString CharacterName;
+
 
 
 public:

@@ -5,11 +5,11 @@
 
 void UXRGameInstance::Init()
 {
-	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
     NetworkManager = NewObject<UNetworkManager>();
     NetworkManager->StartThread();
 	XRAssetManager = NewObject<UXRAssetMgr>();
 	ItemManager = NewObject<UItemManager>();
+	MapManager = NewObject<UMapManager>();
 }
 
 void UXRGameInstance::Shutdown()

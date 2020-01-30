@@ -3,7 +3,6 @@
 
 USlotWidget::USlotWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
-	UE_LOG(LogTemp, Warning, TEXT("INCREDIBUILD"));
 	SlotObject = nullptr;
 }
 
