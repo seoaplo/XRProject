@@ -3,8 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "XRGameInstance.h"
 #include "XRProjectGameModeBase.h"
 #include "LoginWidget.h"
+#include "PlayerCharacter.h"
+#include "InputStream.h"
+#include "AccountManager.h"
 #include "LoginSceneGameMode.generated.h"
 
 /**

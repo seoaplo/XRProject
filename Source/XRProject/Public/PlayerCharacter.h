@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 /*
-	ÀÛ¼ºÀÚ : ¹Ú¼öÂù
+	ï¿½Û¼ï¿½ï¿½ï¿½ : ï¿½Ú¼ï¿½ï¿½ï¿½
 */
 #pragma once
 
@@ -22,7 +22,6 @@ enum class EEquipmentsType : uint8
 	HANDS,
 	LEGS,
 	WEAPON,
-	SUBWEAPON,
 };
 UENUM()
 enum class EPartsType : uint8
@@ -46,8 +45,6 @@ public:
 		USkeletalMeshComponent* LegsComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
 		USkeletalMeshComponent* WeaponComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* SubWeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* BodyItem;
@@ -56,9 +53,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* LegsItem;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
-		UItemWeapon* WeaponItem;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
-		UItemWeapon* SubWeaponItem;
+		UItemEquipment* WeaponItem;
 
 };
 
@@ -84,7 +79,7 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float MovementSpeed;
 	UPROPERTY()
-		bool bIsMale; //¼ºº° Ã¼Å©¸¦ À§ÇÑ bool°ª.
+		bool bIsMale; //ï¿½ï¿½ï¿½ï¿½ Ã¼Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ boolï¿½ï¿½.
 
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -111,7 +106,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
 		bool bIsAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
-		bool bSavedCombo; //ÄÞº¸ ÁøÇàÁßÀÌ¸ç, ´ÙÀ½ÄÞº¸¸¦ ÁøÇàÇÒ ¼ö ÀÖÀ½
+		bool bSavedCombo; //ï¿½Þºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½Þºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
 		int32 ComboCount;
 	/*TEST*/
@@ -138,7 +133,7 @@ public:
 	UFUNCTION()
 		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	UFUNCTION()
-		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //Çì¾î, ÆäÀÌ½º µî ÆÄÃ÷ ±³È¯
+		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 	UFUNCTION()
 		void Attack();
 };

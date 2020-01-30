@@ -3,8 +3,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "XRGameInstance.h"
-#include "AccountManager.h"
-#include "OutputStream.h"
 
 void ULoginWidget::LoginRequest(FText Id, FText Password)
 {
