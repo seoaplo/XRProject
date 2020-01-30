@@ -7,7 +7,6 @@
 #include "EngineMinimal.h"
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
-#include "ItemWeapon.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
@@ -103,11 +102,11 @@ public:
 		UPlayerCharacterStatComponent* PlayerStatComp;
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character",Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bSavedCombo; //�޺� �������̸�, �����޺��� ������ �� ����
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		int32 ComboCount;
 	/*TEST*/
 	FRotator DeltaRotation;

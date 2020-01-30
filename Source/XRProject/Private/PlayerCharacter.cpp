@@ -105,6 +105,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 
 void APlayerCharacter::PostInitializeComponents()
 {
+	Super::PostInitializeComponents();
 	AnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	//AnimInstance->Delegate_CheckNextCombo.AddDynamic(this, )
 
