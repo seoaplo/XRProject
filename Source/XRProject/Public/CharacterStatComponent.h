@@ -76,6 +76,10 @@ public:
 		void SetDefence(float NewDefence);
 
 
+	UFUNCTION(BlueprintCallable)
+		void SetCharacterName(FString NewName) { CharacterName = NewName; }
+
+
 	UPROPERTY(BlueprintAssignable)
 		FOnCharacterStatChange	OnStatChange;
 	UPROPERTY(BlueprintAssignable)
@@ -100,8 +104,6 @@ private:
 		float Speed = 0.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		float Defence = 0.f;
-
-
-
-		
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
+		FString CharacterName;
 };
