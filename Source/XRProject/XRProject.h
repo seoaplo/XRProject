@@ -3,7 +3,6 @@
 #pragma once
 
 #include "EngineMinimal.h"
-#define MAX_PARTY_MEMBER 4
 using namespace std;
 
 DECLARE_LOG_CATEGORY_EXTERN(XRProject, Log, All);

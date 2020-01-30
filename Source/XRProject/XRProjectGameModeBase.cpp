@@ -5,8 +5,8 @@
 #include "PlayerCharacter.h"
 #include "XRGameInstance.h"
 #include "BaseCharacter.h"
-//#include "XRPlayerCharacter.h"
-
+#include "PlayerCharacter.h"
+#include "NonePlayerCharacter.h"
 
 AXRProjectGameModeBase::AXRProjectGameModeBase()
 {
@@ -17,7 +17,6 @@ AXRProjectGameModeBase::AXRProjectGameModeBase()
 
 void AXRProjectGameModeBase::BeginPlay()
 {
-	
 
 	//
     // LoginServer

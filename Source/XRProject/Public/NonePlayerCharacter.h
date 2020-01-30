@@ -16,6 +16,17 @@ enum class NPCType : uint8
 	Enermy,
 };
 
+USTRUCT(Atomic, BlueprintType)
+struct FAggroContainer
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+		ABaseCharacter* AggroCharacter;
+	UPROPERTY(EditAnywhere)
+		int32 AggroGaze=0;
+};
+
 
 USTRUCT(BlueprintType)
 struct FMonsterTableRow : public FTableRowBase
@@ -53,11 +64,6 @@ UCLASS()
 class XRPROJECT_API ANonePlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
-
-
-		
-		
-		
 		///오버라이드///
 public:
 	ANonePlayerCharacter();
@@ -93,16 +99,20 @@ private:
 	///사용자 정의 변수///
 public:
 	UPROPERTY()
-		class UDataTable* NPCDataTable;
+	class UDataTable* NPCDataTable;
 	UFUNCTION(BlueprintCallable)
 	ABaseCharacter* GetTarget() const { return Target; }
 	UFUNCTION(BlueprintCallable)
 	void SetTarget(ABaseCharacter* NewTarget) { Target = NewTarget; }
 
+	//virtual	void SetSkelResource(int32 SkeletalID, int32 AnimBPID) override;
+
 protected:
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		TArray<ABaseCharacter*>		AggroList;
+	
+
 	UPROPERTY(BlueprintReadOnly,VisibleAnywhere,Meta =(AllowPrivateAccess = true))
 		ABaseCharacter*				Target;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
@@ -125,5 +135,10 @@ private:
 		bool bIsAttacking;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Sight* SightConfig;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		class UAISenseConfig_Hearing* HearingConfig;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		class UAISenseConfig_Sight* HConfig;
+
 
 };

@@ -100,6 +100,7 @@ void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* 
 	{
 		Character->ChangeEquipment(Item, LoadedMesh.Get());
 	}
+	XRLOG(Warning, TEXT("%s, LoadComplete"), *Character->GetName());
 }
 
 

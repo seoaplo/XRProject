@@ -9,8 +9,9 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Containers/Array.h"
-
+#include "Perception/AISenseConfig_Hearing.h"
+#include "Perception/AISenseConfig_Damage.h"
+#include "Engine/Engine.h"
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
@@ -48,6 +49,8 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 
 	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 	AIControllerClass = AXRAIController::StaticClass();
+
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 
@@ -60,8 +63,8 @@ void ANonePlayerCharacter::PostInitializeComponents()
 
 void ANonePlayerCharacter::BeginPlay()
 {
-	ABaseCharacter::BeginPlay();
-	//SetCharacterLoadState(ECharacterLoadState::PREINIT);
+	ACharacter::BeginPlay();
+
 
 }
 
@@ -69,6 +72,11 @@ void ANonePlayerCharacter::BeginPlay()
 void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
+	GEngine->AddOnScreenDebugMessage(11, 5.0f, FColor::Blue, FString::Printf(TEXT("Velocity : %s"), *GetVelocity().ToString()));
+	//GEngine->AddOnScreenDebugMessage(4, 5.0f, FColor::Blue,TEXT("Velocity : %f"),*GetVelocity().ToString());
+
+		
+
 }
 
 void ANonePlayerCharacter::PossessedBy(AController* Cntr)
@@ -81,29 +89,30 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	XRLOG(Warning, TEXT("OnAttack"));
+	XRLOG(Warning, TEXT("Attacked"));
+
 	return 0.f;
 }
 
 void ANonePlayerCharacter::DetectTarget(const TArray<AActor*>& DetectingPawn)
 {
-	if (AggroList.Num() < MAX_PARTY_MEMBER)
-	{
-		for (int DetectedNum = 0; DetectedNum < DetectingPawn.Num(); DetectedNum++)
-		{
-			XRLOG(Warning, TEXT("Detected  : %s"), *DetectingPawn[DetectedNum]->GetName());
-			auto castTarget = Cast<APlayerCharacter>(DetectingPawn[DetectedNum]);
-			if (castTarget)
-			{
-				AggroList.AddUnique(castTarget);
-			}
-			if (Target == nullptr)
-			{
-				Target = castTarget;
-			}
-			
-		}
-	}
+	//if (AggroList.Num() < MAX_PARTY_MEMBER)
+	//{
+	//	for (int DetectedNum = 0; DetectedNum < DetectingPawn.Num(); DetectedNum++)
+	//	{
+	//		XRLOG(Warning, TEXT("Detected  : %s"), *DetectingPawn[DetectedNum]->GetName());
+	//		auto castTarget = Cast<APlayerCharacter>(DetectingPawn[DetectedNum]);
+	//		if (castTarget)
+	//		{
+	//			AggroList.AddUnique(castTarget);
+	//		}
+	//		if (Target == nullptr)
+	//		{
+	//			Target = castTarget;
+	//		}
+	//		
+	//	}
+	//}
 }
 
 void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
@@ -211,3 +220,4 @@ void ANonePlayerCharacter::NpcLoadStart(int32 npcID)
 	GetNPCInfoFromTable(npcID);
 	SetCharacterLoadState(ECharacterLoadState::PREINIT);
 }
+
