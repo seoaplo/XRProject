@@ -14,9 +14,10 @@
 UENUM()
 enum class EItemType : uint8
 {
-	EQUIPMENT,
-	CONSUMPTION,
+	NONE,
 	ETC,
+	CONSUMPTION,
+	EQUIPMENT,
 };
 
 UCLASS()
@@ -27,11 +28,13 @@ class XRPROJECT_API UItem : public USlotObject
 public:
 	EItemType ItemType;
 public:
+	virtual int GetCount() override;
+	virtual UTexture2D* GetIcon() override;
+public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual bool Use();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		virtual int GetCount();
-
+		virtual int GetID();
 public:
 	EItemType GetItemType();
 };

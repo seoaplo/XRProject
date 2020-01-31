@@ -32,10 +32,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		int GetHeightSize();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
-		void SetUp();
-	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		FString GetGlod();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void AddList(USlotWidget* newslot);
-
 };

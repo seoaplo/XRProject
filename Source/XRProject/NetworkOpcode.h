@@ -3,47 +3,51 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
-    // LoginServer
-    kCreateAccountRequest = 0,
-    kLoginRequest,
+	// LoginServer
+	kCreateAccountRequest = 0,
+	kLoginRequest,
 
-    // LobbyServer
-    kLobbyConfirmRequest = 100,
-    kCharacterListRequest,
-    kCharacterCreateRequest,
-    kCharacterDeleteRequest,
-    kCharacterSelectionRequest,
+	// LobbyServer
+	kLobbyConfirmRequest = 100,
+	kCharacterListRequest,
+	kCharacterCreateRequest,
+	kCharacterDeleteRequest,
+	kCharacterSelectionRequest,
 
-    // ZoneServer
-    kZoneConrifmRequest = 1000,
-    kZoneInitializeRequest,
-    kNotifyCurrentChrPosition,
+	// ZoneServer
+	kZoneConrifmRequest = 1000,
+	kNotifyCurrentChrPosition,
+
+	kInventoryUpdateRequest,
+	kQuickSlotUseRequest,
+	kEquipmentMountRequest,
+
 };
 
 
 enum class ENetworkSCOpcode : uint16_t
 {
-    // LoginServer
-    kCreateAccountResult = 0,
-    kLoginResult,
+	// LoginServer
+	kCreateAccountResult = 0,
+	kLoginResult,
 
-    // LobbyServer
-    kConfirmFailNotify = 100,
-    kCharacterCreateNotify,
-    kCharacterDeleteNotify,
-    kCharacterListNotify,
-    kMigrateZoneNotify,
+	// LobbyServer
+	kConfirmFailNotify = 100,
+	kCharacterCreateNotify,
+	kCharacterDeleteNotify,
+	kCharacterListNotify,
+	kMigrateZoneNotify,
 
-    // ZoneServer
-    kUserEnterTheMap = 1000,
-    kSpawnCharacter,
-    kExitCharacter,
-    kUpdateCharacterPosition,
-
-
-    kSpawnMonster,
+	// ZoneServer
+	kUserEnterTheMap = 1000,
+	kSpawnCharacter,
+	kExitCharacter,
+	kUpdateCharacterPosition,
 
 
-    kInventoryUpdate,
-    kQuickSlotUpdate,
+	kSpawnMonster,
+
+
+	kInventoryUpdate,
+	kQuickSlotUpdate,
 };

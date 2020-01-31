@@ -1,9 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "ItemWeapon.h"
+#include "MapLogic.h"
 
-bool UItemWeapon::Use()
+MapLogic::MapLogic()
 {
-	return false;
+}
+
+MapLogic::~MapLogic()
+{
 }

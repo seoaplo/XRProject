@@ -98,7 +98,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsMale = true;
 
 #pragma endregion
-
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 APlayerCharacter::~APlayerCharacter()
@@ -113,6 +113,28 @@ void APlayerCharacter::Tick(float deltatime)
 #pragma region TESTCODE
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 #pragma endregion
+
+	if (Cast<APlayerController>(GetController()))
+	{
+		SumSec += deltatime;
+			if (SumSec >= 0.1f) {
+				SumSec -= 0.1f;
+
+					if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+					{
+						OutputStream out;
+							out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+							out << 999;
+							out << GetActorLocation();
+						out << GetActorRotation();
+						GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
+						GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
+						out.CompletePacketBuild();
+						GetNetMgr().SendPacket(out);
+					}
+			}
+		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetCharacterMovement()->Velocity.ToString()));
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputComponent)
@@ -167,7 +189,7 @@ void APlayerCharacter::BeginPlay()
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
-	
+
 
 }
 
@@ -240,39 +262,21 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 
 void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 {
-	
-	bool bIsWeapon = false;
-
 	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
-	UItemWeapon* WeaponItem = nullptr;
-	
-	if (EquipItem == nullptr)
-	{
-		bIsWeapon = true;
-		WeaponItem = Cast<UItemWeapon>(Item);
-	}
 
-	if (EquipItem == nullptr && WeaponItem == nullptr)
+	if (EquipItem == nullptr)
 		check(false);
 
 	EEquipmentsType Types;
-	if (bIsWeapon == false)
+
+	switch (EquipItem->DefaultInfo.Type)
 	{
-		switch (EquipItem->DefaultInfo.Type)
-		{
-			case 0: { Types = EEquipmentsType::BODY; break; }
-			case 1: { Types = EEquipmentsType::HANDS; break; }
-			case 2: { Types = EEquipmentsType::LEGS; break; }
-		}
+		case 0: { Types = EEquipmentsType::BODY; break; }
+		case 1: { Types = EEquipmentsType::HANDS; break; }
+		case 2: { Types = EEquipmentsType::LEGS; break; }
+		case 3: { Types = EEquipmentsType::WEAPON; break; }
 	}
-	else
-	{
-		switch (EquipItem->DefaultInfo.Type)
-		{
-			case 3: { Types = EEquipmentsType::WEAPON; break; }
-			case 4: { Types = EEquipmentsType::SUBWEAPON; break; }
-		}
-	}
+
 
 	//클라의 아이템빌더에서 아이템이 이미 빌드되어 나왔다고 가정
 	//현재 캐릭터가 남/여인지는 아마 GetPawn같은걸로 가져오면 될 듯
@@ -295,12 +299,8 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 			Equipments.LegsComponent->SetSkeletalMesh(SkMesh);
 			break;
 		case EEquipmentsType::WEAPON:
-			Equipments.WeaponItem = WeaponItem;
+			Equipments.WeaponItem = EquipItem;
 			Equipments.WeaponComponent->SetSkeletalMesh(SkMesh);
-			break;
-		case EEquipmentsType::SUBWEAPON:
-			Equipments.SubWeaponItem = WeaponItem;
-			Equipments.SubWeaponComponent->SetSkeletalMesh(SkMesh);
 			break;
 	}
 

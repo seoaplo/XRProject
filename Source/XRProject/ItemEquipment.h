@@ -16,7 +16,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FString Name;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
-		int32 Icon;
+		int32 IconResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 MaleMeshResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
@@ -50,6 +50,7 @@ public:
 struct EquipmentInfo // 서버에서 보내주는 데이터
 {
 	int32_t ID;
+	int32_t AddATK;
 	int32_t AddDEF;
 	int32_t AddSTR;
 	int32_t AddDEX;
@@ -65,11 +66,14 @@ public:
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FEquipmentDefaultInfo DefaultInfo; // 아이템 기본 속성
-private:
 	EquipmentInfo AddInfo; // 아이템 추가 능력치 및 서버 전송용
 public:
 	virtual bool Use() override { return false; };
+	virtual int GetID() override;
+	virtual UTexture2D* GetIcon() override;
 public:
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		int32 GetAddATK() { return AddInfo.AddATK; };
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		int32 GetAddDEF() { return AddInfo.AddDEF; };
 	UFUNCTION(BlueprintCallable, Category = "C_Function")

@@ -12,6 +12,18 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XRProject", "Intermediate\ProjectFiles\XRProject.vcxproj", "{0038D4EC-ACEA-45BD-A378-B18C21D55280}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Visualizers", "Visualizers", "{44B2633D-04AC-414F-A31B-40AA22C987B7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{89C220D5-1112-4606-A23C-0677B25C7B2D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Games", "Games", "{B2BDBF01-9B5C-4A82-9549-EB8EFAA990DC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{957AB451-DEEB-49BE-B8EA-AD08FECE9984}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Games", "Games", "{C2FD1464-546F-46FE-A483-DCD3859F82F9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Visualizers", "Visualizers", "{E7996C6D-63E7-4A77-98FE-714A66B7912B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Visualizers", "Visualizers", "{2509F890-FBA2-4F44-8BC6-C5C5CDB56C9D}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\..\..\..\Program Files\Epic Games\UE_4.23\Engine\Extras\VisualStudioDebugging\UE4.natvis = ..\..\..\..\..\Program Files\Epic Games\UE_4.23\Engine\Extras\VisualStudioDebugging\UE4.natvis
 	EndProjectSection
@@ -83,5 +95,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0EC7F752-43A9-484F-8AB2-4B84101F32A8} = {C56FE846-ED56-44BB-B695-656F0DB379E9}
 		{0038D4EC-ACEA-45BD-A378-B18C21D55280} = {44E7D65C-098A-4568-BA5C-1BC9F438E0BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F90B7BA2-D7CC-4BE1-92D8-D3EDFC9C92B7}
 	EndGlobalSection
 EndGlobal

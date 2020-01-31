@@ -45,7 +45,7 @@ private:
 public:
 	virtual bool Use() override;
 	virtual int GetCount() override;
-public:
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		UTexture2D* GetIcon() { return nullptr; };
+	virtual int GetID() override;
+	virtual void SetCount(int Count);
+	UTexture2D* GetIcon() override;
 };

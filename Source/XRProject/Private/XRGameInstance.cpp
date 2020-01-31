@@ -7,12 +7,13 @@ void UXRGameInstance::Init()
 {
     NetworkManager = NewObject<UNetworkManager>();
     NetworkManager->StartThread();
+    UNetworkManager::Instance = NetworkManager;
 	XRAssetManager = NewObject<UXRAssetMgr>();
 	ItemManager = NewObject<UItemManager>();
-	MapManager = NewObject<UMapManager>();
 }
 
 void UXRGameInstance::Shutdown()
 {
     NetworkManager->StopThread();
+    UNetworkManager::Instance = nullptr;
 }

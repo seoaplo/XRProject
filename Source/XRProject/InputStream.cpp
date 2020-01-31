@@ -170,7 +170,7 @@ FRotator InputStream::ReadFRotator()
     rotator.Pitch = this->ReadFloat32();
     rotator.Yaw = this->ReadFloat32();
     rotator.Roll = this->ReadFloat32();
-    return FRotator();
+    return rotator;
 }
 
 std::string InputStream::ReadCString()

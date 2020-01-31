@@ -40,7 +40,8 @@ private:
 	ETCInfo AddInfo; // 아이템 갯수 및 서버 전송용
 public:
 	virtual int GetCount() override;
+	virtual int GetID() override;
+	virtual void SetCount(int Count);
+	UTexture2D* GetIcon() override;
 public:
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		UTexture2D* GetIcon() { return nullptr; };
 };
