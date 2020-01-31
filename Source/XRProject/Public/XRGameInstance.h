@@ -52,5 +52,5 @@ public:
 };
 
 
-#define GetNetMgr Cast<UXRGameInstance>(GetGameInstance())->GetNetworkManager
+#define GetNetMgr UNetworkManager::GetInstance
 #define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr

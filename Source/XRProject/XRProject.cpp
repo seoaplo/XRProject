@@ -2,6 +2,7 @@
 
 #include "XRProject.h"
 #include "Modules/ModuleManager.h"
+#include <locale>
 
 DEFINE_LOG_CATEGORY(XRProject);
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, XRProject, "XRProject" );
