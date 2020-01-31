@@ -12,6 +12,8 @@
 #include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Damage.h"
 #include "Engine/Engine.h"
+#include "NetworkManager.h"
+#include "XRGameInstance.h"
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
@@ -75,6 +77,26 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 	GEngine->AddOnScreenDebugMessage(11, 5.0f, FColor::Blue, FString::Printf(TEXT("Velocity : %s"), *GetVelocity().ToString()));
 	//GEngine->AddOnScreenDebugMessage(4, 5.0f, FColor::Blue,TEXT("Velocity : %f"),*GetVelocity().ToString());
 
+	SumSec += DeltaTime;
+	if (SumSec >= 0.1f) {
+		SumSec -= 0.1f;
+
+		if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+		{
+			OutputStream out;
+			out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+			out << 999;
+			out << 777;
+			out << GetActorLocation();
+			out << GetActorRotation();
+			GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
+			GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
+			out.CompletePacketBuild();
+			GetNetMgr().SendPacket(out);
+		}
+	}
+
+
 		
 
 }
@@ -96,23 +118,7 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 
 void ANonePlayerCharacter::DetectTarget(const TArray<AActor*>& DetectingPawn)
 {
-	//if (AggroList.Num() < MAX_PARTY_MEMBER)
-	//{
-	//	for (int DetectedNum = 0; DetectedNum < DetectingPawn.Num(); DetectedNum++)
-	//	{
-	//		XRLOG(Warning, TEXT("Detected  : %s"), *DetectingPawn[DetectedNum]->GetName());
-	//		auto castTarget = Cast<APlayerCharacter>(DetectingPawn[DetectedNum]);
-	//		if (castTarget)
-	//		{
-	//			AggroList.AddUnique(castTarget);
-	//		}
-	//		if (Target == nullptr)
-	//		{
-	//			Target = castTarget;
-	//		}
-	//		
-	//	}
-	//}
+
 }
 
 void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)

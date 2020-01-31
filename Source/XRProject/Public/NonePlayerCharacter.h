@@ -141,4 +141,6 @@ private:
 		class UAISenseConfig_Sight* HConfig;
 
 
+
+	float SumSec = 0;
 };
