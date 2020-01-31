@@ -15,7 +15,6 @@ void ACharacterSelectSceneGameMode::SendConfirmRequest()
 	out.WriteCString(ID.c_str());
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
-	BeforeSlotNumber = -1;
 }
 
 void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Character, FCharacterSelectInfo& Info)
@@ -131,10 +130,7 @@ void ACharacterSelectSceneGameMode::Tick(float DeltaSeconds)
 
 void ACharacterSelectSceneGameMode::ChangeSelectedCharacter(int64 SlotNumber)
 {
-	if (BeforeSlotNumber != -1)
-	{
-		if (CharacterList[BeforeSlotNumber]) CharacterList[BeforeSlotNumber]->SetActorHiddenInGame(true);
-	}
+	if (CharacterList[BeforeSlotNumber]) CharacterList[BeforeSlotNumber]->SetActorHiddenInGame(true);
 	CharacterList[SlotNumber]->SetActorHiddenInGame(false);
 	BeforeSlotNumber = SlotNumber;
 

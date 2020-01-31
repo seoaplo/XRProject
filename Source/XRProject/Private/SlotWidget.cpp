@@ -36,11 +36,15 @@ void USlotWidget::SetSlotObject()
 	Update();
 }
 
-void USlotWidget::ExchangeSlot(USlotWidget * Target)
+void USlotWidget::DropIn(UUserWidget * SlotWidget)
 {
-	if(Inventory::GetInstance().ExchangeItem(Index, Target->Index))
+	USlotWidget* Target = Cast<USlotWidget>(SlotWidget);
+	if (Target)
 	{
-		SetSlotObject();
-		Target->SetSlotObject();
+		if (Inventory::GetInstance().ExchangeItem(Index, Target->Index))
+		{
+			SetSlotObject();
+			Target->SetSlotObject();
+		}
 	}
 }

@@ -20,6 +20,13 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
+	if (CurrentWidget != nullptr)
+	{
+		CurrentWidget->AddToViewport();
+	}
+
 	MapMgr.Init(GetWorld(), GetNetMgr());
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(

@@ -9,6 +9,7 @@
 #include "PlayerCharacter.h"
 #include "MapManager.h"
 #include "XRProjectGameModeBase.h"
+#include "InGameMainWidget.h"
 #include "IngameGameMode.generated.h"
 
 /**
@@ -23,6 +24,12 @@ public:
 	AIngameGameMode();
 	virtual ~AIngameGameMode();
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
+		TSubclassOf<UInGameMainWidget> MainWidget;
+	UPROPERTY()
+		UInGameMainWidget* CurrentWidget;
+
+
 	FORCEINLINE UMapManager& GetMapMgr() 
 	{
 		if(MapManager == nullptr)
