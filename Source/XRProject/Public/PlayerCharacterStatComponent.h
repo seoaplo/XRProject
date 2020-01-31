@@ -31,7 +31,6 @@ public:
 		int32 Gender; //0 : Male , 1 : Female
 
 
-
 public:
 	UFUNCTION(BlueprintCallable,Category = "C_StatFunction")
 		float GetMaxStamina();

@@ -15,6 +15,8 @@ class XRPROJECT_API UCharacterSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	UCharacterSlotWidget(const FObjectInitializer& ObjectInitializer);
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")
 		APlayerCharacter* TargetCharacter;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadwrite, Category = "C_Info")

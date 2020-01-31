@@ -19,12 +19,81 @@ UItemManager::~UItemManager()
 {
 }
 
+TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
+{
+	EItemType Type = (EItemType)input.ReadInt32();
+	if (EquipmentItemDataTable == nullptr)
+		check(false);
+	switch (Type)
+	{
+	case EItemType::NONE:
+	{
+		break;
+	}
+	case EItemType::ETC:
+	{
+		int ID = input.ReadInt32();
+		int Count = input.ReadInt32();
+		return nullptr;
+		break;
+	}
+	case EItemType::CONSUMPTION:
+	{
+		int ID = input.ReadInt32();
+		int Count = input.ReadInt32();
+		return nullptr;
+		break;
+	}
+	case EItemType::EQUIPMENT:
+	{
+		int ID = input.ReadInt32();
+		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
+
+		if (Table == nullptr)
+			check(false);
+
+		UItemEquipment* Item = NewObject<UItemEquipment>();
+
+		Item->AddInfo.AddATK = input.ReadInt32();
+		Item->AddInfo.AddDEF = input.ReadInt32();
+		Item->AddInfo.AddSTR = input.ReadInt32();
+		Item->AddInfo.AddDEX = input.ReadInt32();
+		Item->AddInfo.AddINT = input.ReadInt32();
+
+		Item->DefaultInfo.ID = ID;
+		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshId;
+		Item->DefaultInfo.FemaleMeshResourceID = Table->FemaleMeshId;
+		Item->DefaultInfo.Name = Table->Name;
+		Item->DefaultInfo.Icon = Table->IconID;
+		Item->DefaultInfo.Type = Table->Type;
+		Item->DefaultInfo.SubType = Table->SubType;
+		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
+		Item->DefaultInfo.DEF = Table->DEF;
+		Item->DefaultInfo.STR = Table->STR;
+		Item->DefaultInfo.DEX = Table->DEX;
+		Item->DefaultInfo.INT = Table->INT;
+		Item->DefaultInfo.ReqSTR = Table->RequiredSTR;
+		Item->DefaultInfo.ReqDEX = Table->RequiredDEX;
+		Item->DefaultInfo.ReqINT = Table->RequiredINT;
+		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->ItemType = EItemType::EQUIPMENT;
+		int Count = input.ReadInt32();
+		return Item;
+		break;
+	}
+	default:
+		break;
+	}
+	return nullptr;
+}
+
 TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 {
 	if (EquipmentItemDataTable == nullptr)
 		check(false);
-
-	if (Type == EItemType::EQUIPMENT)
+	switch (Type)
+	{
+	case EItemType::EQUIPMENT:
 	{
 		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
 
@@ -52,6 +121,14 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 		Item->ItemType = EItemType::EQUIPMENT;
 
 		return Item;
+	}
+		break;
+	case EItemType::CONSUMPTION:
+		break;
+	case EItemType::ETC:
+		break;
+	default:
+		break;
 	}
 	return nullptr;
 }

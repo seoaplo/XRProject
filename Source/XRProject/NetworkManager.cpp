@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include <WS2tcpip.h>
 
+UNetworkManager* UNetworkManager::Instance = nullptr;
 
 WorkThread::WorkThread()
     : ExitFlag(false)

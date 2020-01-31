@@ -16,7 +16,7 @@
 struct FCharacterSelectInfo
 {
 public:
-	string Name;
+	std::wstring Name;
 	int32 Level;
 	int32 Str;
 	int32 Dex;
@@ -51,12 +51,13 @@ public:
 		UCharacterSelectWidget* CurrentWidget;
 
 public:
-	std::vector<APlayerCharacter*> CharacterList; // ÇöÀç Á¢¼ÓÇÑ °èÁ¤ÀÇ Ä³¸¯ÅÍÀÇ ¸®½ºÆ®(ÆÐÅ¶À¸·Î ¹Þ¾Æ¿Í¾ß ÇÑ´Ù.)
+	std::vector<APlayerCharacter*> CharacterList; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®(ï¿½ï¿½Å¶ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾Æ¿Í¾ï¿½ ï¿½Ñ´ï¿½.)
 private:
 	ACameraActor* MainCamera;
 	FVector MainCameraLocation;
 	FVector CharacterActorLocation;
-	class UDataTable* PartsDataTable; //Hair, Face µ¥ÀÌÅÍÅ×ÀÌºí
+	class UDataTable* PartsDataTable; //Hair, Face ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìºï¿½
+public:
 	int64 BeforeSlotNumber;
 public:
 	virtual void BeginPlay() override;
@@ -66,7 +67,7 @@ public:
 	void ChangeSelectedCharacter(int64 SlotNumber);
 	void HandleCharacterCreateFail(class InputStream& input);
 	void HandleCharacterList(class InputStream& input);
-	void HandleCharacterSlot(class InputStream& input);
+	void HandleMigrateZone(class InputStream& input);
 	void HandleCharacterCreate(class InputStream& input);
 	void HandleCharacterDelete(class InputStream& input);
 	void SendConfirmRequest();

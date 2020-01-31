@@ -4,6 +4,8 @@
 #include "XRGameInstance.h"
 #include "InputStream.h"
 #include <functional>
+#include <locale>
+
 
 void ACharacterSelectSceneGameMode::SendConfirmRequest()
 {
@@ -19,13 +21,18 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 {
 	UPlayerCharacterStatComponent* MyComponent = Character->PlayerStatComp;
 
-	MyComponent->SetCharacterName(Info.Name.c_str());
+	MyComponent->Level = Info.Level;
+	MyComponent->STR = Info.Str;
+	MyComponent->DEX = Info.Dex;
+	MyComponent->INT = Info.Int;
+
+	MyComponent->SetCharacterName(FString(Info.Name.c_str()));
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
 	//Çì¾îÆÄÃ÷
 	FSoftObjectPath HairAssetPath = nullptr;
-	FPartsResource* HairResourceTable =  PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Hair)), TEXT("t"));
+	FPartsResource* HairResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Hair)), TEXT("t"));
 	HairAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(HairResourceTable->ResourceID);
 	FStreamableDelegate HairAssetLoadDelegate;
 	HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
@@ -53,7 +60,7 @@ void ACharacterSelectSceneGameMode::LoadPartsComplete(FSoftObjectPath AssetPath,
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
 	Character->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
-	
+
 }
 
 ACharacterSelectSceneGameMode::ACharacterSelectSceneGameMode()
@@ -91,6 +98,9 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kCharacterDeleteNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleCharacterDelete);
 
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kMigrateZoneNotify)->BindUObject(
+		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
+
 	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
 	int16 Port = AccountManager::GetInstance().GetLobbyPort();
 	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&ACharacterSelectSceneGameMode::SendConfirmRequest, this));
@@ -103,7 +113,7 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 		MainCameraLocation, FRotator::ZeroRotator);
 	APlayerController* CurrentController = UGameplayStatics::GetPlayerController(this, 0);
 	CurrentController->SetViewTarget(MainCamera);
-	
+
 }
 
 void ACharacterSelectSceneGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -120,7 +130,7 @@ void ACharacterSelectSceneGameMode::Tick(float DeltaSeconds)
 
 void ACharacterSelectSceneGameMode::ChangeSelectedCharacter(int64 SlotNumber)
 {
-	CharacterList[BeforeSlotNumber]->SetActorHiddenInGame(true);
+	if (CharacterList[BeforeSlotNumber]) CharacterList[BeforeSlotNumber]->SetActorHiddenInGame(true);
 	CharacterList[SlotNumber]->SetActorHiddenInGame(false);
 	BeforeSlotNumber = SlotNumber;
 
@@ -140,14 +150,15 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 	input >> SlotSize;
 
 	CharacterList.resize(5);
-	
+
 	for (int i = 0; i < SlotSize; i++)
 	{
 		int SlotNumber = input.ReadInt32();
 		FCharacterSelectInfo Info;
-		Info.Name = input.ReadCString();
+		std::string c_name= input.ReadCString();
+		Info.Name = mbs_to_wcs(c_name, std::locale("kor"));
 		input >> Info.Level; input >> Info.Str; input >> Info.Dex;
-		input >> Info.Int;	input >> Info.Job;  input >> Info.Face;
+		input >> Info.Int;   input >> Info.Job;  input >> Info.Face;
 		input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
 		input >> Info.x; input >> Info.y; input >> Info.z;
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
@@ -159,9 +170,21 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		CreatePlayerCharacter(Character, Info);
 		Character->SetActorHiddenInGame(true);
 		CharacterList[SlotNumber] = Character;
+		CurrentWidget->AddCharacter(SlotNumber, Character);
 	}
+}
 
-	
+void ACharacterSelectSceneGameMode::HandleMigrateZone(InputStream& input)
+{
+	string InGameIP;
+	int16 InGamePort;
+	InGameIP = input.ReadCString();
+	input >> InGamePort;
+	AccountManager::GetInstance().SetInGameIP(InGameIP);
+	AccountManager::GetInstance().SetInGamePort(InGamePort);
+
+	GetNetMgr().Close();
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("LEVEL_Village"));
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
@@ -174,9 +197,10 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	}
 
 	FCharacterSelectInfo Info;
-	Info.Name = input.ReadCString();
+	std::string c_name = input.ReadCString();
+	Info.Name = mbs_to_wcs(c_name, std::locale("kor"));
 	input >> Info.Level; input >> Info.Str; input >> Info.Dex;
-	input >> Info.Int;	input >> Info.Job;  input >> Info.Face;
+	input >> Info.Int;   input >> Info.Job;  input >> Info.Face;
 	input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
 	input >> Info.x; input >> Info.y; input >> Info.z;
 	input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
@@ -188,6 +212,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	CreatePlayerCharacter(Character, Info);
 	Character->SetActorHiddenInGame(true);
 	CharacterList[SlotNumber] = Character;
+	CurrentWidget->AddCharacter(SlotNumber, Character);
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterDelete(InputStream & input)
@@ -196,4 +221,5 @@ void ACharacterSelectSceneGameMode::HandleCharacterDelete(InputStream & input)
 	CurrentWidget->DeleteCharacter(SlotNumber);
 	CharacterList[SlotNumber]->Destroy();
 	CharacterList[SlotNumber] = nullptr;
+	CurrentWidget->UpdateList();
 }
