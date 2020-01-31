@@ -194,25 +194,46 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 	FStreamableDelegate AssetLoadDelegate;
-	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemSkMeshAssetComplete, 
+	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete, 
 		AssetPath, RetItem, CurrentTargetCharacter);
 
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
 
-void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item, APlayerCharacter* Character)
+void UItemManager::LoadItemMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item, APlayerCharacter* Character)
 {
-	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
-
-	if (Character == nullptr)
+	const int32 kWeaponTypeNumber = 3;
+	UItemEquipment* EquipItem = nullptr;
+	EquipItem = Cast<UItemEquipment>(Item);
+	
+	if (EquipItem->DefaultInfo.Type != kWeaponTypeNumber)
 	{
-		AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
+		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
+
+		if (Character == nullptr)
+		{
+			AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
+		}
+		else
+		{
+			Character->ChangeEquipment(Item, LoadedMesh.Get());
+		}
 	}
 	else
 	{
-		Character->ChangeEquipment(Item, LoadedMesh.Get());
+		TSoftObjectPtr<UStaticMesh> LoadedMesh(AssetPath);
+
+		if (Character == nullptr)
+		{
+			AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
+		}
+		else
+		{
+			Character->ChangeEquipment(Item, LoadedMesh.Get());
+		}
 	}
+
 }
 
 

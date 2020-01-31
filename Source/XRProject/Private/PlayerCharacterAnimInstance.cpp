@@ -9,6 +9,8 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 {
 	CharacterSpeed = 0.0f;
 	bIsAttack = false;
+	bIsRolling = false;
+	bIsSprint = false;
 
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> 
@@ -29,10 +31,12 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	Super::NativeUpdateAnimation(DeltaSeconds);
 	MyCharacter = AccountManager::GetInstance().GetCurrentPlayerCharacter();
 
-	if (IsValid(MyCharacter))
+	if (MyCharacter)
 	{
-		//CharacterSpeed = MyCharacter->GetVelocity().Size();
+		//CharacterSpeed = MyCharacter->GetCharacterMovement()->Velocity.Size(); //ÁÖÀÇ : velocity crash
 		bIsMove = MyCharacter->bIsMove;
+		bIsRolling = MyCharacter->bIsRolling;
+		bIsSprint = MyCharacter->bIsSprint;
 	}
 
 }
@@ -42,6 +46,14 @@ void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 	if(Delegate_CheckNextCombo.IsBound())
 		Delegate_CheckNextCombo.Execute();
 
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
+{
+	if (IsValid(MyCharacter))
+	{
+		MyCharacter->bIsRolling = false;
+	}
 }
 
 void UPlayerCharacterAnimInstance::PlayAttackMontage()

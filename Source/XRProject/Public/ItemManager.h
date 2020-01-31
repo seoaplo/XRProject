@@ -51,7 +51,7 @@ public:
 	TOptional<UItem*> CreateItem(class InputStream& input);
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
 	void BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter = nullptr);
-	void LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item, APlayerCharacter* Character);
+	void LoadItemMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item, APlayerCharacter* Character);
 	
 };
 

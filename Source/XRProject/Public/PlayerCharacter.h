@@ -4,16 +4,13 @@
 */
 #pragma once
 
-#include "EngineMinimal.h"
+#include "Engine.h"
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
-#include "ItemWeapon.h"
 //#include "Engine/BlueprintGeneratedClass.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
-
-
 
 
 UENUM()
@@ -37,17 +34,15 @@ struct FEquipment
 	GENERATED_USTRUCT_BODY()
 public:
 	/*  */
-
-	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	//UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
 		class USkeletalMeshComponent* BodyComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
 		class USkeletalMeshComponent* HandsComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
 		class USkeletalMeshComponent* LegsComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		class USkeletalMeshComponent* WeaponComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		class USkeletalMeshComponent* WeaponComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
+		class UStaticMeshComponent* WeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* BodyItem;
@@ -74,6 +69,8 @@ public:
 	virtual ~APlayerCharacter();
 	
 	const int32 kMaxComboCount = 4;
+	const float kSprintMovementSpeed = 750.0f;
+	const float kNormalMovementSpeed = 450.0f;
 public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
@@ -100,22 +97,31 @@ public:
 		UPlayerCharacterAnimInstance* MyAnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseLookUpRate;
-	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+		FVector ScaleVector;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+		FVector2D CapsuleSize;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+		FVector MeshLocationVector;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+		FVector WeaponScaleVector;
 
-
-private:
+public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character",Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bIsRolling;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bIsSprint;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bSavedCombo; //�޺� �������̸�, �����޺��� ������ �� ����
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		int32 ComboCount;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsMove;
 	/*TEST*/
 private:
@@ -130,31 +136,27 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* controller) override;
 
-
-
 public:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
+	void Attack();
+	void Roll();
+	void Sprint();
+	void SprintEnd();
 
-	
+	void ChangePartsById(EPartsType Type, int32 ID);
+	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
+	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
+	void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //���, ���̽� �� ���� ��ȯ
 
-	UFUNCTION()
-		void ChangePartsById(EPartsType Type, int32 ID);
-	UFUNCTION()
-		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
-	UFUNCTION()
-		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //���, ���̽� �� ���� ��ȯ
-	UFUNCTION()
-		void Attack();
 	UFUNCTION()
 		void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void ContinueCombo();
 	UFUNCTION()
 		void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
-	
 	
 	float SumSec=0;
 };

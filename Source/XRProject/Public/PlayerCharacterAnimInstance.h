@@ -34,6 +34,10 @@ private:
 		bool bIsAttack;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsMove;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsRolling;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsSprint;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		APlayerCharacter* MyCharacter;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
@@ -45,6 +49,8 @@ public:
 public:
 	UFUNCTION()
 		void AnimNotify_CheckNextComboValid();
+	UFUNCTION()
+		void AnimNotify_RollingEnd();
 
 	void PlayAttackMontage();
 	void StopAttackMontage();
