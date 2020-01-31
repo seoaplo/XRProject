@@ -26,4 +26,5 @@ public:
 	void SetSkill(int Index, USkill* Item);
 	void SetItem(int Index, UItem* Item);
 	void UseQuickSlot(int Index);
+	int GetQuickBarSize();
 };

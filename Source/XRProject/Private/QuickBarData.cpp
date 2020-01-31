@@ -1,5 +1,6 @@
 #include "..\Public\QuickBarData.h"
 #include "NetworkManager.h"
+
 QuickBarData::QuickBarData()
 {
 	for (int i = 0; i < kQuickBarSize; i++)
@@ -36,4 +37,9 @@ void QuickBarData::UseQuickSlot(int Index)
 	Out << (int32_t)Index;
 	Out.CompletePacketBuild();
 	UNetworkManager::GetInstance().SendPacket(Out);
+}
+
+int QuickBarData::GetQuickBarSize()
+{
+	return kQuickBarSize;
 }
