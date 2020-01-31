@@ -7,6 +7,7 @@
 #include "XRGameInstance.h"
 #include "NetworkOpcode.h"
 #include "PlayerCharacter.h"
+#include "MapManager.h"
 #include "XRProjectGameModeBase.h"
 #include "IngameGameMode.generated.h"
 
@@ -21,6 +22,13 @@ class XRPROJECT_API AIngameGameMode : public AXRProjectGameModeBase
 public:
 	AIngameGameMode();
 	virtual ~AIngameGameMode();
+public:
+	FORCEINLINE UMapManager& GetMapMgr() 
+	{
+		if(MapManager == nullptr)
+			MapManager = NewObject<UMapManager>();
+		return *MapManager; 
+	}
 
 public:
 	/*현재 미사용 Dummy 코드이며, 인게임에서 캐릭터가 생성될 때 패킷에 의해 장비, HP등을 초기화하고자할때 개선해서 사용할 예정. */
@@ -42,5 +50,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltatime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
-
+private:
+	UMapManager* MapManager;
 };
+
+#define MapMgr AIngameGameMode::GetMapMgr()

@@ -20,6 +20,7 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	MapMgr.Init(GetWorld(), GetNetMgr());
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
 		this, &AIngameGameMode::HandleEnterZone);
@@ -38,6 +39,7 @@ void AIngameGameMode::Tick(float deltatime)
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	MapMgr.Clear();
 	GetNetMgr().Close();
 }
 
@@ -82,6 +84,9 @@ void AIngameGameMode::ReadBaseCharacterInfo(InputStream & input)
 	int Intel = input.ReadInt32();
 	float Stamina = input.ReadFloat32();
 	float MaxStamina = input.ReadFloat32();
+	
+	MapMgr.SpawnPlayer(Id, Location, Rotation);
+	MapMgr.PossessPlayer(Id, Location, Rotation);
 
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
@@ -134,6 +139,7 @@ void AIngameGameMode::ReadQuickSlot(InputStream & input)
 
 void AIngameGameMode::ReadMapData(InputStream & input)
 {
+	MapMgr.ReadMapDataFromServer(input);
 }
 
 void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)

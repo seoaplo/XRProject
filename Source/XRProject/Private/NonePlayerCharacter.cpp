@@ -48,6 +48,7 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 
 	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 	AIControllerClass = AXRAIController::StaticClass();
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 
@@ -60,7 +61,7 @@ void ANonePlayerCharacter::PostInitializeComponents()
 
 void ANonePlayerCharacter::BeginPlay()
 {
-	ABaseCharacter::BeginPlay();
+	ACharacter::BeginPlay();
 	//SetCharacterLoadState(ECharacterLoadState::PREINIT);
 
 }
@@ -209,5 +210,5 @@ void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 void ANonePlayerCharacter::NpcLoadStart(int32 npcID)
 {
 	GetNPCInfoFromTable(npcID);
-	SetCharacterLoadState(ECharacterLoadState::PREINIT);
+	SetCharacterLoadState(ECharacterLoadState::LOADING);
 }

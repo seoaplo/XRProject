@@ -1,14 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 /*
-	ÀÛ¼ºÀÚ : ¹Ú¼öÂù
+	ï¿½Û¼ï¿½ï¿½ï¿½ : ï¿½Ú¼ï¿½ï¿½ï¿½
 */
 #pragma once
 
 #include "EngineMinimal.h"
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
+#include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "PlayerCharacter.generated.h"
+
+
+
 
 UENUM()
 enum class EEquipmentsType : uint8
@@ -64,8 +68,8 @@ class XRPROJECT_API APlayerCharacter : public ABaseCharacter
 public:
 	APlayerCharacter();
 	virtual ~APlayerCharacter();
-
-
+	
+	const int32 kMaxComboCount = 4;
 public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
@@ -74,7 +78,8 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float MovementSpeed;
 	UPROPERTY()
-		bool bIsMale; //¼ºº° Ã¼Å©¸¦ À§ÇÑ bool°ª.
+		bool bIsMale; //ï¿½ï¿½ï¿½ï¿½ Ã¼Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ boolï¿½ï¿½.
+
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
@@ -85,8 +90,8 @@ public:
 		USkeletalMeshComponent* FaceComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
 		USkeletalMeshComponent* HairComponent;
-
-public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		UPlayerCharacterAnimInstance* AnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
 
@@ -97,6 +102,12 @@ public:
 		UPlayerCharacterStatComponent* PlayerStatComp;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character",Meta = (AllowPrivateAccess = true))
+		bool bIsAttack;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bSavedCombo; //ï¿½Þºï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½Þºï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		int32 ComboCount;
 	/*TEST*/
 	FRotator DeltaRotation;
 	FRotator AdditionalRotationValue;
@@ -105,6 +116,7 @@ private:
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* controller) override;
 
@@ -120,5 +132,7 @@ public:
 	UFUNCTION()
 		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	UFUNCTION()
-		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //Çì¾î, ÆäÀÌ½º µî ÆÄÃ÷ ±³È¯
+		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½Ì½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
+	UFUNCTION()
+		void Attack();
 };

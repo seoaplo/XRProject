@@ -99,6 +99,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	PlayerInputComponent->BindAxis("TurnRate", this, &APlayerCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &APlayerCharacter::LookUpAtRate);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed,this, &APlayerCharacter::Attack);
+
+}
+
+void APlayerCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	AnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	//AnimInstance->Delegate_CheckNextCombo.AddDynamic(this, )
 
 }
 
@@ -124,9 +133,9 @@ void APlayerCharacter::BeginPlay()
 	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
 	bool Ret = AccountManager::GetInstance().SetCurrentPlayerCharacter(this);
 	check(Ret);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld());
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld());
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld());
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
+	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
 
 }
 
@@ -212,4 +221,15 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 	{
 		FaceComponent->SetSkeletalMesh(PartsMesh);
 	}
+}
+
+void APlayerCharacter::Attack()
+{
+	if (bIsAttack == false)
+	{
+		bIsAttack = true;
+		//AnimInstance->
+
+	}
+
 }
