@@ -37,11 +37,49 @@ void UMapManager::ReadMapDataFromServer(InputStream& input)
 		input >> PlayerLocation;
 		input >> PlayerRotator;
 
+		float HP = input.ReadFloat32();
+		float MAXHP = input.ReadFloat32();
+		float AttackMin = input.ReadFloat32();
+		float AttackMax = input.ReadFloat32();
+		float AttackRange = input.ReadFloat32();
+		float AttackSpeed = input.ReadFloat32();
+		float Defense = input.ReadFloat32();
+		float Speed = input.ReadFloat32();
+		std::string Name = input.ReadCString();
+		int Level = input.ReadInt32();
+		int Gender = input.ReadInt32();
+		int FaceID = input.ReadInt32();
+		int HairID = input.ReadInt32();
+		int Str = input.ReadInt32();
+		int Dex = input.ReadInt32();
+		int Intel = input.ReadInt32();
+		float Stamina = input.ReadFloat32();
+		float MaxStamina = input.ReadFloat32();
+
+		int EquipmentSize = 4;
+		for (int i = 0; i < EquipmentSize; i++)
+		{
+			int Type = input.ReadInt32();
+			if (Type)
+			{
+				if (Type == 3)
+				{
+					int ID = input.ReadInt32();
+					int AddATK = input.ReadInt32();
+					int AddDEF = input.ReadInt32();
+					int AddSTR = input.ReadInt32();
+					int AddDex = input.ReadInt32();
+					int AddInt = input.ReadInt32();
+				}
+				int Count = input.ReadInt32();
+			}
+		}
+
 		SpawnPlayer(ObjectID, PlayerLocation, PlayerRotator);
 	}
 
 	input >> monsterlistsize;
-	for (int iCount = 0; iCount < characterlistsize; iCount++)
+	for (int iCount = 0; iCount < monsterlistsize; iCount++)
 	{
 		int64_t ObjectID;
 		FVector MonsterLocation;
@@ -49,6 +87,15 @@ void UMapManager::ReadMapDataFromServer(InputStream& input)
 		input >> ObjectID;
 		input >> MonsterLocation;
 		input >> MonsterRotator;
+
+		float HP = input.ReadFloat32();
+		float MAXHP = input.ReadFloat32();
+		float AttackMin = input.ReadFloat32();
+		float AttackMax = input.ReadFloat32();
+		float AttackRange = input.ReadFloat32();
+		float AttackSpeed = input.ReadFloat32();
+		float Defense = input.ReadFloat32();
+		float Speed = input.ReadFloat32();
 
 		SpawnMonster(ObjectID, MonsterLocation, MonsterRotator);
 	}
@@ -71,8 +118,6 @@ bool UMapManager::SpawnMonster(int64_t objectid, FVector position, FRotator rota
 		else
 		{
 			Monster->Destroy();
-			CheckMonster->SetActorLocation(position);
-			CheckMonster->SetActorRotation(rotator);
 		}
 		return true;
 	}
@@ -103,10 +148,14 @@ bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotat
 		else
 		{
 			Player->Destroy();
-			(*CheckPlayer)->SetActorLocation(position);
-			(*CheckPlayer)->SetActorRotation(rotator);
 		}
 		return true;
 	}
 	else return false;
+}
+
+APlayerCharacter* UMapManager::FindPlayer(int64_t objectid)
+{
+	APlayerCharacter* FindedPlayer = CharacterList.FindRef(objectid);
+	return FindedPlayer;
 }

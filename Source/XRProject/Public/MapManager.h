@@ -29,6 +29,7 @@ public:
 	void ReadMapDataFromServer(InputStream& input);
 	bool SpawnPlayer(int64_t objectid, FVector position, FRotator rotator);
 	bool PossessPlayer(int64_t objectid, FVector position, FRotator rotator);
+	APlayerCharacter* FindPlayer(int64_t objectid);
 
 	// 몬스터 스폰 함수
 	bool SpawnMonster(int64_t objectid, FVector position, FRotator rotator);

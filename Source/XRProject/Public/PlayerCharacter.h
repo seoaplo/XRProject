@@ -135,4 +135,5 @@ public:
 		void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //���, ���̽� �� ���� ��ȯ
 	UFUNCTION()
 		void Attack();
+	float SumSec=0;
 };

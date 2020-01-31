@@ -29,11 +29,8 @@ public:
 	UPROPERTY()
 		UInGameMainWidget* CurrentWidget;
 
-
-	FORCEINLINE UMapManager& GetMapMgr() 
+	UMapManager& GetMapMgr() 
 	{
-		if(MapManager == nullptr)
-			MapManager = NewObject<UMapManager>();
 		return *MapManager; 
 	}
 
@@ -52,12 +49,14 @@ private:
 	void ReadInventoryInfo(class InputStream& input); /*인벤토리 정보 읽기*/
 	void ReadQuickSlot(class InputStream& input); /*퀵 슬롯 정보 읽기*/
 	void ReadMapData(class InputStream& input); /*맵 데이터 정보 읽기*/
-	void FuckingDelegate(class InputStream& input) {};
+	void SpawnCharacterFromServer(class InputStream& input);
+	void UpdateCharacterPosition(class InputStream& input);
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltatime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 private:
+	UPROPERTY()
 	UMapManager* MapManager;
 };
 

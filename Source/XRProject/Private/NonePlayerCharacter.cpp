@@ -25,7 +25,6 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 	else
 	{
 		XRLOG(Error, TEXT("Can't Find NPCTable"));
-
 	}
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
