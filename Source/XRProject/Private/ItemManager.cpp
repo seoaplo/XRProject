@@ -13,6 +13,12 @@ UItemManager::UItemManager()
 	if (DT_EQUIPITEM.Succeeded())
 		EquipmentItemDataTable = DT_EQUIPITEM.Object;
 
+	FString PartsDataPath = TEXT("DataTable'/Game/Resources/DataTable/PartsTable.PartsTable'");
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_PARTS(*PartsDataPath);
+	if (DT_PARTS.Succeeded())
+		PartsDataTable = DT_PARTS.Object;
+
 }
 
 UItemManager::~UItemManager()

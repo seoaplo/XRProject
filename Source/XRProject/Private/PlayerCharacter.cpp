@@ -18,8 +18,6 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 		(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
-	GetMesh()->SetAnimInstanceClass(AnimBP.Class);
-
   	if (AnimBP.Succeeded())
 	{
 		AnimInstance = AnimBP.Class;
@@ -62,7 +60,6 @@ APlayerCharacter::APlayerCharacter()
 	
 	HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
 	FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
-
 	
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		INVISIBLE_MESH
@@ -70,25 +67,27 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		TESTMESH
 		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
+		FIRSTBODYMESH
+		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
 
-
-	//GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
-	
+	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
+
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
 	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
 	Equipments.BodyComponent->SetupAttachment(RootComponent);
 	Equipments.LegsComponent->SetupAttachment(RootComponent);
 	Equipments.HandsComponent->SetupAttachment(RootComponent);
-	HairComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
 	FaceComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, FaceSocket);
+	HairComponent->AttachToComponent(FaceComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
 
-	Equipments.BodyComponent->SetMasterPoseComponent(GetMesh());
-	Equipments.LegsComponent->SetMasterPoseComponent(GetMesh());
-	Equipments.HandsComponent->SetMasterPoseComponent(GetMesh());
-	HairComponent->SetMasterPoseComponent(GetMesh());
-	FaceComponent->SetMasterPoseComponent(GetMesh());
+	Equipments.BodyComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
+	Equipments.BodyComponent->SetAnimInstanceClass(AnimBP.Class);
+
+	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
+	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 
 	ComboCount = 0;
 	bIsMove = false;
@@ -98,13 +97,6 @@ APlayerCharacter::APlayerCharacter()
 	/* 주의 : 남자임을 가정하고 테스트 중 */
 	bIsMale = true;
 
-	//Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
-	//Equipments.BodyComponent->SetupAttachment(RootComponent);
-	auto Hair = 
-		ConstructorHelpers::FObjectFinder
-		<USkeletalMesh>
-		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
-	//Equipments.BodyComponent->SetSkeletalMesh(Mesh.Object);
 #pragma endregion
 
 }
@@ -116,6 +108,7 @@ APlayerCharacter::~APlayerCharacter()
 
 void APlayerCharacter::Tick(float deltatime)
 {
+	Super::Tick(deltatime);
 	ABaseCharacter::Tick(deltatime);
 #pragma region TESTCODE
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
@@ -138,7 +131,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
 	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
 
@@ -163,47 +157,86 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
+
+
 	auto GameInstance = Cast < UXRGameInstance > (GetGameInstance());
 	bool Ret = AccountManager::GetInstance().SetCurrentPlayerCharacter(this);
 	check(Ret);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
+	ChangePartsById(EPartsType::HAIR, 110);
+	ChangePartsById(EPartsType::FACE, 120);
+	
 
 }
 
 void APlayerCharacter::MoveForward(float Value)
 {
-
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (bIsAttack == false)
 	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+		if ((Controller != NULL) && (Value != 0.0f))
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
-
-		bIsMove = true;
-	}
-	else
-	{
-		bIsMove = false;
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+			bIsMove = true;
+		}
+		else
+		{
+			bIsMove = false;
+		}
 	}
 }
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
+	if (bIsAttack == false)
 	{
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-		
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		AddMovementInput(Direction, Value);
+		if ((Controller != NULL) && (Value != 0.0f))
+		{
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			AddMovementInput(Direction, Value);
+			bIsMove = true;
+		}
 	}
 }
 
+
+void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
+{
+	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+	FPartsResource* PartResourceTable = GameInstance->ItemManager->PartsDataTable->
+		FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));
+
+	if (Type == EPartsType::HAIR)
+	{
+		//헤어파츠
+		FSoftObjectPath HairAssetPath = nullptr;
+		HairAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		FStreamableDelegate HairAssetLoadDelegate;
+		HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
+			HairAssetPath, EPartsType::HAIR);
+		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
+	}
+	else if (Type == EPartsType::FACE)
+	{
+		//페이스 파츠
+		FSoftObjectPath FaceAssetPath = nullptr;
+		FaceAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		FStreamableDelegate FaceAssetLoadDelegate;
+		FaceAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
+			FaceAssetPath, EPartsType::FACE);
+		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
+	}
+
+}
 
 void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 {
@@ -251,6 +284,7 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 		case EEquipmentsType::BODY:
 			Equipments.BodyItem = EquipItem;
 			Equipments.BodyComponent->SetSkeletalMesh(SkMesh);
+			MyAnimInstance->CurrentSkeleton = Equipments.BodyComponent->SkeletalMesh->Skeleton;
 			break;
 		case EEquipmentsType::HANDS:
 			Equipments.HandsItem = EquipItem;
@@ -288,14 +322,13 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 void APlayerCharacter::Attack()
 {
 	//first
-	//if (bIsAttack == false)
-	//{
-	//	bIsAttack = true;
-	//	bSavedCombo = true;
-	//	MyAnimInstance->PlayAttackMontage();
-	//}
-	//else
-	//	bSavedCombo = true;
+	if (bIsAttack == false)
+	{
+		bIsAttack = true;
+		MyAnimInstance->PlayAttackMontage();
+	}
+	else
+		bSavedCombo = true;
 }
 
 void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -320,4 +353,13 @@ void APlayerCharacter::ContinueCombo()
 		bSavedCombo = false;
 		XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
 	}
+}
+
+
+void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
+{
+	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
+
+	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
+
 }

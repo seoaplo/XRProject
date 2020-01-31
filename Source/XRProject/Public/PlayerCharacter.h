@@ -39,16 +39,16 @@ struct FEquipment
 public:
 	/*  */
 
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class USkeletalMeshComponent* BodyComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* BodyComponent;
+		class USkeletalMeshComponent* HandsComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* HandsComponent;
+		class USkeletalMeshComponent* LegsComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* LegsComponent;
+		class USkeletalMeshComponent* WeaponComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* WeaponComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Equipment")
-		USkeletalMeshComponent* SubWeaponComponent;
+		class USkeletalMeshComponent* SubWeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
 		UItemEquipment* BodyItem;
@@ -94,15 +94,13 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
-		USkeletalMeshComponent* FaceComponent;
+		class USkeletalMeshComponent* FaceComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
-		USkeletalMeshComponent* HairComponent;
+		class USkeletalMeshComponent* HairComponent;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
-		UAnimBlueprintGeneratedClass* AnimBPClass;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 		float BaseTurnRate;
 
@@ -141,8 +139,11 @@ public:
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
+
 	
 
+	UFUNCTION()
+		void ChangePartsById(EPartsType Type, int32 ID);
 	UFUNCTION()
 		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	UFUNCTION()
@@ -153,4 +154,6 @@ public:
 		void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void ContinueCombo();
+	UFUNCTION()
+		void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
 };

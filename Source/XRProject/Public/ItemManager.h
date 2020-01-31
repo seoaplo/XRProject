@@ -28,6 +28,7 @@ public:
 
 public:
 	class UDataTable* EquipmentItemDataTable;
+	class UDataTable* PartsDataTable;
 	FEquipmentDefaultInfo* EquipmentItemData;
 
 	//º“∫Ò≈€

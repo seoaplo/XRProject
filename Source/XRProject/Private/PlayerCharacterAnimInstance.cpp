@@ -46,7 +46,8 @@ void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
 {
-	Montage_Play(AttackMontage, 1.f);
+	float ret = Montage_Play(AttackMontage, 1.f);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
 }
 
 void UPlayerCharacterAnimInstance::StopAttackMontage()
