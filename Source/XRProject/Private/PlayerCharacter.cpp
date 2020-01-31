@@ -74,7 +74,7 @@ APlayerCharacter::APlayerCharacter()
 		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
 	//Equipments.BodyComponent->SetSkeletalMesh(Mesh.Object);
 #pragma endregion
-
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 }
 
 APlayerCharacter::~APlayerCharacter()
@@ -88,6 +88,25 @@ void APlayerCharacter::Tick(float deltatime)
 #pragma region TESTCODE
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 #pragma endregion
+	SumSec += deltatime;
+	if (SumSec >= 0.1f) {
+		SumSec -= 0.1f;
+
+		if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+		{
+			OutputStream out;
+			out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+			out << 999;
+			out << GetActorLocation();
+			out << GetActorRotation();
+			GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
+			GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
+			out.CompletePacketBuild();
+			GetNetMgr().SendPacket(out);
+		}
+	}
+	GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetCharacterMovement()->Velocity.ToString()));
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputComponent)
@@ -108,6 +127,8 @@ void APlayerCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	AnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	//AnimInstance->Delegate_CheckNextCombo.AddDynamic(this, )
+
+
 
 }
 

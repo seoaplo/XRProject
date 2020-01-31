@@ -4,11 +4,11 @@
 #include "IngameGameMode.h"
 #include "Inventory.h"
 #include "XRGameInstance.h"
+#include "XRAIController.h"
 
 AIngameGameMode::AIngameGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	DefaultPawnClass = APlayerCharacter::StaticClass();
 }
 
 AIngameGameMode::~AIngameGameMode()
@@ -20,10 +20,15 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	MapManager = NewObject<UMapManager>();
 	MapMgr.Init(GetWorld(), GetNetMgr());
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
 		this, &AIngameGameMode::HandleEnterZone);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kSpawnCharacter)->BindUObject(
+		this, &AIngameGameMode::SpawnCharacterFromServer);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
+		this, &AIngameGameMode::UpdateCharacterPosition);
 
 	std::string Ip = AccountManager::GetInstance().GetInGameIP();
 	int16 Port = AccountManager::GetInstance().GetInGamePort();
@@ -209,5 +214,75 @@ void AIngameGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Ty
 
 	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
 
+
+}
+void AIngameGameMode::SpawnCharacterFromServer(class InputStream& input)
+{
+	int64 Id = input.ReadInt64();
+	FVector Location = input.ReadFVector();
+	FRotator Rotation = input.ReadFRotator();
+
+	MapMgr.SpawnPlayer(Id, Location, Rotation);
+
+	float HP = input.ReadFloat32();
+	float MAXHP = input.ReadFloat32();
+	float AttackMin = input.ReadFloat32();
+	float AttackMax = input.ReadFloat32();
+	float AttackRange = input.ReadFloat32();
+	float AttackSpeed = input.ReadFloat32();
+	float Defense = input.ReadFloat32();
+	float Speed = input.ReadFloat32();
+	std::string Name = input.ReadCString();
+	int Level = input.ReadInt32();
+	int Gender = input.ReadInt32();
+	int FaceID = input.ReadInt32();
+	int HairID = input.ReadInt32();
+	int Str = input.ReadInt32();
+	int Dex = input.ReadInt32();
+	int Intel = input.ReadInt32();
+	float Stamina = input.ReadFloat32();
+	float MaxStamina = input.ReadFloat32();
+
+	int EquipmentSize = 4;
+	for (int i = 0; i < EquipmentSize; i++)
+	{
+		int Type = input.ReadInt32();
+		if (Type)
+		{
+			if (Type == 3)
+			{
+				int ID = input.ReadInt32();
+				int AddATK = input.ReadInt32();
+				int AddDEF = input.ReadInt32();
+				int AddSTR = input.ReadInt32();
+				int AddDex = input.ReadInt32();
+				int AddInt = input.ReadInt32();
+			}
+			int Count = input.ReadInt32();
+		}
+	}
+}
+void AIngameGameMode::UpdateCharacterPosition(class InputStream& input)
+{
+	int64 Id = input.ReadInt64();
+	int32 state = input.ReadInt32();
+	
+	FVector Location = input.ReadFVector();
+	FRotator Rotation = input.ReadFRotator();
+
+	APlayerCharacter* TargetPlayer = MapMgr.FindPlayer(Id);
+	if (TargetPlayer == nullptr) 
+	{
+		XRLOG(Warning, TEXT("Player not found"));
+		return;
+	}
+
+	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
+	if (aicon == nullptr)
+	{
+		XRLOG(Warning, TEXT("AICon not found"));
+		return;
+	}
+	else aicon->MoveToLocation(Location, 2, false, false);
 
 }
