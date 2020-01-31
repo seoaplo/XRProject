@@ -173,7 +173,6 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
-		CurrentItemId = ID;
 	}
 
 	FSoftObjectPath AssetPath = nullptr;

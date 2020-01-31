@@ -1,4 +1,6 @@
 #include "Inventory.h"
+#include "OutputStream.h"
+#include "XRGameInstance.h"
 
 Inventory::Inventory()
 {
@@ -94,11 +96,24 @@ bool Inventory::AddItem(UItem* item, int index)
 	return false;
 }
 
-UItem* Inventory::ExchangeItem(UItem * item, int index)
+bool Inventory::ExchangeItem(int index1, int index2)
 {
-	if (item == nullptr) return false;
-	if (index < 0 || index >= kMaxInventorySlotSize) return false;
-	UItem* result = Slot[index];
-	Slot[index] = item;
-	return result;
+	if (index1 < 0 || index1 >= kMaxInventorySlotSize) return false;
+	if (index2 < 0 || index2 >= kMaxInventorySlotSize) return false;
+
+	UItem* Temp = Slot[index1];
+	Slot[index1] = Slot[index2];
+	Slot[index2] = Temp;
+
+	//OutputStream out;
+	//out.WriteOpcode(ENetworkCSOpcode::kCharacterSelectionRequest);
+
+	//out << (int32_t)Number;
+	//out.CompletePacketBuild();
+	//AActor* asd;
+	//asd->GetGameInstance();
+	//GetNetMgr().SendPacket(out);
+	//BlockButton();
+
+	return true;
 }

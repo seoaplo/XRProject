@@ -85,5 +85,9 @@ FString UInventoryWidget::GetGlod()
 
 void UInventoryWidget::AddList(USlotWidget * newslot)
 {
-	if (newslot) list.push_back(newslot);
+	if (newslot)
+	{
+		newslot->Index = list.size();
+		list.push_back(newslot);
+	}
 }

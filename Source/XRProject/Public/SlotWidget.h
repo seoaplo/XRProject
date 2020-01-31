@@ -18,6 +18,7 @@ public:
 	USlotWidget(const FObjectInitializer& ObjectInitializer);
 public:
 		USlotObject* SlotObject;
+		int Index;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual UTexture2D* GetIcon();
@@ -25,6 +26,10 @@ public:
 		virtual int GetCount();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual bool IsEmpty();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual void ExchangeSlot(USlotWidget* Target);
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual void SetSlotObject();
 	UFUNCTION(BlueprintImplementableEvent)
-		void Update();
+		virtual void Update();
 };
