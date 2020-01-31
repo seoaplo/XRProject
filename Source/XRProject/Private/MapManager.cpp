@@ -118,8 +118,6 @@ bool UMapManager::SpawnMonster(int64_t objectid, FVector position, FRotator rota
 		else
 		{
 			Monster->Destroy();
-			CheckMonster->SetActorLocation(position);
-			CheckMonster->SetActorRotation(rotator);
 		}
 		return true;
 	}
@@ -150,8 +148,6 @@ bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotat
 		else
 		{
 			Player->Destroy();
-			(*CheckPlayer)->SetActorLocation(position);
-			(*CheckPlayer)->SetActorRotation(rotator);
 		}
 		return true;
 	}

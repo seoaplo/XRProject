@@ -88,25 +88,28 @@ void APlayerCharacter::Tick(float deltatime)
 #pragma region TESTCODE
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 #pragma endregion
-	SumSec += deltatime;
-	if (SumSec >= 0.1f) {
-		SumSec -= 0.1f;
 
-		if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
-		{
-			OutputStream out;
-			out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
-			out << 999;
-			out << GetActorLocation();
-			out << GetActorRotation();
-			GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
-			GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
-			out.CompletePacketBuild();
-			GetNetMgr().SendPacket(out);
-		}
+	if (Cast<APlayerController>(GetController()))
+	{
+		SumSec += deltatime;
+			if (SumSec >= 0.1f) {
+				SumSec -= 0.1f;
+
+					if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+					{
+						OutputStream out;
+							out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+							out << 999;
+							out << GetActorLocation();
+						out << GetActorRotation();
+						GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
+						GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
+						out.CompletePacketBuild();
+						GetNetMgr().SendPacket(out);
+					}
+			}
+		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetCharacterMovement()->Velocity.ToString()));
 	}
-	GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetCharacterMovement()->Velocity.ToString()));
-
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputComponent)
