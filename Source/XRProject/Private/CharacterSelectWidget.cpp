@@ -5,6 +5,8 @@
 #include "XRGameInstance.h"
 #include "OutputStream.h"
 #include "CharacterSelectSceneGameMode.h"
+#include <locale>
+
 
 UCharacterSelectWidget::UCharacterSelectWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {

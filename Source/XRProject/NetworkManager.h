@@ -60,6 +60,10 @@ class UNetworkManager : public UObject
 	GENERATED_BODY()
 public:
     constexpr static const int MaxBufferLength = 2048;
+    static UNetworkManager& GetInstance() {
+        return *Instance;
+    }
+    static UNetworkManager* Instance;
 public:
     UNetworkManager();
     ~UNetworkManager();

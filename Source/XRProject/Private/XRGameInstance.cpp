@@ -7,6 +7,7 @@ void UXRGameInstance::Init()
 {
     NetworkManager = NewObject<UNetworkManager>();
     NetworkManager->StartThread();
+    UNetworkManager::Instance = NetworkManager;
 	XRAssetManager = NewObject<UXRAssetMgr>();
 	ItemManager = NewObject<UItemManager>();
 }
@@ -14,4 +15,5 @@ void UXRGameInstance::Init()
 void UXRGameInstance::Shutdown()
 {
     NetworkManager->StopThread();
+    UNetworkManager::Instance = nullptr;
 }

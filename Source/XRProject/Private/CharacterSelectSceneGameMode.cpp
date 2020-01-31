@@ -4,6 +4,8 @@
 #include "XRGameInstance.h"
 #include "InputStream.h"
 #include <functional>
+#include <locale>
+
 
 void ACharacterSelectSceneGameMode::SendConfirmRequest()
 {
