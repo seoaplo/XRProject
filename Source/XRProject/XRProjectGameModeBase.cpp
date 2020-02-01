@@ -12,7 +12,6 @@ AXRProjectGameModeBase::AXRProjectGameModeBase()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-
 }
 
 void AXRProjectGameModeBase::BeginPlay()
