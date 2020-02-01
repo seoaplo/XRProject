@@ -38,7 +38,7 @@ private:
 		bool bIsRolling;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsSprint;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		APlayerCharacter* MyCharacter;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
