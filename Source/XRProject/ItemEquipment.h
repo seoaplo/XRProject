@@ -16,7 +16,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		FString Name;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
-		int32 Icon;
+		int32 IconResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
 		int32 MaleMeshResourceID;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "C_Info")
@@ -70,6 +70,7 @@ public:
 public:
 	virtual bool Use() override { return false; };
 	virtual int GetID() override;
+	virtual UTexture2D* GetIcon() override;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		int32 GetAddATK() { return AddInfo.AddATK; };

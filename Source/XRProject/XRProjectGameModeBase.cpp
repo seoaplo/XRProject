@@ -11,7 +11,7 @@
 AXRProjectGameModeBase::AXRProjectGameModeBase()
 {
     PrimaryActorTick.bCanEverTick = true;
-	//DefaultPawnClass = APlayerCharacter::StaticClass();
+	DefaultPawnClass = APlayerCharacter::StaticClass();
 
 }
 
