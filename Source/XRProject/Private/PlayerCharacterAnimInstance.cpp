@@ -38,7 +38,6 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsRolling = MyCharacter->bIsRolling;
 		bIsSprint = MyCharacter->bIsSprint;
 	}
-
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()

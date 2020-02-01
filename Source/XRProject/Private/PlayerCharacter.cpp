@@ -125,6 +125,7 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (Cast<APlayerController>(GetController()))
 	{
+
 		SumSec += deltatime;
 			if (SumSec >= 0.1f) {
 				SumSec -= 0.1f;
