@@ -9,8 +9,6 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 {
 	CharacterSpeed = 0.0f;
 	bIsAttack = false;
-	bIsRolling = false;
-	bIsSprint = false;
 
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> 
@@ -28,51 +26,33 @@ UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
 
 void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
-	Super::NativeUpdateAnimation(DeltaSeconds);
 	MyCharacter = AccountManager::GetInstance().GetCurrentPlayerCharacter();
 
 	if (MyCharacter)
 	{
-		//CharacterSpeed = MyCharacter->GetCharacterMovement()->Velocity.Size(); //ÁÖÀÇ : velocity crash
-		bIsMove = MyCharacter->bIsMove;
-		bIsRolling = MyCharacter->bIsRolling;
-		bIsSprint = MyCharacter->bIsSprint;
+		CharacterSpeed = MyCharacter->GetVelocity().Size();
 	}
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 {
-	if(Delegate_CheckNextCombo.IsBound())
-		Delegate_CheckNextCombo.Execute();
+	Delegate_CheckNextCombo.Broadcast();
 
-}
-
-void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
-{
-	if (IsValid(MyCharacter))
-	{
-		MyCharacter->bIsRolling = false;
-	}
 }
 
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
 {
-	float ret = Montage_Play(AttackMontage, 1.f);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
-}
-
-void UPlayerCharacterAnimInstance::StopAttackMontage()
-{
+	Montage_Play(AttackMontage, 1.f);
 }
 
 void UPlayerCharacterAnimInstance::JumpToComboMontageSection(int32 Section)
 {
 	check((Section <= 4));
-	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%d"), Section)));
+	Montage_JumpToSection(FName(*FString::Printf(TEXT("Combo%d"), Section)));
 }
 
 void UPlayerCharacterAnimInstance::JumpToReloadMontageSection(int32 Section)
 {
 	check((Section <= 4));
-	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%dR"), Section)));
+	Montage_JumpToSection(FName(*FString::Printf(TEXT("Combo%dR"), Section)));
 }

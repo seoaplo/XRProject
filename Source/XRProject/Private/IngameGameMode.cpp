@@ -20,13 +20,6 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
-	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
-	if (CurrentWidget != nullptr)
-	{
-		CurrentWidget->AddToViewport();
-	}
-
 	MapManager = NewObject<UMapManager>();
 	MapMgr.Init(GetWorld(), GetNetMgr());
 

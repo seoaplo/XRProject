@@ -19,11 +19,6 @@ enum class ENetworkCSOpcode : uint16_t
 	kZoneConrifmRequest = 1000,
 	kNotifyCurrentChrPosition,
 
-
-	kInventoryUpdateRequest,
-	kQuickSlotUseRequest,
-	kEquipmentMountRequest,
-
 };
 
 
