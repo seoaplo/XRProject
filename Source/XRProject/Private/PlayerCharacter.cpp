@@ -96,6 +96,11 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 
+	Equipments.WeaponComponent->SetCollisionProfileName(TEXT("Trigger"));
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlapBegin);
+	
+	
 
 
 	ComboCount = 0;
@@ -418,4 +423,11 @@ void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType T
 
 	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
 
+}
+
+void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AActor * OtherActor,
+	UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if(OtherActor)
+		GEngine->AddOnScreenDebugMessage(3, 2.0f, FColor::Green, FString::Printf(TEXT("Overlap Event %s"), *GetDebugName(OtherActor)));
 }
