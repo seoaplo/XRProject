@@ -9,6 +9,7 @@
 #include "ItemEquipment.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -100,6 +101,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
+		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
+
+
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character",Meta = (AllowPrivateAccess = true))

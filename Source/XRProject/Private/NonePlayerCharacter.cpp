@@ -5,15 +5,17 @@
 #include "XRAIController.h"
 #include "XRPlayerController.h"
 #include "PlayerCharacter.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AISenseConfig_Hearing.h"
-#include "Perception/AISenseConfig_Damage.h"
-#include "Engine/Engine.h"
+
+#include "Containers/Array.h"
 #include "NetworkManager.h"
 #include "XRGameInstance.h"
+#include "IngameGameMode.h"
+
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
@@ -65,7 +67,8 @@ void ANonePlayerCharacter::BeginPlay()
 {
 	ACharacter::BeginPlay();
 
-	//SetCharacterLoadState(ECharacterLoadState::PREINIT);
+
+
 
 
 }
@@ -74,30 +77,34 @@ void ANonePlayerCharacter::BeginPlay()
 void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(11, 5.0f, FColor::Blue, FString::Printf(TEXT("Velocity : %s"), *GetVelocity().ToString()));
-	//GEngine->AddOnScreenDebugMessage(4, 5.0f, FColor::Blue,TEXT("Velocity : %f"),*GetVelocity().ToString());
 
-	SumSec += DeltaTime;
-	if (SumSec >= 0.1f) {
-		SumSec -= 0.1f;
+	auto ingameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+	if(ingameMode)
+	{
 
-		if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+		if (ingameMode->IsSuper)
 		{
-			OutputStream out;
-			out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
-			out << 999;
-			out << 777;
-			out << GetActorLocation();
-			out << GetActorRotation();
-			GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
-			GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
-			out.CompletePacketBuild();
-			GetNetMgr().SendPacket(out);
+			AICon->RunAI();
+
+			SumSec += DeltaTime;
+			if (SumSec >= 0.1f) {
+				SumSec -= 0.1f;
+
+				if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+				{
+					OutputStream out;
+					out.WriteOpcode(ENetworkCSOpcode::kNotifyMonsterAction);
+					out << 500;
+					out << GetActorLocation();
+					out << GetActorRotation();
+					GEngine->AddOnScreenDebugMessage(500, 5.0f, FColor::Red, FString::Printf(TEXT("Monster Send Location : %s"), *GetActorLocation().ToString()));
+					GEngine->AddOnScreenDebugMessage(501, 5.0f, FColor::Red, FString::Printf(TEXT("Monster Send Rotator : %s"), *GetActorRotation().ToString()));
+					out.CompletePacketBuild();
+					GetNetMgr().SendPacket(out);
+				}
+			}
 		}
 	}
-
-
-		
 
 }
 
@@ -146,12 +153,7 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : READY")));
 		SetCharacterLifeState(ECharacterLifeState::ALIVE);
-		auto playerCon = Cast<AXRPlayerController>(GetWorld()->GetFirstPlayerController());
-		//if (playerCon && playerCon->IsSpuer())
-		//{
-		
-				AICon->RunAI();
-		//}
+
 		break;
 	}
 	default:

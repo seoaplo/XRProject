@@ -142,5 +142,8 @@ private:
 
 
 
-	float SumSec = 0;
+
+
+	float SumSec = 0.f;
+
 };
