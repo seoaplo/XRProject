@@ -126,4 +126,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Sight* SightConfig;
 
+
+
+	float SumSec = 0.f;
 };

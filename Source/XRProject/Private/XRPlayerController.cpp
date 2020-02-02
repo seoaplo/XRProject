@@ -3,3 +3,10 @@
 
 #include "XRPlayerController.h"
 
+
+
+void AXRPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+	XRLOG(Warning, TEXT("PlayerController IS Ready"));
+}

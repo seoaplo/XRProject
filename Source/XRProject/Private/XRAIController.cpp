@@ -42,13 +42,17 @@ void AXRAIController::OnUnPossess()
 
 void AXRAIController::RunAI()
 {
-	if (UseBlackboard(BBAsset, Blackboard))
+	auto BehaviorTreeComponent = Cast<UBehaviorTreeComponent>(BrainComponent);
+	if (nullptr == BehaviorTreeComponent)
 	{
-		Blackboard->SetValueAsVector(HomePosKey, GetPawn()->GetActorLocation());
-		if (!RunBehaviorTree(BTAsset))
-		{
-			XRLOG(Error, TEXT("AIController couldn't run behavior tree!"));
-		}
+			if (UseBlackboard(BBAsset, Blackboard))
+			{
+				Blackboard->SetValueAsVector(HomePosKey, GetPawn()->GetActorLocation());
+				if (!RunBehaviorTree(BTAsset))
+				{
+					XRLOG(Error, TEXT("AIController couldn't run behavior tree!"));
+				}
+			}
 	}
 
 }
