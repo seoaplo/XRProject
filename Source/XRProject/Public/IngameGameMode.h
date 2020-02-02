@@ -53,7 +53,6 @@ public:
 	virtual void Tick(float deltatime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
-	bool  IsSuper = false;
 private:
 	UPROPERTY()
 	UMapManager* MapManager;

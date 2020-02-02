@@ -11,6 +11,7 @@
 AIngameGameMode::AIngameGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PlayerControllerClass = AXRPlayerController::StaticClass();
 }
 
 AIngameGameMode::~AIngameGameMode()
@@ -71,10 +72,11 @@ void AIngameGameMode::SendConfirmRequest()
 
 void AIngameGameMode::HandleEnterZone(InputStream & input)
 {
+	input.ReadInt32();
+	ReadMapData(input);
 	ReadBaseCharacterInfo(input);
 	ReadInventoryInfo(input);
 	ReadQuickSlot(input);
-	ReadMapData(input);
 }
 
 void AIngameGameMode::ReadBaseCharacterInfo(InputStream & input)
@@ -301,9 +303,7 @@ void AIngameGameMode::UpdateCharacterPosition(class InputStream& input)
 void AIngameGameMode::SetMonsterController(InputStream& input)
 {
 	bool IsMonsterController = input.ReadBool();
-	
 	IsSuper = IsMonsterController;
-
 }
 
 void AIngameGameMode::UpdateMonsterAction(InputStream& input)
@@ -313,7 +313,7 @@ void AIngameGameMode::UpdateMonsterAction(InputStream& input)
 	{
 		if (!firstPlayer->IsSpuer())
 		{
-			int64 ObjID	=	input.ReadInt64();
+			int64 ObjID		=	input.ReadInt64();
 			int32 ActionID	=	input.ReadInt32();
 			FVector Location =	input.ReadFVector();
 			FRotator Rotator =	input.ReadFRotator();

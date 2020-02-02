@@ -113,16 +113,27 @@ bool UMapManager::SpawnMonster(int32 MonsterID, int64_t objectid, FVector positi
 	ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
 	if (Monster)
 	{
-		Monster->NpcLoadStart(MonsterID);
-		ANonePlayerCharacter* CheckMonster = MonsterList.FindOrAdd(objectid);
-		if (CheckMonster == nullptr)
+		ANonePlayerCharacter** Monreturn = MonsterList.Find(objectid);
+		if (Monreturn == nullptr)
 		{
-			CheckMonster = Monster;
+			Monster->NpcLoadStart(MonsterID);
+			Monster->ObjectID = objectid;
+			MonsterList.Add(objectid, Monster);
+		}
+
+
+
+
+		/*ANonePlayerCharacter** CheckMonster = &MonsterList.FindOrAdd(objectid);
+		Monster->NpcLoadStart(MonsterID);
+		if (*CheckMonster == nullptr)
+		{
+			*CheckMonster = Monster;
 		}
 		else
 		{
 			Monster->Destroy();
-		}
+		}*/
 		return true;
 	}
 	else return false;

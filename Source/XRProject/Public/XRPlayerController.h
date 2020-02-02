@@ -4,16 +4,17 @@
 
 #include "XRProject.h"
 #include "GameFramework/PlayerController.h"
+
 #include "XRPlayerController.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class XRPROJECT_API AXRPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 
 public:
 
@@ -30,6 +31,8 @@ public:
 protected:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
-		bool bIsSuper= false;
+		bool bIsSuper = false;
+
+
 
 };

@@ -4,6 +4,7 @@
 
 #include "XRProject.h"
 #include "AIController.h"
+#include "GenericTeamAgentInterface.h"
 #include "XRAIController.generated.h"
 
 /**
@@ -43,5 +44,5 @@ private:
 
 	FTimerHandle RepeatTimerHandle;
 	float RepeatInterval;
-
+	ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 };

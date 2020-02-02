@@ -9,4 +9,11 @@ void AXRPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	XRLOG(Warning, TEXT("PlayerController IS Ready"));
+	
+	//TeamId = FGenericTeamId(10);
 }
+
+//FGenericTeamId AXRPlayerController::GetGenericTeamId() const
+//{
+//	return TeamId;
+//}

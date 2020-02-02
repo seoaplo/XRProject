@@ -6,6 +6,7 @@
 #include "BaseCharacter.h"
 #include "CharacterStatComponent.h"
 #include "Engine/DataTable.h"
+#include "GenericTeamAgentInterface.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "NonePlayerCharacter.generated.h"
 
@@ -137,8 +138,9 @@ private:
 		class UAISenseConfig_Sight* SightConfig;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Hearing* HearingConfig;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		class UAISenseConfig_Sight* HConfig;
+
+
+
 
 
 

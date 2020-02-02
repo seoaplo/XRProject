@@ -11,6 +11,7 @@
 #include "Navigation/PathFollowingComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
+#include "XRProjectGameModeBase.h"
 #include "Containers/Array.h"
 #include "NetworkManager.h"
 #include "XRGameInstance.h"
@@ -21,6 +22,7 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 {
 
 
+	
 	static ConstructorHelpers::FObjectFinder<UDataTable> NPCDATATABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterTable.MonsterTable'"));
 	if (NPCDATATABLE.Succeeded())
 	{
@@ -48,11 +50,13 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
+	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
 
 	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 	AIControllerClass = AXRAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
 }
 
 
@@ -78,10 +82,9 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
 
-	auto ingameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+	auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
 	if(ingameMode)
 	{
-
 		if (ingameMode->IsSuper)
 		{
 			AICon->RunAI();
@@ -94,6 +97,7 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 				{
 					OutputStream out;
 					out.WriteOpcode(ENetworkCSOpcode::kNotifyMonsterAction);
+					out << ObjectID;
 					out << 500;
 					out << GetActorLocation();
 					out << GetActorRotation();
@@ -106,6 +110,8 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 		}
 	}
 
+
+	//GetMesh()->GetBodyInstance(FName("monster_UndeadSpearman_w"))->
 }
 
 void ANonePlayerCharacter::PossessedBy(AController* Cntr)
@@ -119,12 +125,16 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	XRLOG(Warning, TEXT("Attacked"));
-
 	return 0.f;
 }
 
 void ANonePlayerCharacter::DetectTarget(const TArray<AActor*>& DetectingPawn)
 {
+
+	for (auto detec : DetectingPawn)
+	{
+		XRLOG(Warning, TEXT("%s"), *detec->GetName());
+	}
 
 }
 
