@@ -260,6 +260,11 @@ void AIngameGameMode::SpawnCharacterFromServer(class InputStream& input)
 	float Stamina = input.ReadFloat32();
 	float MaxStamina = input.ReadFloat32();
 
+	APlayerCharacter* Character = nullptr;
+	Character = GetMapMgr().FindPlayer(Id);
+	if (Character == nullptr)
+		check(false);
+
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{

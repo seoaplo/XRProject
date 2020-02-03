@@ -28,6 +28,9 @@ enum class EPartsType : uint8
 {
 	HAIR,
 	FACE,
+	NUDEBODY,
+	NUDEHAND,
+	NUDELEG,
 };
 
 USTRUCT(BlueprintType)
@@ -37,13 +40,13 @@ struct FEquipment
 public:
 	/*  */
 	//UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Equipment")
 		class USkeletalMeshComponent* BodyComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Equipment")
 		class USkeletalMeshComponent* HandsComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Equipment")
 		class USkeletalMeshComponent* LegsComponent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Equipment")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Equipment")
 		class UStaticMeshComponent* WeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_EquipmentItem")
@@ -89,11 +92,11 @@ public:
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Parts")
 		class USkeletalMeshComponent* FaceComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_Parts")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Parts")
 		class USkeletalMeshComponent* HairComponent;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;

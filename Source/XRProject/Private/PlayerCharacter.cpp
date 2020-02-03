@@ -300,6 +300,17 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 			FaceAssetPath, EPartsType::FACE);
 		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
 	}
+	else //¸Ç¸ö, ¸ÇÁÖ¸Ô, ¸Ç´Ù¸®
+	{
+		FSoftObjectPath ETCAssetPath = nullptr;
+		ETCAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		FStreamableDelegate ETCAssetLoadDelegate;
+		ETCAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
+			ETCAssetPath, Type);
+
+		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
+
+	}
 
 }
 
@@ -358,6 +369,18 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 	else if (Type == EPartsType::FACE)
 	{
 		FaceComponent->SetSkeletalMesh(PartsMesh);
+	}
+	else if (Type == EPartsType::NUDEBODY)
+	{
+		Equipments.BodyComponent->SetSkeletalMesh(PartsMesh);
+	}
+	else if (Type == EPartsType::NUDEHAND)
+	{
+		Equipments.HandsComponent->SetSkeletalMesh(PartsMesh);
+	}
+	else if (Type == EPartsType::NUDELEG)
+	{
+		Equipments.LegsComponent->SetSkeletalMesh(PartsMesh);
 	}
 }
 

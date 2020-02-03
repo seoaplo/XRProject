@@ -133,8 +133,10 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 	{
 		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
 
-		if (Table == nullptr)
-			check(false);
+		if (Table == nullptr) //¸Ç¸ö
+		{
+			return nullptr;
+		}
 
 		UItemEquipment* Item = NewObject<UItemEquipment>();
 
@@ -173,6 +175,10 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 {
 	TOptional<UItem*> ItemOptional = GetItemFromId(Type, ID);
 	//is valid
+
+
+	if (ItemOptional == nullptr)
+		return;
 
 	UItem* RetItem = nullptr;
 	APlayerCharacter* CurrentTargetCharacter = TargetCharacter;
