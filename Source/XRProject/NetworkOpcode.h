@@ -3,56 +3,66 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
+	// LoginServer
+	kCreateAccountRequest = 0,
+	kLoginRequest,
 
-    // LoginServer
-    kCreateAccountRequest = 0,
-    kLoginRequest,
+	// LobbyServer
+	kLobbyConfirmRequest = 100,
+	kCharacterListRequest,
+	kCharacterCreateRequest,
+	kCharacterDeleteRequest,
+	kCharacterSelectionRequest,
 
-    // LobbyServer
-    kLobbyConfirmRequest = 100,
-    kCharacterListRequest,
-    kCharacterCreateRequest,
-    kCharacterDeleteRequest,
-    kCharacterSelectionRequest,
+	// ZoneServer
+	kZoneConrifmRequest = 1000,
+	kNotifyCurrentChrPosition,
+	kNotifyMonsterAction,
 
-    // ZoneServer
-    kZoneConrifmRequest = 1000,
-    kNotifyCurrentChrPosition,
-    kNotifyMonsterAction,
+	kInventoryUpdateRequest,
+	kQuickSlotUseRequest,
+	kEquipmentMountRequest,
 
-    kInventoryUpdateRequest,
-    kQuickSlotUseRequest,
-    kEquipmentMountRequest,
+	kMatchingRequest,
+	kMatchingConfirmRequest, // true / false
 
+	kCharacterAttack,
+	kCharcterHitSuccess,
 };
 
 
 enum class ENetworkSCOpcode : uint16_t
 {
-    // LoginServer
-    kCreateAccountResult = 0,
-    kLoginResult,
+	// LoginServer
+	kCreateAccountResult = 0,
+	kLoginResult,
 
-    // LobbyServer
-    kConfirmFailNotify = 100,
-    kCharacterCreateNotify,
-    kCharacterDeleteNotify,
-    kCharacterListNotify,
-    kMigrateZoneNotify,
+	// LobbyServer
+	kConfirmFailNotify = 100,
+	kCharacterCreateNotify,
+	kCharacterDeleteNotify,
+	kCharacterListNotify,
+	kMigrateZoneNotify,
 
-    // ZoneServer
-    kUserEnterTheMap = 1000,
-    kSpawnCharacter,
-    kSetMonsterController,
+	// ZoneServer
+	kUserEnterTheMap = 1000,
+	kSpawnCharacter,
+	kSetMonsterController,
 
-    kExitCharacter,
-    kUpdateCharacterPosition,
-    kUpdateMonsterAction,
+	kNotifyCharacterAttack,
+	kNotifyCharacterRolling,
+	kActorDamaged,
 
+	kExitCharacter,
+	kUpdateCharacterPosition,
+	kUpdateMonsterAction,
 
-    kSpawnMonster,
+	kSpawnMonster,
 
+	kInventoryUpdate,
+	kQuickSlotUpdate,
 
-    kInventoryUpdate,
-    kQuickSlotUpdate,
+	kNotifyMatchResult,
+	kNotifyMatchCanceled,
+
 };

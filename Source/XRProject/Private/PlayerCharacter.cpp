@@ -98,11 +98,14 @@ APlayerCharacter::APlayerCharacter()
 
 
 
-	ComboCount = 0;
+	ComboCount = 1;
+	CurrentComboCount = 1;
 	bIsMove = false;
 	bIsRolling = false;
 	bIsAttack = false;
 	bIsSprint = false;
+	bIsCharacterDead = false;
+	bIsHit = false;
 
 #pragma region TESTCODE
 
@@ -179,7 +182,7 @@ void APlayerCharacter::PostInitializeComponents()
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
-	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnAttackMontageEnded);
+	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
@@ -234,7 +237,7 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	if (bIsAttack || bIsRolling)
+	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -255,7 +258,7 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	if (bIsAttack || bIsRolling)
+	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -359,10 +362,45 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 	}
 }
 
+float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
+{
+	ANonePlayerCharacter* NPC = nullptr;
+	if (DamageCauser != nullptr)
+	{
+		NPC = Cast<ANonePlayerCharacter>(DamageCauser);
+	}
+
+	if (NPC == nullptr)
+		check(false);
+
+	if (PlayerStatComp->GetCurrentHP() < 0.0f)
+	{
+		SetCharacterLifeState(ECharacterLifeState::DEAD);
+		bIsCharacterDead = true;
+		//Dead 재생
+	}
+	else
+	{
+		PlayerStatComp->SetCurrentHP(PlayerStatComp->GetCurrentHP() - Damage);
+		bIsHit = true;
+		MyAnimInstance->PlayHitMontage();
+
+		UE_LOG(LogTemp, Warning, TEXT("Damaged By %s, Damage : %f"), *(NPC->GetName()), Damage);
+		//Hit 재생
+	}
+	return 0.0f;
+}
+
 void APlayerCharacter::Attack()
 {
-	if (bIsRolling == true)
+	if (bIsRolling == true || bIsHit)
 		return;
+	if (CurrentComboCount == ComboCount)
+		return;
+
+
+	AttackOverlapList.clear(); //Overlap list 초기화
+
 	//first
 	if (bIsAttack == false)
 	{
@@ -371,6 +409,15 @@ void APlayerCharacter::Attack()
 	}
 	else
 		bSavedCombo = true;
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+	out << ComboCount;
+	out << GetActorLocation();
+	out << GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
 }
 
 void APlayerCharacter::Roll()
@@ -392,12 +439,21 @@ void APlayerCharacter::SprintEnd()
 	UE_LOG(LogTemp, Warning, TEXT("Sprint END"));
 }
 
-void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	bIsAttack = false;
-	bSavedCombo = false;
-	ComboCount = 1;
+
+	if (MyAnimInstance->AttackMontage == Montage)
+	{
+		bIsAttack = false;
+		bSavedCombo = false;
+		ComboCount = 1;
+	}
+	else if (MyAnimInstance->HitMontage == Montage)
+	{
+		bIsHit = false;
+	}
 }
+
 
 void APlayerCharacter::ContinueCombo()
 {
@@ -423,4 +479,35 @@ void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType T
 
 	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
 
+}
+
+void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AActor * OtherActor,
+	UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+
+	ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
+	if (NPC)
+	{
+
+		for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
+		{
+			if (FlagNpc == NPC)
+				return;
+		}
+
+		int64 EnemyID = NPC->ObjectID;
+		int64 MyID = this->ObjectID;
+	
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterCreateRequest);
+		out << MyID;
+		out << EnemyID;
+		out << this->GetActorLocation();
+		out << this->GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
+		AttackOverlapList.push_back(NPC);
+
+	}
 }

@@ -47,6 +47,8 @@ private:
 	void UpdateCharacterPosition(class InputStream& input);
 	void SetMonsterController(class InputStream& input);
 	void UpdateMonsterAction(class InputStream& input);
+	void GiveDamageToCharacter(class InputStream& input);
+	void UpdateCharacterMotion(class InputStream& input);
 
 public:
 	virtual void BeginPlay() override;

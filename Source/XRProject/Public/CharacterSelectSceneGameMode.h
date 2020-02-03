@@ -31,6 +31,7 @@ public:
 	int32 hand_itemid;
 	int32 shoes_itemid;;
 	int32 weapon_itemid;
+	int32 sub_weapon_itemid;
 	int32 gender;
 };
 

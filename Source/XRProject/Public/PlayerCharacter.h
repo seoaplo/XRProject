@@ -8,6 +8,7 @@
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
 //#include "Engine/BlueprintGeneratedClass.h"
+#include "NonePlayerCharacter.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
@@ -129,12 +130,19 @@ public:
 		int32 ComboCount;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsMove;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bIsCharacterDead;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bIsHit;
+
 	/*TEST*/
 private:
 	FRotator DeltaRotation;
 	FRotator AdditionalRotationValue;
 	FVector SpringArmLocation;
 	bool bForwardKeyIsNeutral;
+	std::vector<ANonePlayerCharacter*> AttackOverlapList;
+	int32 CurrentComboCount;
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -156,9 +164,15 @@ public:
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
 	void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //���, ���̽� �� ���� ��ȯ
-
+	
+	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
+		class AActor* DamageCauser) override;
+	
 	UFUNCTION()
-		void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,
+			class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void ContinueCombo();
 	UFUNCTION()

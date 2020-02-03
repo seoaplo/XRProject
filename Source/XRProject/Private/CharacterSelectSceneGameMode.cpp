@@ -2,6 +2,7 @@
 #include "PlayerCharacter.h"
 #include "AccountManager.h"
 #include "XRGameInstance.h"
+#include "ChatingManager.h"
 #include "InputStream.h"
 #include <functional>
 #include <locale>
@@ -29,6 +30,8 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	MyComponent->SetCharacterName(FString(Info.Name.c_str()));
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+
 
 	//헤어파츠
 	FSoftObjectPath HairAssetPath = nullptr;
@@ -79,7 +82,10 @@ ACharacterSelectSceneGameMode::ACharacterSelectSceneGameMode()
 
 void ACharacterSelectSceneGameMode::BeginPlay()
 {
+	// 캐선창에 돌아오는 경우도 생각하여 채팅리스트 초기화
+	ChatingManager::GetInstance().ChatList.clear();
 	// 인스턴스에서 로비서버의 IP, port를 중계하는 방식으로 바꾸기 & 옵코드 유효한 옵코드로 변경
+
 	CurrentWidget = CreateWidget<UCharacterSelectWidget>(GetWorld(), LoginWidget);
 	if (CurrentWidget != nullptr)
 	{
@@ -101,11 +107,6 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kMigrateZoneNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
 
-	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
-	int16 Port = AccountManager::GetInstance().GetLobbyPort();
-	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&ACharacterSelectSceneGameMode::SendConfirmRequest, this));
-
-
 	/*캐릭터 선택창 카메라 배치*/
 	MainCameraLocation = FVector(0.0f, 2740.0f, 290.0f);
 	CharacterActorLocation = MainCameraLocation + FVector(100.0f, 0.0f, 0.0f);
@@ -113,6 +114,13 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 		MainCameraLocation, FRotator::ZeroRotator);
 	APlayerController* CurrentController = UGameplayStatics::GetPlayerController(this, 0);
 	CurrentController->SetViewTarget(MainCamera);
+
+	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
+	int16 Port = AccountManager::GetInstance().GetLobbyPort();
+	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&ACharacterSelectSceneGameMode::SendConfirmRequest, this));
+
+
+
 
 }
 
@@ -162,9 +170,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
 		input >> Info.x; input >> Info.y; input >> Info.z;
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
-
-		input >> Info.weapon_itemid;input >> Info.gender;
-
+		input >> Info.weapon_itemid; input >> Info.gender;
 
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
@@ -206,8 +212,15 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
 	input >> Info.x; input >> Info.y; input >> Info.z;
 	input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
+	input >> Info.weapon_itemid; input >> Info.gender;
 
-	input >> Info.weapon_itemid;  input >> Info.gender;
+	//기본장비
+	if (Info.armor_itemid == -1)
+		Info.armor_itemid = 3000001;
+	if (Info.hand_itemid == -1)
+		Info.hand_itemid = 3100001;
+	if (Info.shoes_itemid == -1)
+		Info.shoes_itemid = 3200001;
 
 	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 		CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));

@@ -40,7 +40,11 @@ void AIngameGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateMonsterAction)->BindUObject(
 		this, &AIngameGameMode::UpdateMonsterAction);
 
-	
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
+		this, &AIngameGameMode::GiveDamageToCharacter);
+		
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
+		this, &AIngameGameMode::UpdateCharacterMotion);
 
 	std::string Ip = AccountManager::GetInstance().GetInGameIP();
 	int16 Port = AccountManager::GetInstance().GetInGamePort();
@@ -324,5 +328,53 @@ void AIngameGameMode::UpdateMonsterAction(InputStream& input)
 				*Location.ToString(),*Rotator.ToString()));
 		}
 	}
+
+}
+
+void AIngameGameMode::GiveDamageToCharacter(InputStream & input)
+{
+	int64 AttackerID = input.ReadInt64();
+	int64 VictimID = input.ReadInt64();
+	float HitDamage = input.ReadFloat32();
+
+	//ANonePlayerCharacter* Attacker = MapMgr.FindPlayer(AttackerID);
+	ANonePlayerCharacter* Attacker = nullptr;
+	APlayerCharacter* TargetPlayer = MapMgr.FindPlayer(VictimID);
+	
+	TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
+	FDamageEvent DamageEvent(ValidDamageTypeClass);
+
+	if (Attacker && TargetPlayer)
+	{
+		TargetPlayer->TakeDamage(HitDamage, DamageEvent, Attacker->GetController(), Attacker);
+		TargetPlayer->TakeDamage(HitDamage, DamageEvent, nullptr, nullptr);
+	}
+
+}
+
+void AIngameGameMode::UpdateCharacterMotion(InputStream & input)
+{
+	int64 ObjectID = input.ReadInt64();
+	int32 MotionID = input.ReadInt32();
+	FVector TargetLocation = input.ReadFVector();
+	FRotator TargetRotation = input.ReadFRotator();
+
+
+
+	APlayerCharacter* TargetPlayer = nullptr;
+	TargetPlayer = MapMgr.FindPlayer(ObjectID);
+
+	if (TargetPlayer)
+	{
+		TargetPlayer->MyAnimInstance->PlayAttackOnlyPlayMontage();
+		TargetPlayer->MyAnimInstance->JumpToComboMontageSection(MotionID);
+		
+		UE_LOG(LogTemp,
+			Warning,
+			TEXT("CharacterMotionDebug ID : %d, MotionID : %d, TargetVec : %f %f %f, TargetRot : %f %f %f"),
+			ObjectID, MotionID, TargetLocation.X, TargetLocation.Y, TargetLocation.Z,
+			TargetRotation.Yaw, TargetRotation.Pitch, TargetRotation.Roll);
+	}
+
 
 }

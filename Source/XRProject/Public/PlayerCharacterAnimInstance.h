@@ -38,9 +38,19 @@ private:
 		bool bIsRolling;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsSprint;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsCharacterDead;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsHit;
 	APlayerCharacter* MyCharacter;
+
+public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* AttackMontageOnlyPlay;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* HitMontage;
 
 public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
@@ -52,7 +62,10 @@ public:
 		void AnimNotify_RollingEnd();
 
 	void PlayAttackMontage();
+	void PlayAttackOnlyPlayMontage();
 	void StopAttackMontage();
+	void PlayHitMontage();
+
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToReloadMontageSection(int32 Section);
 
