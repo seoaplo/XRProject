@@ -28,13 +28,13 @@ class XRPROJECT_API UItem : public USlotObject
 public:
 	EItemType ItemType;
 public:
-	virtual int GetCount() override;
-	virtual UTexture2D* GetIcon() override;
-public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual bool Use();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual int GetCount();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual int GetID();
+
 public:
 	EItemType GetItemType();
 };

@@ -12,8 +12,6 @@ class XRPROJECT_API USlotObject : public UObject
 public:
 		USlotObject() {};
 public:
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		virtual UTexture2D* GetIcon();
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		virtual int GetCount();
+		UTexture2D* GetIcon();
+		int GetCount();
 };
