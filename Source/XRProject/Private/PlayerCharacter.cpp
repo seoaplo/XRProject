@@ -127,7 +127,7 @@ void APlayerCharacter::Tick(float deltatime)
 	{
 		SumSec += deltatime;
 			if (SumSec >= 0.1f) {
-				SumSec -= 0.1f;
+				SumSec = 0.0f;
 
 					if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
 					{
@@ -138,7 +138,6 @@ void APlayerCharacter::Tick(float deltatime)
 						out << GetActorRotation();
 						GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
 						GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
-						GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
 						out.CompletePacketBuild();
 						GetNetMgr().SendPacket(out);
 					}
@@ -146,12 +145,11 @@ void APlayerCharacter::Tick(float deltatime)
 		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetCharacterMovement()->Velocity.ToString()));
 	}
 	
+	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
 	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
 	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
-
-	//GetCharacterMovement()->MaxWalkSpeed = 
 
 
 }
