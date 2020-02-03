@@ -1,5 +1,5 @@
 #include "Inventory.h"
-
+#include "NetworkManager.h"
 Inventory::Inventory()
 {
 	for (int i = 0; i < kMaxInventorySlotSize; i++)
@@ -94,11 +94,47 @@ bool Inventory::AddItem(UItem* item, int index)
 	return false;
 }
 
-UItem* Inventory::ExchangeItem(UItem * item, int index)
+bool Inventory::ExchangeItem(int index1, int index2)
 {
-	if (item == nullptr) return false;
-	if (index < 0 || index >= kMaxInventorySlotSize) return false;
-	UItem* result = Slot[index];
-	Slot[index] = item;
-	return result;
+	if (index1 < 0 || index1 >= kMaxInventorySlotSize) return false;
+	if (index2 < 0 || index2 >= kMaxInventorySlotSize) return false;
+	UItem* Temp = Slot[index1];
+	Slot[index2] = Temp;
+	Slot[index1] = Slot[index2];
+
+	OutputStream Out;
+
+	Out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
+	Out << (int32_t)index1;
+	Out << (int32_t)index2;
+	Out.CompletePacketBuild();
+
+	UNetworkManager::GetInstance().SendPacket(Out);
+	return true;
+}
+
+bool Inventory::UseSlot(int SlotID)
+{
+	if (SlotID < 0 || SlotID >= kMaxInventorySlotSize) return false;
+	if (Slot[SlotID])
+	{
+		switch (Slot[SlotID]->GetItemType())
+		{
+		case EItemType::EQUIPMENT:
+		{
+
+		}
+		case EItemType::CONSUMPTION:
+		{
+			OutputStream Out;
+			Out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+			Out << (int32_t)SlotID;
+			Out.CompletePacketBuild();
+			return true;
+		}
+		default:
+			break;
+		}
+	}
+	return false;
 }

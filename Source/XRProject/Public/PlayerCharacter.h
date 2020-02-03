@@ -129,6 +129,9 @@ public:
 		int32 ComboCount;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsMove;
+	
+	
+	float SumSec = 0;
 	/*TEST*/
 private:
 	FRotator DeltaRotation;
@@ -164,5 +167,5 @@ public:
 	UFUNCTION()
 		void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
 
-	float SumSec = 0;
+
 };
