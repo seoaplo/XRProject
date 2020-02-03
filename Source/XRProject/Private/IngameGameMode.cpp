@@ -10,6 +10,7 @@
 
 AIngameGameMode::AIngameGameMode()
 {
+	IsSuper = false;
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerControllerClass = AXRPlayerController::StaticClass();
 }
@@ -50,6 +51,7 @@ void AIngameGameMode::SendConfirmRequest()
 
 void AIngameGameMode::Tick(float deltatime)
 {
+	Super::Tick(deltatime);
 	if (GetMapMgr().InitComplete)
 	{
 		PlayerControllerClass = AXRPlayerController::StaticClass();
@@ -62,7 +64,10 @@ void AIngameGameMode::Tick(float deltatime)
 		GetMapMgr().RemotePlayerSpawn(GetWorld());
 		GetMapMgr().PlayerSpawnReady = false;
 	}
-	Super::Tick(deltatime);
+	if (Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper())
+	{
+		IsSuper = true;
+	}
 	GetNetMgr().Update();
 }
 

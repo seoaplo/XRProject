@@ -61,6 +61,8 @@ void UMapManager::ReadMosnterFromServer(InputStream& Input)
 		Input >> CurrentData.ObjectID;
 		Input >> CurrentData.Location;
 		Input >> CurrentData.Rotator;
+		
+		CurrentData.Rotator = FRotator(0, 0, 0);
 
 		CurrentData.Current_HP = Input.ReadFloat32();
 		CurrentData.Max_HP = Input.ReadFloat32();
@@ -294,6 +296,7 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 			}
 			//if (Monster->PlayerStatComp == nullptr) return false;
 			//Monster->PlayerStatComp->GetStatDataFromServer(Input);
+			Monster->NpcLoadStart(CurrentData.MonsterID);
 			Monster->ObjectID = CurrentData.ObjectID;
 			MonsterList.Add(CurrentData.ObjectID, Monster);
 		}

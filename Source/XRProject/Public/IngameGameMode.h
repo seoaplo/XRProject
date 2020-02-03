@@ -24,6 +24,8 @@ public:
 	AIngameGameMode();
 	virtual ~AIngameGameMode();
 public:
+	bool GetIsSuper() { return IsSuper; }
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
 		TSubclassOf<UInGameMainWidget> MainWidget;
 	UPROPERTY()
@@ -44,7 +46,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 private:
 	FTimerHandle PacketExcuteTimerHandle;
-public:
-	bool IsSuper = false;
+private:
+	bool IsSuper;
 };
 

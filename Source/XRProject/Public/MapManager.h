@@ -19,9 +19,9 @@
 struct CharacterData
 {
 	// Actor Spawn Data
-	int64_t ObjectID;
-	FVector Location;
-	FRotator Rotator;
+	int64_t ObjectID = -1;
+	FVector Location = FVector(0, 0, 0);
+	FRotator Rotator = FRotator(0, 0, 0);
 
 	// Base Character Stat Data
 	int Current_HP = -1;
@@ -59,10 +59,10 @@ struct CharacterData
 struct MonsterData
 {
 	// Actor Spawn Data
-	int32_t MonsterID;
-	int64_t ObjectID;
-	FVector Location;
-	FRotator Rotator;
+	int32_t MonsterID = -1;
+	int64_t ObjectID = -1;
+	FVector Location = FVector(0, 0, 0);
+	FRotator Rotator = FRotator(0, 0, 0);
 
 	// Base Character Stat Data
 	int Current_HP = -1;

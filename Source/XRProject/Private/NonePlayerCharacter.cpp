@@ -72,10 +72,12 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
 
-	auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
+	//auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
+	auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
+
 	if(ingameMode)
 	{
-		if (ingameMode->IsSuper)
+		if (ingameMode->GetIsSuper())
 		{
 			AICon->RunAI();
 
@@ -272,12 +274,13 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 
 void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 {
-	auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
+	//auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
+	auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
 	if (ingameMode)
 	{
-		if (ingameMode->IsSuper)
+		if (!ingameMode->GetIsSuper())
 		{
-			int64 ObjID = input.ReadInt64();
+			//int64 ObjID = input.ReadInt64();
 			int32 ActionID = input.ReadInt32();
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
@@ -287,7 +290,10 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 				AICon->StopMovement();
 				SetActorLocation(Location);
 				SetActorRotation(Rotator);
-				PlayAnimMontage(NpcAnim->NpcAttackMontage[ActionID]);
+				if (NpcAnim)
+				{
+					PlayAnimMontage(NpcAnim->NpcAttackMontage[ActionID]);
+				}
 			}
 			else if (ActionID >= 1000)
 			{
