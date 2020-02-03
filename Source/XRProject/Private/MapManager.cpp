@@ -304,7 +304,7 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 bool UMapManager::RemotePlayerSpawn(UWorld* world)
 {
 	if (World == nullptr) return false;
-	auto& CurrentData = CharacterDataList[CharacterDataList.size()];
+	auto& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
 	{
 		AActor* actor =
 			World->SpawnActor

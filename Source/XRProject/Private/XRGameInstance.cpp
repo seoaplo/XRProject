@@ -127,7 +127,6 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 void UXRGameInstance::SetMonsterController(InputStream& input)
 {
 	bool IsMonsterController = input.ReadBool();
-
 	IsSuper = IsMonsterController;
 
 }

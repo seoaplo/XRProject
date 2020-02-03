@@ -23,11 +23,11 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
-	if (CurrentWidget != nullptr)
-	{
-		CurrentWidget->AddToViewport();
-	}
+	//CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
+	//if (CurrentWidget != nullptr)
+	//{
+	//	CurrentWidget->AddToViewport();
+	//}
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -35,18 +35,6 @@ void AIngameGameMode::BeginPlay()
 	int16 Port = AccountManager::GetInstance().GetInGamePort();
 	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&AIngameGameMode::SendConfirmRequest, this));
 	IsSuper = Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper();
-
-void AIngameGameMode::Tick(float deltatime)
-{
-	Super::Tick(deltatime);
-	GetNetMgr().Update();
-}
-
-void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-	MapMgr.Clear();
-	GetNetMgr().Close();
 }
 
 void AIngameGameMode::SendConfirmRequest()
@@ -57,6 +45,7 @@ void AIngameGameMode::SendConfirmRequest()
 	out.WriteCString(ID.c_str());
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
+
 }
 
 void AIngameGameMode::Tick(float deltatime)
@@ -150,41 +139,5 @@ void AIngameGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Ty
 
 	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
 
-
-}
-
-void AIngameGameMode::SendConfirmRequest()
-{
-	std::string ID = AccountManager::GetInstance().GetAccountID();
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kZoneConrifmRequest);
-	out.WriteCString(ID.c_str());
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
-}
-void AIngameGameMode::SetMonsterController(InputStream& input)
-{
-	bool IsMonsterController = input.ReadBool();
-	IsSuper = IsMonsterController;
-}
-
-void AIngameGameMode::UpdateMonsterAction(InputStream& input)
-{
-	auto firstPlayer = Cast<AXRPlayerController>(GetWorld()->GetFirstPlayerController());
-	if(firstPlayer)
-	{
-		if (!firstPlayer->IsSpuer())
-		{
-			int64 ObjID		=	input.ReadInt64();
-			int32 ActionID	=	input.ReadInt32();
-			FVector Location =	input.ReadFVector();
-			FRotator Rotator =	input.ReadFRotator();
-
-
-			GEngine->AddOnScreenDebugMessage(112, 5.f, FColor::Blue, FString::Printf(TEXT("Recv MonsterUpdate  ObjectID: %s, ActionID: %s, Location : %s, Rotator: %s"),
-				*FString::FromInt(ObjID), *FString::FromInt(ActionID),
-				*Location.ToString(),*Rotator.ToString()));
-		}
-	}
 
 }
