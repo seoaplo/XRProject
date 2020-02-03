@@ -214,14 +214,6 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
 	input >> Info.weapon_itemid; input >> Info.gender;
 
-	//기본장비
-	if (Info.armor_itemid == -1)
-		Info.armor_itemid = 3000001;
-	if (Info.hand_itemid == -1)
-		Info.hand_itemid = 3100001;
-	if (Info.shoes_itemid == -1)
-		Info.shoes_itemid = 3200001;
-
 	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 		CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
 

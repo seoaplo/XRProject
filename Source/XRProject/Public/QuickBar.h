@@ -2,14 +2,13 @@
 
 #pragma once
 
-const int kQuickBarSize = 10;
-
 
 #include <vector>
 #include "InputStream.h"
 #include "CoreMinimal.h"
 #include "QuickSlot.h"
 #include "Blueprint/UserWidget.h"
+#include "QuickBarData.h"
 #include "QuickBar.generated.h"
 
 /**

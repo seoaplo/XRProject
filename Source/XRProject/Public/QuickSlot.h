@@ -32,6 +32,8 @@ public:
 		virtual void SetSkill(USkill* NewSkill);
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual void ClearSlot();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual void DropIn(UUserWidget* Target);
 	UFUNCTION(BlueprintImplementableEvent)
 		void Update();
 };

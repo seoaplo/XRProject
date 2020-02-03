@@ -9,6 +9,7 @@
 #include "PlayerCharacter.h"
 #include "MapManager.h"
 #include "XRProjectGameModeBase.h"
+#include "InGameMainWidget.h"
 #include "IngameGameMode.generated.h"
 
 /**
@@ -23,6 +24,11 @@ public:
 	AIngameGameMode();
 	virtual ~AIngameGameMode();
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
+		TSubclassOf<UInGameMainWidget> MainWidget;
+	UPROPERTY()
+		UInGameMainWidget* CurrentWidget;
+
 	UMapManager& GetMapMgr() 
 	{
 		return *MapManager; 
@@ -55,6 +61,7 @@ public:
 	virtual void Tick(float deltatime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
+	bool  IsSuper = false;
 private:
 	UPROPERTY()
 	UMapManager* MapManager;
