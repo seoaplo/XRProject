@@ -5,7 +5,7 @@
 #include "XRGameInstance.h"
 #include "AccountManager.h"
 #include "Components/InputComponent.h"
-
+#include "Perception/AISenseConfig_Sight.h"
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -59,6 +59,9 @@ APlayerCharacter::APlayerCharacter()
 	HairComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
 	FaceComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, FaceSocket);
 
+
+	TeamId = FGenericTeamId(0);
+
 	
 
 #pragma region TESTCODE
@@ -75,6 +78,9 @@ APlayerCharacter::APlayerCharacter()
 	//Equipments.BodyComponent->SetSkeletalMesh(Mesh.Object);
 #pragma endregion
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
+	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
 }
 
 APlayerCharacter::~APlayerCharacter()
@@ -91,6 +97,7 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (Cast<APlayerController>(GetController()))
 	{
+
 		SumSec += deltatime;
 			if (SumSec >= 0.1f) {
 				SumSec -= 0.1f;
@@ -101,14 +108,14 @@ void APlayerCharacter::Tick(float deltatime)
 							out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
 							out << 999;
 							out << GetActorLocation();
-						out << GetActorRotation();
-						GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
+							out << GetActorRotation();
+							GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
 						GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
 						out.CompletePacketBuild();
 						GetNetMgr().SendPacket(out);
 					}
 			}
-		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetCharacterMovement()->Velocity.ToString()));
+		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Velocity : %s"), *GetCharacterMovement()->Velocity.ToString()));
 	}
 }
 
@@ -130,6 +137,9 @@ void APlayerCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	AnimInstance = Cast<UPlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	//AnimInstance->Delegate_CheckNextCombo.AddDynamic(this, )
+
+	PlayerAIPerceptionStimul->bAutoRegister = true;
+	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
 
 
 
@@ -188,6 +198,11 @@ void APlayerCharacter::MoveRight(float Value)
 	}
 }
 
+
+FGenericTeamId APlayerCharacter::GetGenericTeamId() const
+{
+	return TeamId;
+}
 
 void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 {

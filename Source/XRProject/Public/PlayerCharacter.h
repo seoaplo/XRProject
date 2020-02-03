@@ -9,6 +9,8 @@
 #include "ItemEquipment.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
+#include "GenericTeamAgentInterface.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -61,7 +63,7 @@ public:
  * 
  */
 UCLASS()
-class XRPROJECT_API APlayerCharacter : public ABaseCharacter
+class XRPROJECT_API APlayerCharacter : public ABaseCharacter,  public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -100,6 +102,10 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
+		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
+
+
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character",Meta = (AllowPrivateAccess = true))
@@ -127,7 +133,10 @@ public:
 	void MoveRight(float Value);
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
-	
+
+
+	FGenericTeamId TeamId;
+	FGenericTeamId GetGenericTeamId() const override;
 
 	UFUNCTION()
 		void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);

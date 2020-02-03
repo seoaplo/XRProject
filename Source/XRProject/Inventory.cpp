@@ -98,18 +98,13 @@ bool Inventory::ExchangeItem(int index1, int index2)
 {
 	if (index1 < 0 || index1 >= kMaxInventorySlotSize) return false;
 	if (index2 < 0 || index2 >= kMaxInventorySlotSize) return false;
-	UItem* Temp = Slot[index1];
-	Slot[index2] = Temp;
-	Slot[index1] = Slot[index2];
 
-	OutputStream Out;
-
-	Out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
-	Out << (int32_t)index1;
-	Out << (int32_t)index2;
-	Out.CompletePacketBuild();
-
-	UNetworkManager::GetInstance().SendPacket(Out);
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
+	out << (int32_t)index1;
+	out << (int32_t)index2;
+	out.CompletePacketBuild();
+	UNetworkManager::GetInstance().SendPacket(out);
 	return true;
 }
 

@@ -1,4 +1,3 @@
-//kSendChatRequest
 #pragma once
 #include <cstdint>
 
@@ -52,6 +51,8 @@ enum class ENetworkSCOpcode : uint16_t
 	kSpawnCharacter,
 	kSetMonsterController,
 
+	kNotifyCharacterAttack,
+	kNotifyCharacterRolling,
 	kActorDamaged,
 
 	kExitCharacter,

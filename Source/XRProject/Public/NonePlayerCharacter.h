@@ -6,6 +6,7 @@
 #include "BaseCharacter.h"
 #include "CharacterStatComponent.h"
 #include "Engine/DataTable.h"
+#include "GenericTeamAgentInterface.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "NonePlayerCharacter.generated.h"
 
@@ -14,6 +15,17 @@ enum class NPCType : uint8
 {
 	Alli,
 	Enermy,
+};
+
+USTRUCT(Atomic, BlueprintType)
+struct FAggroContainer
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+		ABaseCharacter* AggroCharacter;
+	UPROPERTY(EditAnywhere)
+		int32 AggroGaze=0;
 };
 
 
@@ -53,11 +65,6 @@ UCLASS()
 class XRPROJECT_API ANonePlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
-
-
-		
-		
-		
 		///오버라이드///
 public:
 	ANonePlayerCharacter();
@@ -83,6 +90,8 @@ public:
 	virtual void GetNPCInfoFromTable(int32 NpcID);
 	UFUNCTION(BlueprintCallable)
 		void NpcLoadStart(int32 npcID);
+
+
 protected:
 private:
 
@@ -93,22 +102,27 @@ private:
 	///사용자 정의 변수///
 public:
 	UPROPERTY()
-		class UDataTable* NPCDataTable;
+	class UDataTable* NPCDataTable;
 	UFUNCTION(BlueprintCallable)
 	ABaseCharacter* GetTarget() const { return Target; }
 	UFUNCTION(BlueprintCallable)
 	void SetTarget(ABaseCharacter* NewTarget) { Target = NewTarget; }
 
+	//virtual	void SetSkelResource(int32 SkeletalID, int32 AnimBPID) override;
+
+
+
 protected:
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		TArray<ABaseCharacter*>		AggroList;
+	
+
 	UPROPERTY(BlueprintReadOnly,VisibleAnywhere,Meta =(AllowPrivateAccess = true))
 		ABaseCharacter*				Target;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UCharacterStatComponent*	EnermyStatComponent;
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		UAIPerceptionComponent*		EnermyPerceptionComponent;
+	
 	
 
 
@@ -123,7 +137,17 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		bool bIsAttacking;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		class UAISenseConfig_Sight* SightConfig;
+		class UAISenseConfig_Hearing* HearingConfig;
+
+
+
+
+
+
+
+
+	float SumSec = 0.f;
 
 };

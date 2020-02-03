@@ -1,9 +1,0 @@
-diff a/Source/XRProject/Inventory.h b/Source/XRProject/Inventory.h	(rejected hunks)
-@@ -28,5 +28,5 @@
- 	int GetItemCount(int64 ID);
- 	UItem* GetItem(int index); // ������ ��ü ����
- 	bool AddItem(UItem* item, int index = -1); // -1�� ��� �� ���� ã�Ƽ� �ֱ�, �� ���� ��� �ش� �ε�����
--	UItem* ExchangeItem(UItem* item, int index); // �ش� �ε����� ���Կ� �������� �ְ� �޾ư� ������ ��������
-+	bool ExchangeItem(int index1, int index2); // �ش� �ε����� ���Կ� �������� �ְ� �޾ư� ������ ��������
- };
-\ No newline at end of file

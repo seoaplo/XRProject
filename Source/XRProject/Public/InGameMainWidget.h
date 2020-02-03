@@ -7,6 +7,7 @@
 #include "QuickBar.h"
 #include "ChatingWidget.h"
 #include "HealthBarWidget.h"
+#include "DungeonMatchingWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "InGameMainWidget.generated.h"
 
@@ -18,7 +19,6 @@ class XRPROJECT_API UInGameMainWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-
 	UInGameMainWidget(const FObjectInitializer& ObjectInitializer);
 public:
 	bool bIsVisible;
@@ -31,4 +31,6 @@ public:
 		UChatingWidget* ChatingBar;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UHealthBarWidget* HealthBar;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+		UDungeonMatchingWidget* MatchingWindow;
 };

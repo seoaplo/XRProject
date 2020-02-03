@@ -28,7 +28,6 @@ public:
 		TSubclassOf<UInGameMainWidget> MainWidget;
 	UPROPERTY()
 		UInGameMainWidget* CurrentWidget;
-
 	UMapManager& GetMapMgr() 
 	{
 		return *MapManager; 
@@ -51,13 +50,19 @@ private:
 	void ReadMapData(class InputStream& input); /*맵 데이터 정보 읽기*/
 	void SpawnCharacterFromServer(class InputStream& input);
 	void UpdateCharacterPosition(class InputStream& input);
+	void SetMonsterController(class InputStream& input);
+	void UpdateMonsterAction(class InputStream& input);
+
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltatime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
 private:
 	UPROPERTY()
 	UMapManager* MapManager;
+	FTimerHandle PacketExcuteTimerHandle;
+
 };
 
 #define MapMgr AIngameGameMode::GetMapMgr()

@@ -32,7 +32,6 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		CharacterSpeed = MyCharacter->GetVelocity().Size();
 	}
-
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
