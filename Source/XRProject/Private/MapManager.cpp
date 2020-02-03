@@ -82,8 +82,11 @@ void UMapManager::ReadMapDataFromServer(InputStream& input)
 	for (int iCount = 0; iCount < monsterlistsize; iCount++)
 	{
 		int64_t ObjectID;
+		int32   MonsterID;
 		FVector MonsterLocation;
 		FRotator MonsterRotator;
+
+		input >> MonsterID;
 		input >> ObjectID;
 		input >> MonsterLocation;
 		input >> MonsterRotator;
@@ -97,11 +100,11 @@ void UMapManager::ReadMapDataFromServer(InputStream& input)
 		float Defense = input.ReadFloat32();
 		float Speed = input.ReadFloat32();
 
-		SpawnMonster(ObjectID, MonsterLocation, MonsterRotator);
+		SpawnMonster(MonsterID,ObjectID, MonsterLocation, MonsterRotator);
 	}
 }
 
-bool UMapManager::SpawnMonster(int64_t objectid, FVector position, FRotator rotator)
+bool UMapManager::SpawnMonster(int32 MonsterID, int64_t objectid, FVector position, FRotator rotator)
 {
 	AActor* actor =
 		World->SpawnActor
@@ -110,6 +113,7 @@ bool UMapManager::SpawnMonster(int64_t objectid, FVector position, FRotator rota
 	ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
 	if (Monster)
 	{
+		Monster->NpcLoadStart(MonsterID);
 		ANonePlayerCharacter* CheckMonster = MonsterList.FindOrAdd(objectid);
 		if (CheckMonster == nullptr)
 		{

@@ -10,6 +10,7 @@
 //#include "Engine/BlueprintGeneratedClass.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "PlayerCharacter.generated.h"
 
 
@@ -101,6 +102,7 @@ public:
 		float BaseLookUpRate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
+
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
 		FVector ScaleVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
@@ -109,6 +111,10 @@ public:
 		FVector MeshLocationVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
 		FVector WeaponScaleVector;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
+		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character",Meta = (AllowPrivateAccess = true))

@@ -14,7 +14,14 @@ class XRPROJECT_API AXRPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+
 public:
+
+	void BeginPlay() override;
+
+public:
+
+
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsSpuer() const { return bIsSuper; }
 	UFUNCTION(BlueprintCallable)

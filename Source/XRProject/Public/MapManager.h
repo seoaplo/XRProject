@@ -32,7 +32,7 @@ public:
 	APlayerCharacter* FindPlayer(int64_t objectid);
 
 	// 몬스터 스폰 함수
-	bool SpawnMonster(int64_t objectid, FVector position, FRotator rotator);
+	bool SpawnMonster(int32 MonsterID, int64_t objectid, FVector position, FRotator rotator);
 private:
 	int64_t PlayerID;
 	UWorld* World;
