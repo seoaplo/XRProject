@@ -155,6 +155,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 	{
 		int SlotNumber = input.ReadInt32();
 		FCharacterSelectInfo Info;
+		ZeroMemory(&Info, sizeof(FCharacterSelectInfo));
 		std::string c_name= input.ReadCString();
 		Info.Name = mbs_to_wcs(c_name, std::locale("kor"));
 		input >> Info.Level; input >> Info.Str; input >> Info.Dex;

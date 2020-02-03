@@ -77,7 +77,6 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 	auto ingameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
 	if(ingameMode)
 	{
-
 		if (ingameMode->IsSuper)
 		{
 			AICon->RunAI();

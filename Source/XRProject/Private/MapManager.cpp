@@ -2,164 +2,327 @@
 
 
 #include "MapManager.h"
+#include "XRPlayerController.h"
 
-bool UMapManager::Init(UWorld* world, UNetworkManager& networkmanager)
+bool UMapManager::CheckReady;
+
+bool UMapManager::Init()
 {
-
-	if (world == nullptr) return false;
-
-	World = world;
-	//SpawnPlayer(1, FVector(-6370.0, 850.0, 480.0), FRotator(0, 0, 0));
-	//PossessPlayer(1, FVector(-6370.0, 850.0, 480.0), FRotator(0, 0, 0));
+	PlayerID = -1;
+	UMapManager::CheckReady = false;
+	InitComplete = false;
+	PlayerSpawnReady = false;
 	return true;
 }
 bool UMapManager::Clear()
 {
+
+	for (auto& Character : CharacterList)
+	{
+		Character.Value->Destroy();
+	}
+	for (auto& Monster : MonsterList)
+	{
+		Monster.Value->Destroy();
+	}
+
 	CharacterList.Reset();
 	MonsterList.Reset();
+
+	CharacterDataList.clear();
+	MonsterDataList.clear();
 
 	return true;
 }
 
 // ¸Ê¿¡ ÀÔÀå
-void UMapManager::ReadMapDataFromServer(InputStream& input)
+
+
+void UMapManager::ReadMapDataFromServer(InputStream& Input)
 {
 	int32_t characterlistsize = 0;
 	int32_t monsterlistsize = 0;
 
-	input >> characterlistsize;
-	for (int iCount = 0; iCount < characterlistsize; iCount++)
-	{
-		int64_t ObjectID;
-		FVector PlayerLocation;
-		FRotator PlayerRotator;
-		input >> ObjectID;
-		input >> PlayerLocation;
-		input >> PlayerRotator;
+	Input >> characterlistsize;
+	CharacterDataList.resize(characterlistsize + 1);
+	ReadPlayerFromServer(Input);
 
-		float HP = input.ReadFloat32();
-		float MAXHP = input.ReadFloat32();
-		float AttackMin = input.ReadFloat32();
-		float AttackMax = input.ReadFloat32();
-		float AttackRange = input.ReadFloat32();
-		float AttackSpeed = input.ReadFloat32();
-		float Defense = input.ReadFloat32();
-		float Speed = input.ReadFloat32();
-		std::string Name = input.ReadCString();
-		int Level = input.ReadInt32();
-		int Gender = input.ReadInt32();
-		int FaceID = input.ReadInt32();
-		int HairID = input.ReadInt32();
-		int Str = input.ReadInt32();
-		int Dex = input.ReadInt32();
-		int Intel = input.ReadInt32();
-		float Stamina = input.ReadFloat32();
-		float MaxStamina = input.ReadFloat32();
+	Input >> monsterlistsize;
+	MonsterDataList.resize(monsterlistsize);
+	ReadMosnterFromServer(Input);
+}
+
+void UMapManager::ReadMosnterFromServer(InputStream& Input)
+{
+
+	for (auto& CurrentData : MonsterDataList)
+	{
+		Input >> CurrentData.MonsterID;
+		Input >> CurrentData.ObjectID;
+		Input >> CurrentData.Location;
+		Input >> CurrentData.Rotator;
+
+		CurrentData.Current_HP = Input.ReadFloat32();
+		CurrentData.Max_HP = Input.ReadFloat32();
+		CurrentData.Attack_Min = Input.ReadFloat32();
+		CurrentData.Attack_Max = Input.ReadFloat32();
+		CurrentData.Attack_Range = Input.ReadFloat32();
+		CurrentData.Attack_Speed = Input.ReadFloat32();
+		CurrentData.Speed = Input.ReadFloat32();
+		CurrentData.Defence = Input.ReadFloat32();
+	}
+}
+
+void UMapManager::ReadPlayerFromServer(InputStream& Input)
+{
+	for (int iCount = 0; iCount < CharacterDataList.size() - 1; iCount++)
+	{
+		CharacterData& CurrentData = CharacterDataList[iCount];
+
+
+		Input >> CurrentData.ObjectID;
+		Input >> CurrentData.Location;
+		Input >> CurrentData.Rotator;
+
+		CurrentData.Current_HP = Input.ReadFloat32();
+		CurrentData.Max_HP = Input.ReadFloat32();
+		CurrentData.Attack_Min = Input.ReadFloat32();
+		CurrentData.Attack_Max = Input.ReadFloat32();
+		CurrentData.Attack_Range = Input.ReadFloat32();
+		CurrentData.Attack_Speed = Input.ReadFloat32();
+		CurrentData.Speed = Input.ReadFloat32();
+		CurrentData.Defence = Input.ReadFloat32();
+
+		CurrentData.Name = Input.ReadCString();
+		CurrentData.Level = Input.ReadInt32();
+		CurrentData.Gender = Input.ReadInt32();
+		CurrentData.FaceID = Input.ReadInt32();
+		CurrentData.HairID = Input.ReadInt32();
+		CurrentData.STR = Input.ReadInt32();
+		CurrentData.DEX = Input.ReadInt32();
+		CurrentData.INT = Input.ReadInt32();
+		CurrentData.CurrentStamina = Input.ReadFloat32();
+		CurrentData.MaxStamina = Input.ReadFloat32();
 
 		int EquipmentSize = 4;
 		for (int i = 0; i < EquipmentSize; i++)
 		{
-			int Type = input.ReadInt32();
-			if (Type)
+			CurrentData.Type = Input.ReadInt32();
+			if (CurrentData.Type)
 			{
-				if (Type == 3)
+				if (CurrentData.Type == 3)
 				{
-					int ID = input.ReadInt32();
-					int AddATK = input.ReadInt32();
-					int AddDEF = input.ReadInt32();
-					int AddSTR = input.ReadInt32();
-					int AddDex = input.ReadInt32();
-					int AddInt = input.ReadInt32();
+					CurrentData.ID = Input.ReadInt32();
+					CurrentData.AddATK = Input.ReadInt32();
+					CurrentData.AddDEF = Input.ReadInt32();
+					CurrentData.AddSTR = Input.ReadInt32();
+					CurrentData.AddDex = Input.ReadInt32();
+					CurrentData.AddInt = Input.ReadInt32();
 				}
-				int Count = input.ReadInt32();
+				CurrentData.Count = Input.ReadInt32();
 			}
 		}
-
-		SpawnPlayer(ObjectID, PlayerLocation, PlayerRotator);
-	}
-
-	input >> monsterlistsize;
-	for (int iCount = 0; iCount < monsterlistsize; iCount++)
-	{
-		int64_t ObjectID;
-		int32   MonsterID;
-		FVector MonsterLocation;
-		FRotator MonsterRotator;
-
-		input >> MonsterID;
-		input >> ObjectID;
-		input >> MonsterLocation;
-		input >> MonsterRotator;
-
-		float HP = input.ReadFloat32();
-		float MAXHP = input.ReadFloat32();
-		float AttackMin = input.ReadFloat32();
-		float AttackMax = input.ReadFloat32();
-		float AttackRange = input.ReadFloat32();
-		float AttackSpeed = input.ReadFloat32();
-		float Defense = input.ReadFloat32();
-		float Speed = input.ReadFloat32();
-
-		SpawnMonster(MonsterID,ObjectID, MonsterLocation, MonsterRotator);
 	}
 }
 
-bool UMapManager::SpawnMonster(int32 MonsterID, int64_t objectid, FVector position, FRotator rotator)
+
+void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 {
-	AActor* actor =
-		World->SpawnActor
-		(ANonePlayerCharacter::StaticClass(), &position, &rotator);
 
-	ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
-	if (Monster)
+	CharacterData& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
+
+	Input >> CurrentData.ObjectID;
+	Input >> CurrentData.Location;
+	Input >> CurrentData.Rotator;
+
+	CurrentData.Current_HP = Input.ReadFloat32();
+	CurrentData.Max_HP = Input.ReadFloat32();
+	CurrentData.Attack_Min = Input.ReadFloat32();
+	CurrentData.Attack_Max = Input.ReadFloat32();
+	CurrentData.Attack_Range = Input.ReadFloat32();
+	CurrentData.Attack_Speed = Input.ReadFloat32();
+	CurrentData.Speed = Input.ReadFloat32();
+	CurrentData.Defence = Input.ReadFloat32();
+
+	CurrentData.Name = Input.ReadCString();
+	CurrentData.Level = Input.ReadInt32();
+	CurrentData.Gender = Input.ReadInt32();
+	CurrentData.FaceID = Input.ReadInt32();
+	CurrentData.HairID = Input.ReadInt32();
+	CurrentData.STR = Input.ReadInt32();
+	CurrentData.DEX = Input.ReadInt32();
+	CurrentData.INT = Input.ReadInt32();
+	CurrentData.CurrentStamina = Input.ReadFloat32();
+	CurrentData.MaxStamina = Input.ReadFloat32();
+
+	int EquipmentSize = 4;
+	for (int i = 0; i < EquipmentSize; i++)
 	{
-		Monster->NpcLoadStart(MonsterID);
-		ANonePlayerCharacter* CheckMonster = MonsterList.FindOrAdd(objectid);
-		if (CheckMonster == nullptr)
+		CurrentData.Type = Input.ReadInt32();
+		if (CurrentData.Type)
 		{
-			CheckMonster = Monster;
+			if (CurrentData.Type == 3)
+			{
+				CurrentData.ID = Input.ReadInt32();
+				CurrentData.AddATK = Input.ReadInt32();
+				CurrentData.AddDEF = Input.ReadInt32();
+				CurrentData.AddSTR = Input.ReadInt32();
+				CurrentData.AddDex = Input.ReadInt32();
+				CurrentData.AddInt = Input.ReadInt32();
+			}
+			CurrentData.Count = Input.ReadInt32();
 		}
-		else
-		{
-			Monster->Destroy();
-		}
-		return true;
 	}
-	else return false;
-}
-bool UMapManager::PossessPlayer(int64_t objectid, FVector position, FRotator rotator)
-{
-	APlayerCharacter* CheckPlayer = CharacterList.FindRef(objectid);
-	if (CheckPlayer == nullptr) return false;
-	World->GetPlayerControllerIterator()->Get()->Possess(CheckPlayer);
-	return true;
+	PlayerID = CurrentData.ObjectID;
 }
 
-bool UMapManager::SpawnPlayer(int64_t objectid, FVector position, FRotator rotator)
-{
-	AActor* actor = 
-		World->SpawnActor
-		(APlayerCharacter::StaticClass(), &position, &rotator);
-
-	APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
-	if (Player)
-	{
-		APlayerCharacter** CheckPlayer = &CharacterList.FindOrAdd(objectid);
-		if (*CheckPlayer == nullptr)
-		{
-			*CheckPlayer = Player;
-		}
-		else
-		{
-			Player->Destroy();
-		}
-		return true;
-	}
-	else return false;
-}
 
 APlayerCharacter* UMapManager::FindPlayer(int64_t objectid)
 {
 	APlayerCharacter* FindedPlayer = CharacterList.FindRef(objectid);
 	return FindedPlayer;
+}
+ANonePlayerCharacter* UMapManager::FindMonster(int64_t ObjectID)
+{
+	ANonePlayerCharacter* FindedMonster = MonsterList.FindRef(ObjectID);
+	return FindedMonster;
+}
+void UMapManager::TemporaryEnterZone()
+{
+	CheckReady = !CheckReady;
+}
+
+bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
+{
+	CharacterData CurrentData;
+	Input >> CurrentData.ObjectID;
+	Input >> CurrentData.Location;
+	Input >> CurrentData.Rotator;
+
+	CurrentData.Current_HP = Input.ReadFloat32();
+	CurrentData.Max_HP = Input.ReadFloat32();
+	CurrentData.Attack_Min = Input.ReadFloat32();
+	CurrentData.Attack_Max = Input.ReadFloat32();
+	CurrentData.Attack_Range = Input.ReadFloat32();
+	CurrentData.Attack_Speed = Input.ReadFloat32();
+	CurrentData.Speed = Input.ReadFloat32();
+	CurrentData.Defence = Input.ReadFloat32();
+
+	CurrentData.Name = Input.ReadCString();
+	CurrentData.Level = Input.ReadInt32();
+	CurrentData.Gender = Input.ReadInt32();
+	CurrentData.FaceID = Input.ReadInt32();
+	CurrentData.HairID = Input.ReadInt32();
+	CurrentData.STR = Input.ReadInt32();
+	CurrentData.DEX = Input.ReadInt32();
+	CurrentData.INT = Input.ReadInt32();
+	CurrentData.CurrentStamina = Input.ReadFloat32();
+	CurrentData.MaxStamina = Input.ReadFloat32();
+
+	int EquipmentSize = 4;
+	for (int i = 0; i < EquipmentSize; i++)
+	{
+		CurrentData.Type = Input.ReadInt32();
+		if (CurrentData.Type)
+		{
+			if (CurrentData.Type == 3)
+			{
+				CurrentData.ID = Input.ReadInt32();
+				CurrentData.AddATK = Input.ReadInt32();
+				CurrentData.AddDEF = Input.ReadInt32();
+				CurrentData.AddSTR = Input.ReadInt32();
+				CurrentData.AddDex = Input.ReadInt32();
+				CurrentData.AddInt = Input.ReadInt32();
+			}
+			CurrentData.Count = Input.ReadInt32();
+		}
+	}
+	CharacterDataList.push_back(CurrentData);
+	return true;
+}
+bool UMapManager::PlayerListSpawn(UWorld* World)
+{
+	if (World == nullptr) return false;
+	for (auto& CurrentData : CharacterDataList)
+	{
+		AActor* actor =
+			World->SpawnActor
+			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
+	
+		APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
+		if (Player)
+		{
+			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
+			if (CheckPlayer != nullptr)
+			{
+				Player->Destroy();
+				continue;
+			}
+			if (Player->PlayerStatComp == nullptr) continue;
+	
+			//Player->PlayerStatComp->GetStatDataFromServer(Input);
+			CharacterList.Add(CurrentData.ObjectID, Player);
+		}
+	}
+
+	APlayerCharacter* Player = CharacterList.FindRef(PlayerID);
+	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(World->GetPlayerControllerIterator()->Get());
+	if (MyPlayerController == nullptr) return false;
+	MyPlayerController->Possess(Player);
+	MyPlayerController->SetEnterZoneFunc(&UMapManager::TemporaryEnterZone);
+
+	return true;
+}
+bool UMapManager::MonsterListSpawn(UWorld* World)
+{
+	if (World == nullptr) return false;
+
+	for (auto& CurrentData : MonsterDataList)
+	{
+		AActor* actor =
+			World->SpawnActor
+			(ANonePlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
+
+		ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
+		if (Monster)
+		{
+			ANonePlayerCharacter** CheckMonster = MonsterList.Find(CurrentData.ObjectID);
+			if (CheckMonster != nullptr)
+			{
+				Monster->Destroy();
+				continue;
+			}
+			//if (Monster->PlayerStatComp == nullptr) return false;
+			//Monster->PlayerStatComp->GetStatDataFromServer(Input);
+			MonsterList.Add(CurrentData.ObjectID, Monster);
+		}
+	}
+	return true;
+}
+
+bool UMapManager::RemotePlayerSpawn(UWorld* world)
+{
+	if (World == nullptr) return false;
+	auto& CurrentData = CharacterDataList[CharacterDataList.size()];
+	{
+		AActor* actor =
+			World->SpawnActor
+			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
+
+		APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
+		if (Player)
+		{
+			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
+			if (CheckPlayer != nullptr)
+			{
+				Player->Destroy();
+				return false;
+			}
+			if (Player->PlayerStatComp == nullptr) return false;
+
+			//Player->PlayerStatComp->GetStatDataFromServer(Input);
+			CharacterList.Add(CurrentData.ObjectID, Player);
+		}
+	}
+	return true;
 }

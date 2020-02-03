@@ -125,7 +125,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 	{
 	case EItemType::EQUIPMENT:
 	{
-		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
+		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT(""));
 
 		if (Table == nullptr)
 			check(false);

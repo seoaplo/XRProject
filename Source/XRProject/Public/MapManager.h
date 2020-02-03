@@ -15,27 +15,103 @@
 /**
  * 작성자 : 서승석
  */
+
+struct CharacterData
+{
+	// Actor Spawn Data
+	int64_t ObjectID;
+	FVector Location;
+	FRotator Rotator;
+
+	// Base Character Stat Data
+	int Current_HP = -1;
+	int Max_HP = -1;
+	int Attack_Min = -1;
+	int Attack_Max = -1;
+	int Attack_Range = -1;
+	int Attack_Speed = -1;
+	int Speed = -1;
+	int Defence = -1;
+
+	std::string Name;
+	int Level = -1;
+	int Gender= -1;
+	int FaceID= -1;
+	int HairID= -1;
+	int STR = -1;
+	int DEX = -1;
+	int INT = -1;
+	int CurrentStamina = -1;
+	int MaxStamina = -1;
+
+
+	// Equipment
+	int Type = -1;
+	int ID = -1;
+	int AddATK = -1;
+	int AddDEF = -1;
+	int AddSTR = -1;
+	int AddDex = -1;
+	int AddInt = -1;
+	int Count = -1;
+};
+
+struct MonsterData
+{
+	// Actor Spawn Data
+	int32_t MonsterID;
+	int64_t ObjectID;
+	FVector Location;
+	FRotator Rotator;
+
+	// Base Character Stat Data
+	int Current_HP = -1;
+	int Max_HP = -1;
+	int Attack_Min = -1;
+	int Attack_Max = -1;
+	int Attack_Range = -1;
+	int Attack_Speed = -1;
+	int Speed = -1;
+	int Defence = -1;
+};
+
 UCLASS()
 class XRPROJECT_API UMapManager : public UObject
 {
 	GENERATED_BODY()
 public:
 	int64_t GetPlayerID() { return PlayerID; }
+	bool	GetCheckReady() { return CheckReady;  }
+	static void	TemporaryEnterZone();
 public:
-	bool Init(UWorld* world, UNetworkManager& networkmanager);
+	bool Init();
 	bool Clear();
 
 	// 맵에 입장
-	void ReadMapDataFromServer(InputStream& input);
-	bool SpawnPlayer(int64_t objectid, FVector position, FRotator rotator);
-	bool PossessPlayer(int64_t objectid, FVector position, FRotator rotator);
-	APlayerCharacter* FindPlayer(int64_t objectid);
+	void ReadMapDataFromServer(InputStream& Input);
+	void ReadPlayerFromServer(InputStream& Input);
+	void ReadPossesPlayerFromServer(InputStream& Input);
+	void ReadMosnterFromServer(InputStream& Input);
+	bool ReadPlayerSpawnFromServer(InputStream& Input);
 
-	// 몬스터 스폰 함수
-	bool SpawnMonster(int32 MonsterID, int64_t objectid, FVector position, FRotator rotator);
+	APlayerCharacter* FindPlayer(int64_t ObjectID);
+	ANonePlayerCharacter* FindMonster(int64_t ObjectID);
+
+	// 스폰 함수들
+	bool PlayerListSpawn(UWorld* world);
+	bool MonsterListSpawn(UWorld* world);
+	bool RemotePlayerSpawn(UWorld* world);
+public:
+	bool InitComplete;
+	bool PlayerSpawnReady;
 private:
+	int32_t LevelID;
 	int64_t PlayerID;
 	UWorld* World;
+	std::vector<CharacterData> CharacterDataList;
+	std::vector<MonsterData> MonsterDataList;
+
 	TMap<int64_t, APlayerCharacter*> CharacterList;
 	TMap<int64_t, ANonePlayerCharacter*> MonsterList;
+	static bool CheckReady;
 };
