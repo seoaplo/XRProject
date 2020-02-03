@@ -287,12 +287,13 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 
 			if (ActionID < 1000)
 			{
-				AICon->StopMovement();
+				//AICon->StopMovement();
 				SetActorLocation(Location);
 				SetActorRotation(Rotator);
-				if (NpcAnim)
+				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+				if (npcAnim)
 				{
-					PlayAnimMontage(NpcAnim->NpcAttackMontage[ActionID]);
+					PlayAnimMontage(npcAnim->NpcAttackMontage[ActionID]);
 				}
 			}
 			else if (ActionID >= 1000)
