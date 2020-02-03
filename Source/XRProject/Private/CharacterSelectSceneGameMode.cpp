@@ -162,7 +162,9 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
 		input >> Info.x; input >> Info.y; input >> Info.z;
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
+
 		input >> Info.weapon_itemid;input >> Info.gender;
+
 
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
@@ -204,6 +206,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	input >> Info.Hair; input >> Info.Gold; input >> Info.Zone;
 	input >> Info.x; input >> Info.y; input >> Info.z;
 	input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
+
 	input >> Info.weapon_itemid;  input >> Info.gender;
 
 	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),

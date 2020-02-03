@@ -3,6 +3,7 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
+
     // LoginServer
     kCreateAccountRequest = 0,
     kLoginRequest,
