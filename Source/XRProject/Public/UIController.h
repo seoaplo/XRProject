@@ -15,4 +15,11 @@ class XRPROJECT_API AUIController : public APlayerController
 	GENERATED_BODY()
 public:
 	AUIController();
+public:
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		void Test_SendChat(FText const& Chat);
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		void Test_HP(int hp);
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		void SendBoxFocusOrSend();
 };

@@ -1,3 +1,4 @@
+//kSendChatRequest
 #pragma once
 #include <cstdint>
 
@@ -17,11 +18,19 @@ enum class ENetworkCSOpcode : uint16_t
 	// ZoneServer
 	kZoneConrifmRequest = 1000,
 	kNotifyCurrentChrPosition,
+	kNotifyMonsterAction,
 
 	kInventoryUpdateRequest,
 	kQuickSlotUseRequest,
 	kEquipmentMountRequest,
 
+	kMatchingRequest,
+	kMatchingConfirmRequest, // true / false
+
+	kCharacterAttack,
+	kCharcterHitSuccess,
+
+	kSendChatRequest,
 };
 
 
@@ -41,13 +50,20 @@ enum class ENetworkSCOpcode : uint16_t
 	// ZoneServer
 	kUserEnterTheMap = 1000,
 	kSpawnCharacter,
+	kSetMonsterController,
+
+	kActorDamaged,
+
 	kExitCharacter,
 	kUpdateCharacterPosition,
-
+	kUpdateMonsterAction,
 
 	kSpawnMonster,
 
-
 	kInventoryUpdate,
 	kQuickSlotUpdate,
+
+	kNotifyMatchResult,
+	kNotifyMatchCanceled,
+
 };

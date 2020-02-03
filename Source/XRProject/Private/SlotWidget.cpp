@@ -32,7 +32,34 @@ bool USlotWidget::IsEmpty()
 
 void USlotWidget::SetSlotObject()
 {
-	SlotObject = Inventory::GetInstance().GetItem(Index);
+	if (Index >= 0 || Inventory::GetInstance().GetInventorySize() > Index)
+	{
+		SlotObject = Inventory::GetInstance().GetItem(Index);
+	}
+	else
+	{
+		switch (Index)
+		{
+		case 100:
+		{
+			break;
+		}
+		case 101:
+		{
+			break;
+		}
+		case 102:
+		{
+			break;
+		}
+		case 103:
+		{
+			break;
+		}
+		default:
+			break;
+		}
+	}
 	Update();
 }
 

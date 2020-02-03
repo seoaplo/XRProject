@@ -130,6 +130,8 @@ bool Inventory::UseSlot(int SlotID)
 			Out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
 			Out << (int32_t)SlotID;
 			Out.CompletePacketBuild();
+
+			UNetworkManager::GetInstance().SendPacket(Out);
 			return true;
 		}
 		default:

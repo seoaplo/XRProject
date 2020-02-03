@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "InventoryWidget.h"
 #include "QuickBar.h"
+#include "ChatingWidget.h"
+#include "HealthBarWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "InGameMainWidget.generated.h"
 
@@ -21,8 +23,12 @@ public:
 public:
 	bool bIsVisible;
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UInventoryWidget* Inventory;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UQuickBar* QuickBar;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+		UChatingWidget* ChatingBar;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+		UHealthBarWidget* HealthBar;
 };
