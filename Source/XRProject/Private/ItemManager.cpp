@@ -194,16 +194,14 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 	FStreamableDelegate AssetLoadDelegate;
-
-	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete, 
+	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
 		AssetPath, RetItem, CurrentTargetCharacter);
 
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }
 
 
-
-void UItemManager::LoadItemMeshAssetComplete(FSoftObjectPath AssetPath,UItem* Item, APlayerCharacter* Character)
+void UItemManager::LoadItemMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item, APlayerCharacter* Character)
 {
 	const int32 kWeaponTypeNumber = 3;
 	UItemEquipment* EquipItem = nullptr;

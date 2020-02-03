@@ -18,7 +18,7 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
-  	if (AnimBP.Succeeded())
+	if (AnimBP.Succeeded())
 	{
 		AnimInstance = AnimBP.Class;
 	}
@@ -57,14 +57,14 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent->bUsePawnControlRotation = false;
 
 
+
 	FName HairSocket("HairSocket");
 	FName FaceSocket("FaceSocket");
 	FName WeaponSocket("WeaponSocket");
 
-
 	HairComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hair"));
 	FaceComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Face"));
-	
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		INVISIBLE_MESH
 		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/CommonSkeleton/SK_Character_human_male_skeleton.SK_Character_human_male_skeleton'"));
@@ -77,7 +77,6 @@ APlayerCharacter::APlayerCharacter()
 
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
-
 
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
@@ -93,8 +92,10 @@ APlayerCharacter::APlayerCharacter()
 
 	Equipments.BodyComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimBP.Class);
+
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
+
 
 
 	ComboCount = 1;
@@ -131,8 +132,7 @@ void APlayerCharacter::Tick(float deltatime)
 	if (Cast<APlayerController>(GetController()))
 	{
 		SumSec += deltatime;
-		if (SumSec >= 0.1f) 
-		{
+		if (SumSec >= 0.1f) {
 			SumSec = 0.0f;
 
 			if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
@@ -156,6 +156,8 @@ void APlayerCharacter::Tick(float deltatime)
 	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
+
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputComponent)
@@ -171,7 +173,6 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	PlayerInputComponent->BindAction("Roll", IE_Pressed, this, &APlayerCharacter::Roll);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::SprintEnd);
-
 
 }
 
@@ -314,9 +315,9 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 
 	switch (EquipItem->DefaultInfo.Type)
 	{
-		case 0: { Types = EEquipmentsType::BODY; break; }
-		case 1: { Types = EEquipmentsType::HANDS; break; }
-		case 2: { Types = EEquipmentsType::LEGS; break; }
+	case 0: { Types = EEquipmentsType::BODY; break; }
+	case 1: { Types = EEquipmentsType::HANDS; break; }
+	case 2: { Types = EEquipmentsType::LEGS; break; }
 	}
 
 	switch (Types)
@@ -419,7 +420,6 @@ void APlayerCharacter::Attack()
 
 }
 
-
 void APlayerCharacter::Roll()
 {
 	bIsRolling = true;
@@ -466,7 +466,6 @@ void APlayerCharacter::ContinueCombo()
 		}
 
 		ComboCount++;
-		CurrentComboCount = ComboCount;
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
 		XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);

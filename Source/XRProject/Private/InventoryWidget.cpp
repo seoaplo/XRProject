@@ -39,6 +39,15 @@ int UInventoryWidget::GetHeightSize()
 	return Inventory::GetInstance().GetInventoryHeight();
 }
 
+void UInventoryWidget::SetUp()
+{
+	int Size = Inventory::GetInstance().GetInventorySize();
+	for (int i = 0; i < Size; i++)
+	{
+		list[i]->SlotObject = Inventory::GetInstance().GetItem(i);
+	}
+}
+
 FString UInventoryWidget::GetGlod()
 {
 	int Money = Inventory::GetInstance().GetGold();
@@ -76,10 +85,5 @@ FString UInventoryWidget::GetGlod()
 
 void UInventoryWidget::AddList(USlotWidget * newslot)
 {
-	if (newslot)
-	{
-		newslot->Index = list.size();
-		list.push_back(newslot);
-		newslot->SetSlotObject();
-	}
+	if (newslot) list.push_back(newslot);
 }

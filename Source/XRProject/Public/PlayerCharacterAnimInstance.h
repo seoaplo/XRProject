@@ -45,7 +45,6 @@ private:
 	APlayerCharacter* MyCharacter;
 
 public:
-
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
