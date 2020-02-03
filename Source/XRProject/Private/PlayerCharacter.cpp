@@ -125,14 +125,13 @@ APlayerCharacter::~APlayerCharacter()
 
 void APlayerCharacter::Tick(float deltatime)
 {
-	Super::Tick(deltatime);
 	ABaseCharacter::Tick(deltatime);
 
 	if (Cast<APlayerController>(GetController()))
 	{
 		SumSec += deltatime;
 			if (SumSec >= 0.1f) {
-				SumSec -= 0.1f;
+				SumSec -= 0.0f;
 
 					if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
 					{
