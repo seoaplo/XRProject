@@ -9,10 +9,10 @@
 class APlayerCharacter;
 
 
-DECLARE_MULTICAST_DELEGATE(FCheckNextComboValid)
+DECLARE_DELEGATE(FCheckNextComboValid)
 
 /**
- * 
+ *
  */
 UCLASS()
 class XRPROJECT_API UPlayerCharacterAnimInstance : public UAnimInstance
@@ -28,12 +28,17 @@ public:
 
 
 private:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		float CharacterSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
-		APlayerCharacter* MyCharacter;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsMove;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsRolling;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsSprint;
+	APlayerCharacter* MyCharacter;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
 
@@ -43,8 +48,11 @@ public:
 public:
 	UFUNCTION()
 		void AnimNotify_CheckNextComboValid();
+	UFUNCTION()
+		void AnimNotify_RollingEnd();
 
 	void PlayAttackMontage();
+	void StopAttackMontage();
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToReloadMontageSection(int32 Section);
 
