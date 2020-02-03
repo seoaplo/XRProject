@@ -99,7 +99,6 @@ APlayerCharacter::APlayerCharacter()
 
 
 	ComboCount = 1;
-	CurrentComboCount = 1;
 	bIsMove = false;
 	bIsRolling = false;
 	bIsAttack = false;
@@ -395,9 +394,6 @@ void APlayerCharacter::Attack()
 {
 	if (bIsRolling == true || bIsHit)
 		return;
-	if (CurrentComboCount == ComboCount)
-		return;
-
 
 	AttackOverlapList.clear(); //Overlap list √ ±‚»≠
 
