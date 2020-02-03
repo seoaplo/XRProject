@@ -42,6 +42,13 @@ private:
 	UPROPERTY()
 		class UBlackboardData* BBAsset;
 
+
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		UAIPerceptionComponent* EnermyPerceptionComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		class UAISenseConfig_Sight* SightConfig;
+
 	FTimerHandle RepeatTimerHandle;
 	float RepeatInterval;
 	ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;

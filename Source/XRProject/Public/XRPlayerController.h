@@ -4,14 +4,14 @@
 
 #include "XRProject.h"
 #include "GameFramework/PlayerController.h"
-
+#include "GenericTeamAgentInterface.h"
 #include "XRPlayerController.generated.h"
 
 /**
  *
  */
 UCLASS()
-class XRPROJECT_API AXRPlayerController : public APlayerController
+class XRPROJECT_API AXRPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -33,6 +33,7 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		bool bIsSuper = false;
 
-
+	FGenericTeamId TeamId;
+	FGenericTeamId GetGenericTeamId() const;
 
 };

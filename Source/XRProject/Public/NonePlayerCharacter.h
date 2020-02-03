@@ -90,6 +90,8 @@ public:
 	virtual void GetNPCInfoFromTable(int32 NpcID);
 	UFUNCTION(BlueprintCallable)
 		void NpcLoadStart(int32 npcID);
+
+
 protected:
 private:
 
@@ -108,6 +110,8 @@ public:
 
 	//virtual	void SetSkelResource(int32 SkeletalID, int32 AnimBPID) override;
 
+
+
 protected:
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
@@ -118,8 +122,7 @@ private:
 		ABaseCharacter*				Target;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UCharacterStatComponent*	EnermyStatComponent;
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		UAIPerceptionComponent*		EnermyPerceptionComponent;
+	
 	
 
 
@@ -134,8 +137,7 @@ private:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		bool bIsAttacking;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-		class UAISenseConfig_Sight* SightConfig;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Hearing* HearingConfig;
 

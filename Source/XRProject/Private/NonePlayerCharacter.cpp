@@ -9,10 +9,8 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
 
 #include "XRProjectGameModeBase.h"
-#include "Containers/Array.h"
 #include "NetworkManager.h"
 #include "XRGameInstance.h"
 #include "IngameGameMode.h"
@@ -35,24 +33,14 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 	}
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
-	EnermyPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("EnermySensing"));
-	SightConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
+
 	AIControllerClass = AXRAIController::StaticClass();
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
 
 
-	SightConfig->SightRadius = 500.f;
-	SightConfig->LoseSightRadius = 500.f+50.f;
-	SightConfig->PeripheralVisionAngleDegrees = 75.f;
-	SightConfig->SetMaxAge(5.f);
 
-	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
-
-	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 	AIControllerClass = AXRAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -63,7 +51,7 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 void ANonePlayerCharacter::PostInitializeComponents()
 {
 	ABaseCharacter::PostInitializeComponents();
-	EnermyPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANonePlayerCharacter::DetectTarget);
+	//EnermyPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANonePlayerCharacter::DetectTarget);
 
 }
 
