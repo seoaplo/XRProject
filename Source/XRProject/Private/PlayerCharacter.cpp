@@ -78,18 +78,6 @@ APlayerCharacter::APlayerCharacter()
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
-		INVISIBLE_MESH
-		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/CommonSkeleton/SK_Character_human_male_skeleton.SK_Character_human_male_skeleton'"));
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
-		TESTMESH
-		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
-		FIRSTBODYMESH
-		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
-
-	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
-	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
