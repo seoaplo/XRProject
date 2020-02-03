@@ -1,5 +1,8 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
 #include "QuickSlot.h"
-#include "SlotWidget.h"
+
 
 UQuickSlot::UQuickSlot(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
@@ -11,7 +14,6 @@ UQuickSlot::UQuickSlot(const FObjectInitializer& ObjectInitializer) : UUserWidge
 void UQuickSlot::PushButton()
 {
 	// ƒ¸ΩΩ∑‘¿Ã ¥≠∏±∂ß π›¿¿
-	
 }
 
 UTexture2D * UQuickSlot::GetIcon()
@@ -61,16 +63,4 @@ void UQuickSlot::ClearSlot()
 	bIsSkill = false;
 	ID = 0;
 	Update();
-}
-
-void UQuickSlot::DropIn(UUserWidget * SlotWidget)
-{
-	USlotWidget* Target = Cast<USlotWidget>(SlotWidget);
-	if (Target)
-	{
-		if (Target->SlotObject)
-		{
-			SetItem(Target->SlotObject);
-		}
-	}
 }

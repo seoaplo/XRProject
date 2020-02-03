@@ -294,6 +294,7 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 			}
 			//if (Monster->PlayerStatComp == nullptr) return false;
 			//Monster->PlayerStatComp->GetStatDataFromServer(Input);
+			Monster->ObjectID = CurrentData.ObjectID;
 			MonsterList.Add(CurrentData.ObjectID, Monster);
 		}
 	}

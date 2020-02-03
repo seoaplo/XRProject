@@ -8,16 +8,11 @@ UItemManager::UItemManager()
 {
 
 	FString EquipmentDataPath = TEXT("DataTable'/Game/Resources/DataTable/EquipTable.EquipTable'");
-	FString ConsumptionDataPath = TEXT("DataTable'/Game/Resources/DataTable/ConsumptionItemTable.ConsumptionItemTable'");
-	FString ETCDataPath = TEXT("DataTable'/Game/Resources/DataTable/ETCItemTable.ETCItemTable'");
 
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_EQUIPITEM(*EquipmentDataPath);
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_CONSUMPTIONITEM(*ConsumptionDataPath);
-	static ConstructorHelpers::FObjectFinder<UDataTable> DT_ETCITEM(*ETCDataPath);
+	if (DT_EQUIPITEM.Succeeded())
+		EquipmentItemDataTable = DT_EQUIPITEM.Object;
 
-	if (DT_EQUIPITEM.Succeeded()) EquipmentItemDataTable = DT_EQUIPITEM.Object;
-	if (DT_CONSUMPTIONITEM.Succeeded()) ConsumptionItemDataTable = DT_CONSUMPTIONITEM.Object;
-	if (DT_ETCITEM.Succeeded()) ETCItemDataTable = DT_ETCITEM.Object;
 }
 
 UItemManager::~UItemManager()
@@ -39,24 +34,14 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 	{
 		int ID = input.ReadInt32();
 		int Count = input.ReadInt32();
-		FETCTableResource* Table = ETCItemDataTable->FindRow<FETCTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
-		if (Table == nullptr)
-			check(false);
-		UItemETC* Item = NewObject<UItemETC>();
-		Item->SetCount(input.ReadInt32());
-		return Item;
+		return nullptr;
 		break;
 	}
 	case EItemType::CONSUMPTION:
 	{
 		int ID = input.ReadInt32();
 		int Count = input.ReadInt32();
-		FConsumptionTableResource* Table = ConsumptionItemDataTable->FindRow<FConsumptionTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
-		if (Table == nullptr)
-			check(false);
-		UItemConsumption* Item = NewObject<UItemConsumption>();
-		Item->SetCount(input.ReadInt32());
-		return Item;
+		return nullptr;
 		break;
 	}
 	case EItemType::EQUIPMENT:
@@ -79,7 +64,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshId;
 		Item->DefaultInfo.FemaleMeshResourceID = Table->FemaleMeshId;
 		Item->DefaultInfo.Name = Table->Name;
-		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.Icon = Table->IconID;
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
 		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
@@ -102,21 +87,6 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 	return nullptr;
 }
 
-void UItemManager::GetIcon(UTexture2D* OutTexture, int ID)
-{
-	FSoftObjectPath AssetPath;
-	auto GI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
-	GI->GetXRAssetMgr()->FindResourceFromDataTable(ID);
-	FStreamableDelegate ResultCallback;
-	ResultCallback.BindLambda([AssetPath, &OutTexture, this]()
-	{
-		TSoftObjectPtr<UTexture2D> Loaded(AssetPath);
-		OutTexture = Loaded.Get();
-		XRLOG(Warning, TEXT("IconLoadComplete"));
-	});
-	GI->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, ResultCallback);
-}
-
 TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 {
 	if (EquipmentItemDataTable == nullptr)
@@ -136,7 +106,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 		Item->DefaultInfo.MaleMeshResourceID = Table->MaleMeshId;
 		Item->DefaultInfo.FemaleMeshResourceID = Table->FemaleMeshId;
 		Item->DefaultInfo.Name = Table->Name;
-		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.Icon = Table->IconID;
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
 		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
@@ -207,6 +177,7 @@ void UItemManager::LoadItemSkMeshAssetComplete(FSoftObjectPath AssetPath,UItem* 
 	{
 		Character->ChangeEquipment(Item, LoadedMesh.Get());
 	}
+	XRLOG(Warning, TEXT("%s, LoadComplete"), *Character->GetName());
 }
 
 

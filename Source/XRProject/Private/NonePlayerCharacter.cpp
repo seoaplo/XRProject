@@ -9,16 +9,18 @@
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
-#include "Perception/AISenseConfig_Sight.h"
-#include "Containers/Array.h"
+
+#include "XRProjectGameModeBase.h"
 #include "NetworkManager.h"
 #include "XRGameInstance.h"
 #include "IngameGameMode.h"
+
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
 
 
+	
 	static ConstructorHelpers::FObjectFinder<UDataTable> NPCDATATABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterTable.MonsterTable'"));
 	if (NPCDATATABLE.Succeeded())
 	{
@@ -31,33 +33,25 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 	}
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
-	EnermyPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("EnermySensing"));
-	SightConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
+
 	AIControllerClass = AXRAIController::StaticClass();
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
 
 
-	SightConfig->SightRadius = 500.f;
-	SightConfig->LoseSightRadius = 500.f+50.f;
-	SightConfig->PeripheralVisionAngleDegrees = 75.f;
-	SightConfig->SetMaxAge(5.f);
 
-	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	SightConfig->DetectionByAffiliation.bDetectFriendlies = true;
-
-	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 	AIControllerClass = AXRAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
 }
 
 
 void ANonePlayerCharacter::PostInitializeComponents()
 {
 	ABaseCharacter::PostInitializeComponents();
-	EnermyPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANonePlayerCharacter::DetectTarget);
+	//EnermyPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &ANonePlayerCharacter::DetectTarget);
 
 }
 
@@ -68,13 +62,15 @@ void ANonePlayerCharacter::BeginPlay()
 
 
 
+
 }
 
 
 void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
-	auto ingameMode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+
+	auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
 	if(ingameMode)
 	{
 		if (ingameMode->IsSuper)
@@ -89,6 +85,7 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 				{
 					OutputStream out;
 					out.WriteOpcode(ENetworkCSOpcode::kNotifyMonsterAction);
+					out << ObjectID;
 					out << 500;
 					out << GetActorLocation();
 					out << GetActorRotation();
@@ -100,6 +97,9 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 			}
 		}
 	}
+
+
+	//GetMesh()->GetBodyInstance(FName("monster_UndeadSpearman_w"))->
 }
 
 void ANonePlayerCharacter::PossessedBy(AController* Cntr)
@@ -112,29 +112,18 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	XRLOG(Warning, TEXT("OnAttack"));
+	XRLOG(Warning, TEXT("Attacked"));
 	return 0.f;
 }
 
 void ANonePlayerCharacter::DetectTarget(const TArray<AActor*>& DetectingPawn)
 {
-	if (AggroList.Num() < MAX_PARTY_MEMBER)
+
+	for (auto detec : DetectingPawn)
 	{
-		for (int DetectedNum = 0; DetectedNum < DetectingPawn.Num(); DetectedNum++)
-		{
-			XRLOG(Warning, TEXT("Detected  : %s"), *DetectingPawn[DetectedNum]->GetName());
-			auto castTarget = Cast<APlayerCharacter>(DetectingPawn[DetectedNum]);
-			if (castTarget)
-			{
-				AggroList.AddUnique(castTarget);
-			}
-			if (Target == nullptr)
-			{
-				Target = castTarget;
-			}
-			
-		}
+		XRLOG(Warning, TEXT("%s"), *detec->GetName());
 	}
+
 }
 
 void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
@@ -237,3 +226,4 @@ void ANonePlayerCharacter::NpcLoadStart(int32 npcID)
 	GetNPCInfoFromTable(npcID);
 	SetCharacterLoadState(ECharacterLoadState::LOADING);
 }
+

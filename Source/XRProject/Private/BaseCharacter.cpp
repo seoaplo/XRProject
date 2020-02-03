@@ -120,7 +120,7 @@ void ABaseCharacter::SetSkelResource(int32 SkeletalID, int32 AnimBPID)
 		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 		GetMesh()->SetSkeletalMesh(LoadedMesh.Get());
 		XRLOG(Warning, TEXT("MeshLoadComplete"));
-		SetCharacterLoadState(ECharacterLoadState::READY);
+		//SetCharacterLoadState(ECharacterLoadState::READY);
 	});
 	GetAssetMgr()->ASyncLoadAssetFromPath(AssetPath, ResultCallback);
 
@@ -134,11 +134,10 @@ void ABaseCharacter::SetSkelResource(int32 SkeletalID, int32 AnimBPID)
 		TSoftClassPtr<UAnimInstance> LoadedAnim(AssetPath2);
 		GetMesh()->SetAnimInstanceClass(LoadedAnim.Get());
 		XRLOG(Warning, TEXT("AnimBlueprint Load Complete"));
-		//*** 클래스로 사용하는 에셋의 경우 에셋 경로 끝에 반드시  _C가 붙어야한다 ***///
+		SetCharacterLoadState(ECharacterLoadState::READY);
+		//*** 클래스로 사용하는 에셋의 경우 에셋 경로 끝에 반드시  _C가 붙어야한다 ***/// 
 	});
 	GetAssetMgr()->ASyncLoadAssetFromPath(AssetPath2, ResultCallback2);
-
-
 }
 
 void ABaseCharacter::SetRemoteLocation(FVector remoteLocation)

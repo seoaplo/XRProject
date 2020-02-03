@@ -8,7 +8,6 @@
 #include "NetworkOpcode.h"
 #include "PlayerCharacter.h"
 #include "XRProjectGameModeBase.h"
-#include "InGameMainWidget.h"
 #include "IngameGameMode.generated.h"
 
 
