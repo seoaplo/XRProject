@@ -70,10 +70,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual	void SetRemoteRotation(FRotator remoteRotator);
 
-	UPROPERTY()
-		int64 ObjectID;
-
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		ECharacterLoadState			CurrentLoadState;

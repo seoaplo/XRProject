@@ -9,7 +9,7 @@ UQuickBar::UQuickBar(const FObjectInitializer& ObjectInitializer) : UUserWidget(
 
 void UQuickBar::SetQuickSlot(InputStream & input)
 {
-	for (int i = 0; i < kQuickBarSize; i++)
+	for (int i = 0; i < QuickBarData::GetInstance().GetQuickBarSize(); i++)
 	{
 		int32 SlotNum;
 		int8 Type;
