@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "SlotObject.h"
+#include "Item.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SlotWidget.generated.h"
@@ -17,7 +17,8 @@ class XRPROJECT_API USlotWidget : public UUserWidget
 public:
 	USlotWidget(const FObjectInitializer& ObjectInitializer);
 public:
-		USlotObject* SlotObject;
+	UItem* SlotObject;
+	int Index;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual UTexture2D* GetIcon();
@@ -25,6 +26,10 @@ public:
 		virtual int GetCount();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual bool IsEmpty();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual void SetSlotObject();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		virtual void DropIn(UUserWidget* SlotWidget);
 	UFUNCTION(BlueprintImplementableEvent)
 		void Update();
 };
