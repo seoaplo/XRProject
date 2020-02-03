@@ -18,13 +18,18 @@ public:
 	USlotWidget(const FObjectInitializer& ObjectInitializer);
 public:
 		USlotObject* SlotObject;
+		int Index;
 public:
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		void SetSlotObject();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual UTexture2D* GetIcon();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual int GetCount();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual bool IsEmpty();
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		void DropIn(UUserWidget * SlotWidget);
 	UFUNCTION(BlueprintImplementableEvent)
 		void Update();
 };

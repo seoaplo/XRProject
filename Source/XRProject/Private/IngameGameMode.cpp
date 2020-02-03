@@ -23,12 +23,12 @@ AIngameGameMode::~AIngameGameMode()
 void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	//CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
-	//if (CurrentWidget != nullptr)
-	//{
-	//	CurrentWidget->AddToViewport();
-	//}
 
+	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
+	if (CurrentWidget != nullptr)
+	{
+		CurrentWidget->AddToViewport();
+	}
 	PrimaryActorTick.bCanEverTick = true;
 
 	std::string Ip = AccountManager::GetInstance().GetInGameIP();

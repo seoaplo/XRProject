@@ -8,6 +8,7 @@
 #include "NetworkOpcode.h"
 #include "PlayerCharacter.h"
 #include "XRProjectGameModeBase.h"
+#include "InGameMainWidget.h"
 #include "IngameGameMode.generated.h"
 
 
@@ -23,10 +24,10 @@ public:
 	AIngameGameMode();
 	virtual ~AIngameGameMode();
 public:
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
-	//	TSubclassOf<UInGameMainWidget> MainWidget;
-	//UPROPERTY()
-	//	UInGameMainWidget* CurrentWidget;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
+		TSubclassOf<UInGameMainWidget> MainWidget;
+	UPROPERTY()
+		UInGameMainWidget* CurrentWidget;
 
 public:
 	/*현재 미사용 Dummy 코드이며, 인게임에서 캐릭터가 생성될 때 패킷에 의해 장비, HP등을 초기화하고자할때 개선해서 사용할 예정. */
