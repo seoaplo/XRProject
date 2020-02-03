@@ -56,6 +56,10 @@ private:
 	void UpdateCharacterPosition(class InputStream& input);
 	void SetMonsterController(class InputStream& input);
 	void UpdateMonsterAction(class InputStream& input);
+	void SpawnCharacterFromServer(class InputStream& input);
+	void UpdateCharacterPosition(class InputStream& input);
+	void GiveDamageToCharacter(class InputStream& input);
+	void UpdateCharacterMotion(class InputStream& input);
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-
