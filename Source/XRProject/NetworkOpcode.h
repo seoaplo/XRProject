@@ -3,16 +3,22 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
-    // LoginServer
-    kCreateAccountRequest = 0,
-    kLoginRequest,
 
-    // LobbyServer
-    kLobbyConfirmRequest = 100,
-    kCharacterListRequest,
-    kCharacterCreateRequest,
-    kCharacterDeleteRequest,
-    kCharacterSelectionRequest,
+	// LoginServer
+	kCreateAccountRequest = 0,
+	kLoginRequest,
+
+	// LobbyServer
+	kLobbyConfirmRequest = 100,
+	kCharacterListRequest,
+	kCharacterCreateRequest,
+	kCharacterDeleteRequest,
+	kCharacterSelectionRequest,
+
+	// ZoneServer
+	kZoneConrifmRequest = 1000,
+	kNotifyCurrentChrPosition,
+	kNotifyMonsterAction,
 
     // ZoneServer
     kZoneConrifmRequest = 1000,
@@ -30,41 +36,43 @@ enum class ENetworkCSOpcode : uint16_t
     kCharcterHitSuccess = 1009,
     kMonsterHitCharacter = 1010,
 	kSendChatRequest = 1011,
+
 };
 
 
 enum class ENetworkSCOpcode : uint16_t
 {
-    // LoginServer
-    kCreateAccountResult = 0,
-    kLoginResult,
+	// LoginServer
+	kCreateAccountResult = 0,
+	kLoginResult,
 
-    // LobbyServer
-    kConfirmFailNotify = 100,
-    kCharacterCreateNotify,
-    kCharacterDeleteNotify,
-    kCharacterListNotify,
-    kMigrateZoneNotify,
+	// LobbyServer
+	kConfirmFailNotify = 100,
+	kCharacterCreateNotify,
+	kCharacterDeleteNotify,
+	kCharacterListNotify,
+	kMigrateZoneNotify,
 
-    // ZoneServer
-    kUserEnterTheMap = 1000,
-    kSpawnCharacter,
-    kSetMonsterController,
+	// ZoneServer
+	kUserEnterTheMap = 1000,
+	kSpawnCharacter,
+	kSetMonsterController,
 
-    kNotifyCharacterAttack,
-    kNotifyCharacterRolling,
-    kActorDamaged,
 
-    kExitCharacter,
-    kUpdateCharacterPosition,
-    kUpdateMonsterAction,
+	kNotifyCharacterAttack,
+	kNotifyCharacterRolling,
+	kActorDamaged,
 
-    kSpawnMonster,
+	kExitCharacter,
+	kUpdateCharacterPosition,
+	kUpdateMonsterAction,
 
-    kInventoryUpdate,
-    kQuickSlotUpdate,
+	kSpawnMonster,
 
-    kNotifyMatchResult,
-    kNotifyMatchCanceled,
+	kInventoryUpdate,
+	kQuickSlotUpdate,
+
+	kNotifyMatchResult,
+	kNotifyMatchCanceled,
 
 };
