@@ -52,6 +52,7 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	if (GetMapMgr().InitComplete)
 	{
+		PlayerControllerClass = AXRPlayerController::StaticClass();
 		GetMapMgr().PlayerListSpawn(GetWorld());
 		GetMapMgr().MonsterListSpawn(GetWorld());
 		GetMapMgr().InitComplete = false;
