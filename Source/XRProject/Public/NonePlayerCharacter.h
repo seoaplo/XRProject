@@ -8,6 +8,9 @@
 #include "Engine/DataTable.h"
 #include "GenericTeamAgentInterface.h"
 #include "Perception/AIPerceptionComponent.h"
+#include "PlayerCharacter.h"
+#include "NetworkManager.h"
+#include "NonePlayerCharacterAnimInstance.h"
 #include "NonePlayerCharacter.generated.h"
 
 UENUM()
@@ -88,6 +91,7 @@ public:
 	void SetCharacterLifeState(ECharacterLifeState NewState) override;
 	void OnDead() override;
 	virtual void GetNPCInfoFromTable(int32 NpcID);
+
 	UFUNCTION(BlueprintCallable)
 		void NpcLoadStart(int32 npcID);
 
@@ -103,12 +107,47 @@ private:
 public:
 	UPROPERTY()
 	class UDataTable* NPCDataTable;
+
+
 	UFUNCTION(BlueprintCallable)
 	ABaseCharacter* GetTarget() const { return Target; }
+
 	UFUNCTION(BlueprintCallable)
 	void SetTarget(ABaseCharacter* NewTarget) { Target = NewTarget; }
 
-	//virtual	void SetSkelResource(int32 SkeletalID, int32 AnimBPID) override;
+
+
+	UFUNCTION(BlueprintCallable)
+		void AttackCheck (UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(BlueprintCallable)
+		void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
+
+
+
+
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+		TArray<APlayerCharacter*> AttackOverlapList;
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UNonePlayerCharacterAnimInstance* NpcAnim;
+
+
+
+
+
+
+	void ExcuteRecvNpcAction(InputStream& input);
+
+
+
+
+
+
+
+
 
 
 
@@ -124,8 +163,6 @@ private:
 		UCharacterStatComponent*	EnermyStatComponent;
 	
 	
-
-
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		int32 SkelID;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))

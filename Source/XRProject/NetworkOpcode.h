@@ -28,7 +28,8 @@ enum class ENetworkCSOpcode : uint16_t
 
     kCharacterAttack = 1008,
     kCharcterHitSuccess = 1009,
-	kSendChatRequest,
+    kMonsterHitCharacter = 1010,
+	kSendChatRequest = 1011,
 };
 
 
