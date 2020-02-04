@@ -8,6 +8,7 @@
 #include "XRPlayerController.h"
 #include "Engine/Engine.h"
 
+class APlayerCharacter;
 AIngameGameMode::AIngameGameMode()
 {
 	IsSuper = false;
