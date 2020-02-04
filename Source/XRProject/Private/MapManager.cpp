@@ -114,21 +114,22 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 		CurrentData.MaxStamina = Input.ReadFloat32();
 
 		int EquipmentSize = 4;
-		for (int i = 0; i < EquipmentSize; i++)
+		for (int iCount = 0; iCount < EquipmentSize; iCount++)
 		{
-			CurrentData.Type = Input.ReadInt32();
-			if (CurrentData.Type)
+			Equipment& CurrentEquip = CurrentData.EquipArray[iCount];
+			CurrentEquip.Type = Input.ReadInt32();
+			if (CurrentEquip.Type)
 			{
-				if (CurrentData.Type == 3)
+				if (CurrentEquip.Type == 3)
 				{
-					CurrentData.ID = Input.ReadInt32();
-					CurrentData.AddATK = Input.ReadInt32();
-					CurrentData.AddDEF = Input.ReadInt32();
-					CurrentData.AddSTR = Input.ReadInt32();
-					CurrentData.AddDex = Input.ReadInt32();
-					CurrentData.AddInt = Input.ReadInt32();
+					CurrentEquip.ID = Input.ReadInt32();
+					CurrentEquip.AddATK = Input.ReadInt32();
+					CurrentEquip.AddDEF = Input.ReadInt32();
+					CurrentEquip.AddSTR = Input.ReadInt32();
+					CurrentEquip.AddDex = Input.ReadInt32();
+					CurrentEquip.AddInt = Input.ReadInt32();
 				}
-				CurrentData.Count = Input.ReadInt32();
+				CurrentEquip.Count = Input.ReadInt32();
 			}
 		}
 	}
@@ -167,19 +168,20 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{
-		CurrentData.Type = Input.ReadInt32();
-		if (CurrentData.Type)
+		Equipment& CurrentEquip = CurrentData.EquipArray[EquipmentSize];
+		CurrentEquip.Type = Input.ReadInt32();
+		if (CurrentEquip.Type)
 		{
-			if (CurrentData.Type == 3)
+			if (CurrentEquip.Type == 3)
 			{
-				CurrentData.ID = Input.ReadInt32();
-				CurrentData.AddATK = Input.ReadInt32();
-				CurrentData.AddDEF = Input.ReadInt32();
-				CurrentData.AddSTR = Input.ReadInt32();
-				CurrentData.AddDex = Input.ReadInt32();
-				CurrentData.AddInt = Input.ReadInt32();
+				CurrentEquip.ID = Input.ReadInt32();
+				CurrentEquip.AddATK = Input.ReadInt32();
+				CurrentEquip.AddDEF = Input.ReadInt32();
+				CurrentEquip.AddSTR = Input.ReadInt32();
+				CurrentEquip.AddDex = Input.ReadInt32();
+				CurrentEquip.AddInt = Input.ReadInt32();
 			}
-			CurrentData.Count = Input.ReadInt32();
+			CurrentEquip.Count = Input.ReadInt32();
 		}
 	}
 	PlayerID = CurrentData.ObjectID;
@@ -230,19 +232,20 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{
-		CurrentData.Type = Input.ReadInt32();
-		if (CurrentData.Type)
+		Equipment& CurrentEquip = CurrentData.EquipArray[EquipmentSize];
+		CurrentEquip.Type = Input.ReadInt32();
+		if (CurrentEquip.Type)
 		{
-			if (CurrentData.Type == 3)
+			if (CurrentEquip.Type == 3)
 			{
-				CurrentData.ID = Input.ReadInt32();
-				CurrentData.AddATK = Input.ReadInt32();
-				CurrentData.AddDEF = Input.ReadInt32();
-				CurrentData.AddSTR = Input.ReadInt32();
-				CurrentData.AddDex = Input.ReadInt32();
-				CurrentData.AddInt = Input.ReadInt32();
+				CurrentEquip.ID = Input.ReadInt32();
+				CurrentEquip.AddATK = Input.ReadInt32();
+				CurrentEquip.AddDEF = Input.ReadInt32();
+				CurrentEquip.AddSTR = Input.ReadInt32();
+				CurrentEquip.AddDex = Input.ReadInt32();
+				CurrentEquip.AddInt = Input.ReadInt32();
 			}
-			CurrentData.Count = Input.ReadInt32();
+			CurrentEquip.Count = Input.ReadInt32();
 		}
 	}
 	CharacterDataList.push_back(CurrentData);
@@ -302,6 +305,7 @@ bool UMapManager::PossessPlayer(UWorld* World)
 	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(World->GetPlayerControllerIterator()->Get());
 	if (MyPlayerController == nullptr) return false;
 	MyPlayerController->Possess(Player);
+	PlayerCharacter = Player;
 	return true;
 }
 bool UMapManager::MonsterListSpawn(UWorld* World)
