@@ -46,6 +46,10 @@ public:
 
 	void SpawnRemotePlayer();
 	void DeleteRemotePlayer();
+
+	// widget data from server
+	void NotifyMatchResult(class InputStream& input);
+	void NotifyMatchCanceled(class InputStream& input);
 private:
 	FTimerHandle PacketExcuteTimerHandle;
 private:

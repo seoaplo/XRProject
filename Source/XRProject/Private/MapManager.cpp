@@ -268,7 +268,7 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 	for (auto& CurrentData : CharacterDataList)
 	{
 		FActorSpawnParameters Param;
-		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		AActor* actor =
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);

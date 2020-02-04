@@ -10,6 +10,7 @@
 #include "MapManager.h"
 #include "XRGameInstance.generated.h"
 
+class UIngameGameMode;
 /**
  * 
  */
@@ -24,7 +25,6 @@ public:
     virtual void Init() override;
     virtual void Shutdown() override;
 	void ReqEnterZone();
-
     FORCEINLINE UNetworkManager& GetNetworkManager() {
         return *NetworkManager;
 
@@ -61,6 +61,9 @@ private:
 	void UpdateMonsterAction(class InputStream& input);
 	void UpdateCharacterMotion(class InputStream& input);
 	void ActorDamaged(class InputStream& input);
+
+	void NotifyChat(class InputStream& input);
+
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-

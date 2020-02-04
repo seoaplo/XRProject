@@ -41,6 +41,11 @@ void AIngameGameMode::BeginPlay()
 
 	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
 	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
+
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchResult)->BindUObject(
+		this, &AIngameGameMode::NotifyMatchResult);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchCanceled)->BindUObject(
+		this, &AIngameGameMode::NotifyMatchCanceled);
 }
 
 
@@ -134,4 +139,15 @@ void AIngameGameMode::SpawnRemotePlayer()
 void AIngameGameMode::DeleteRemotePlayer()
 {
 	GetMapMgr().DeleteRemotePlayer(GetWorld());
+}
+
+void AIngameGameMode::NotifyMatchResult(class InputStream& input)
+{
+	if (CurrentWidget == nullptr) return;
+	CurrentWidget->MatchingWindow->DungeonMatchingResult();
+}
+void AIngameGameMode::NotifyMatchCanceled(class InputStream& input)
+{
+	if (CurrentWidget == nullptr) return;
+	CurrentWidget->MatchingWindow->DungeonEnterFail();
 }
