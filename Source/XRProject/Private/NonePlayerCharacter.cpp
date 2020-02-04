@@ -288,7 +288,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			if (ActionID < 1000)
 			{
 				AttackOverlapList.Reset();
-				//AICon->StopMovement();
+				AICon->StopMovement();
 				SetActorLocation(Location);
 				SetActorRotation(Rotator);
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
