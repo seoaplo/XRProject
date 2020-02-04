@@ -18,6 +18,7 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
+	
 
 	if (AnimBP.Succeeded())
 	{
@@ -25,6 +26,8 @@ APlayerCharacter::APlayerCharacter()
 	}
 	else
 		check(false);
+
+	
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -102,7 +105,16 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 
+	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
+	CapsuleSize = FVector2D(90.0f, 34.0f);
+	MeshLocationVector = FVector(0.0f, 0.0f, -90.0f);
+	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
 
+	this->GetMesh()->SetRelativeScale3D(ScaleVector);
+	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
+	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
+	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
+	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
 	ComboCount = 1;
 	bIsMove = false;
@@ -157,8 +169,6 @@ void APlayerCharacter::Tick(float deltatime)
 	}
 
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
-	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
-	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
 
@@ -217,16 +227,7 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 
 
-	ScaleVector = FVector(2.5f, 2.5f, 2.5f);
-	CapsuleSize = FVector2D(22.0f, 8.0f);
-	MeshLocationVector = FVector(0.0f, 0.0f, -22.0f);
-	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
 
-	this->SetActorRelativeScale3D(ScaleVector);
-	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
-	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
-	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
-	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
 	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
 	
@@ -257,6 +258,14 @@ void APlayerCharacter::MoveForward(float Value)
 	else
 	{
 		bIsMove = false;
+		
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterWait);
+		out << this->ObjectID;
+		out << this->GetActorLocation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
 	}
 
 }
@@ -437,17 +446,20 @@ void APlayerCharacter::Attack()
 	{
 		bIsAttack = true;
 		MyAnimInstance->PlayAttackMontage();
+		
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out << ComboCount;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
 	}
 	else
 		bSavedCombo = true;
 
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
-	out << ComboCount;
-	out << GetActorLocation();
-	out << GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
+
 
 }
 
@@ -460,7 +472,14 @@ void APlayerCharacter::Sprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	bIsSprint = true;
-	UE_LOG(LogTemp, Warning, TEXT("Sprint"));
+	
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterSprint);
+	out << this->ObjectID;
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
+	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Send"));
 }
 
 void APlayerCharacter::SprintEnd()
@@ -468,6 +487,12 @@ void APlayerCharacter::SprintEnd()
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 	bIsSprint = false;
 	UE_LOG(LogTemp, Warning, TEXT("Sprint END"));
+}
+
+void APlayerCharacter::InitializeCharacter(CharacterData & Data)
+{
+
+
 }
 
 void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -500,6 +525,16 @@ void APlayerCharacter::ContinueCombo()
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
 		XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
+
+
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out << ComboCount;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
 	}
 }
 
@@ -530,7 +565,7 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 		int64 MyID = this->ObjectID;
 	
 		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterCreateRequest);
+		out.WriteOpcode(ENetworkCSOpcode::kCharcterHitSuccess);
 		out << MyID;
 		out << EnemyID;
 		out << this->GetActorLocation();

@@ -48,7 +48,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
-		UAnimMontage* AttackMontageOnlyPlay;
+		UAnimMontage* AttackMontageOnlyPlay;	
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* MoveMontageOnlyPlay;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* HitMontage;
 	
@@ -65,11 +67,12 @@ public:
 
 	void PlayAttackMontage();
 	void PlayAttackOnlyPlayMontage();
+	void PlayMoveOnlyPlayMontage();
 	void StopAttackMontage();
 	void PlayHitMontage();
 
 	void JumpToComboMontageSection(int32 Section);
-	void JumpToReloadMontageSection(int32 Section);
+	void JumpToMoveMontageSection(FString Section);
 
 
 };

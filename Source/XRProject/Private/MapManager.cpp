@@ -274,6 +274,23 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
 
+		Player->ObjectID = CurrentData.ObjectID;
+		Player->PlayerStatComp->SetCurrentHP(CurrentData.Current_HP);
+		Player->PlayerStatComp->SetMaxHP(CurrentData.Max_HP);
+		Player->PlayerStatComp->SetAttack_Min(CurrentData.Attack_Min);
+		Player->PlayerStatComp->SetAttack_Max(CurrentData.Attack_Max);
+		Player->PlayerStatComp->SetAttack_Range(CurrentData.Attack_Range);
+		Player->PlayerStatComp->SetAttack_Speed(CurrentData.Attack_Speed);
+		Player->PlayerStatComp->SetSpeed(CurrentData.Speed);
+		Player->PlayerStatComp->SetDefence(CurrentData.Defence);
+		Player->PlayerStatComp->SetLevel(CurrentData.Level);
+		Player->PlayerStatComp->SetGender(CurrentData.Gender);
+		Player->PlayerStatComp->SetSTR(CurrentData.STR);
+		Player->PlayerStatComp->SetDEX(CurrentData.DEX);
+		Player->PlayerStatComp->SetINT(CurrentData.INT);
+		Player->PlayerStatComp->SetCurrentStamina(CurrentData.CurrentStamina);
+		Player->PlayerStatComp->SetMaxStamina(CurrentData.MaxStamina);
+
 		for (int ii = 0; ii < CurrentData.kEquipmentArraySize; ii++)
 		{
 			/*¸Ç¸öÀÏ ¶§ */

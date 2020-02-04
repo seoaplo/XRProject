@@ -90,9 +90,6 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	else
 		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
 
-
-	
-
 	MyComponent->Gender = Info.gender;
 }
 
@@ -146,7 +143,7 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
 
 	/*캐릭터 선택창 카메라 배치*/
-	MainCameraLocation = FVector(-50.0f, 2740.0f, 170.0f);
+	MainCameraLocation = FVector(-120.0f, 2740.0f, 200.0f);
 	CharacterActorLocation = MainCameraLocation + FVector(100.0f, 0.0f, 0.0f);
 	MainCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(),
 		MainCameraLocation, FRotator::ZeroRotator);
@@ -214,6 +211,8 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, -200.0f, 0.0f));
+
+		Character->SetActorEnableCollision(false);
 
 		CreatePlayerCharacter(Character, Info);
 		Character->SetActorHiddenInGame(true);

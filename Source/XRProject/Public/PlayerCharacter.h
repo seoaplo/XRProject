@@ -7,7 +7,6 @@
 #include "Engine.h"
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
-//#include "Engine/BlueprintGeneratedClass.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
@@ -162,6 +161,7 @@ public:
 	void Roll();
 	void Sprint();
 	void SprintEnd();
+	void InitializeCharacter(CharacterData& Data);
 
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
