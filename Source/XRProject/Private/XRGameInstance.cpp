@@ -45,13 +45,26 @@ void UXRGameInstance::Shutdown()
     UNetworkManager::Instance = nullptr;
 }
 
+void UXRGameInstance::ReqEnterZone()
+{
+	std::string Ip = AccountManager::GetInstance().GetInGameIP();
+	int16 Port = AccountManager::GetInstance().GetInGamePort();
+	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&UXRGameInstance::SendConfirmRequest, this));
+}
+void UXRGameInstance::SendConfirmRequest()
+{
+	std::string ID = AccountManager::GetInstance().GetAccountID();
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kZoneConrifmRequest);
+	out.WriteCString(ID.c_str());
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
+}
+
 void UXRGameInstance::HandleEnterZone(InputStream & input)
 {
-	int32_t ReadLevelID;
-	input >> ReadLevelID;
 
-	//UGameplayStatics::OpenLevel(GetWorld(), TEXT("LEVEL_Zone_1"));
-	
 	MapManager->Clear();
 	MapManager->Init();
 
@@ -59,8 +72,7 @@ void UXRGameInstance::HandleEnterZone(InputStream & input)
 	ReadBaseCharacterInfo(input);
 	ReadInventoryInfo(input);
 	ReadQuickSlot(input);
-
-	MapManager->InitComplete = true;
+	MapManager->OpenMap(GetWorld());
 }
 
 void UXRGameInstance::ReadBaseCharacterInfo(InputStream & input)
@@ -106,7 +118,6 @@ void UXRGameInstance::ReadMapData(InputStream & input)
 void UXRGameInstance::SpawnCharacterFromServer(class InputStream& input)
 {
 	MapManager->ReadPlayerSpawnFromServer(input);
-	MapManager->PlayerSpawnReady = true;
 }
 void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 {

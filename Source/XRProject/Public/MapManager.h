@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include <vector>
+#include <list>
 #include "NetworkOpcode.h"
 #include "MapPacketHelper.h"
 #include "NetworkManager.h"
@@ -75,14 +76,14 @@ struct MonsterData
 	int Defence = -1;
 };
 
+DECLARE_DELEGATE(CharacterDataProcess)
+
 UCLASS()
 class XRPROJECT_API UMapManager : public UObject
 {
 	GENERATED_BODY()
 public:
 	int64_t GetPlayerID() { return PlayerID; }
-	bool	GetCheckReady() { return CheckReady;  }
-	static void	TemporaryEnterZone();
 public:
 	bool Init();
 	bool Clear();
@@ -93,25 +94,31 @@ public:
 	void ReadPossesPlayerFromServer(InputStream& Input);
 	void ReadMosnterFromServer(InputStream& Input);
 	bool ReadPlayerSpawnFromServer(InputStream& Input);
+	bool ReadPlayerDeleteFromServer(InputStream& Input);
 
+	// 오브젝트 탐색
 	APlayerCharacter* FindPlayer(int64_t ObjectID);
 	ANonePlayerCharacter* FindMonster(int64_t ObjectID);
 
+	// 오픈 레벨
+	bool OpenMap(UWorld* World);
 	// 스폰 함수들
 	bool PlayerListSpawn(UWorld* world);
 	bool MonsterListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
+	bool PossessPlayer(UWorld* World);
+
+	bool DeleteRemotePlayer(UWorld* World);
 public:
-	bool InitComplete;
-	bool PlayerSpawnReady;
+	CharacterDataProcess Spawn_Character;
+	CharacterDataProcess Delete_Character;
 private:
 	int32_t LevelID;
 	int64_t PlayerID;
-	UWorld* World;
 	std::vector<CharacterData> CharacterDataList;
 	std::vector<MonsterData> MonsterDataList;
 
 	TMap<int64_t, APlayerCharacter*> CharacterList;
 	TMap<int64_t, ANonePlayerCharacter*> MonsterList;
-	static bool CheckReady;
+	TMap<int32_t, FName> MapList;
 };

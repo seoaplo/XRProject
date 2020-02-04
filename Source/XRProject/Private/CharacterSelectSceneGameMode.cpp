@@ -194,7 +194,8 @@ void ACharacterSelectSceneGameMode::HandleMigrateZone(InputStream& input)
 	AccountManager::GetInstance().SetInGamePort(InGamePort);
 
 	GetNetMgr().Close();
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("LEVEL_Village"));
+	
+	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)

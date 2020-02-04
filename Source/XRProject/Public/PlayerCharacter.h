@@ -8,12 +8,12 @@
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
 //#include "Engine/BlueprintGeneratedClass.h"
-#include "NonePlayerCharacter.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "PlayerCharacter.generated.h"
 
+class ANonePlayerCharacter;
 
 UENUM()
 enum class EEquipmentsType : uint8

@@ -7,6 +7,7 @@
 #include "AccountManager.h"
 #include "Components/InputComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "NonePlayerCharacter.h"
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;

@@ -15,11 +15,6 @@ enum class ENetworkCSOpcode : uint16_t
 	kCharacterDeleteRequest,
 	kCharacterSelectionRequest,
 
-	// ZoneServer
-	kZoneConrifmRequest = 1000,
-	kNotifyCurrentChrPosition,
-	kNotifyMonsterAction,
-
     // ZoneServer
     kZoneConrifmRequest = 1000,
     kNotifyCurrentChrPosition = 1001,
