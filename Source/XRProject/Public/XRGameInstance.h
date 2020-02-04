@@ -61,6 +61,7 @@ private:
 	void UpdateMonsterAction(class InputStream& input);
 	void GiveDamageToCharacter(class InputStream& input);
 	void UpdateCharacterMotion(class InputStream& input);
+	void ActorDamaged(class InputStream& input);
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-

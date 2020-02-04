@@ -5,6 +5,7 @@
 #include "XRAIController.h"
 #include "XRPlayerController.h"
 #include "Engine/Engine.h"
+#include "EngineMinimal.h"
 
 void UXRGameInstance::Init()
 {
@@ -35,6 +36,10 @@ void UXRGameInstance::Init()
 		
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
+
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
+		this, &UXRGameInstance::ActorDamaged);
+	
 
 	
 }
@@ -292,3 +297,28 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 //	}
 //
 //}
+
+void UXRGameInstance::ActorDamaged(InputStream& input)
+{
+
+	int32 AttackerType = input.ReadInt32();
+	int64 AttackerID = input.ReadInt64();
+	int32 AttackedType = input.ReadInt32();
+	int64 AttackedID = input.ReadInt64();
+	int32 AttackActionID = input.ReadInt32();
+	float AttackSetHp = input.ReadFloat32();
+
+	if (AttackerType == 1)
+	{
+
+		ANonePlayerCharacter* AttackerMonster = MapManager->FindMonster(AttackerID);
+		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
+
+		//AttackedCharacter->TakeDamage(AttackSetHp,FDamageEvent(),AttackerMonster->GetController(), AttackerMonster);
+	}
+	
+
+
+
+
+}
