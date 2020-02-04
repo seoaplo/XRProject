@@ -341,9 +341,11 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 
 	for (auto& CurrentData : MonsterDataList)
 	{
+		FActorSpawnParameters param;
+		param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		AActor* actor =
 			World->SpawnActor
-			(ANonePlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
+			(ANonePlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, param);
 
 		ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
 		if (Monster)

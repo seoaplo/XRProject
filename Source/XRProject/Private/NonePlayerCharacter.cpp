@@ -252,6 +252,7 @@ void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent,
 			out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
 			out << ObjectID;
 			out << castPlayerCharacter->ObjectID;
+			out << 1;
 			out << GetActorLocation();
 			out << GetActorRotation();
 			out.CompletePacketBuild();
@@ -287,12 +288,14 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 
 			if (ActionID < 1000)
 			{
+				AttackOverlapList.Reset();
 				AICon->StopMovement();
 				SetActorLocation(Location);
 				SetActorRotation(Rotator);
-				if (NpcAnim)
+				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+				if (npcAnim)
 				{
-					PlayAnimMontage(NpcAnim->NpcAttackMontage[ActionID]);
+					PlayAnimMontage(npcAnim->NpcAttackMontage[ActionID]);
 				}
 			}
 			else if (ActionID >= 1000)
@@ -301,6 +304,13 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			}
 		}
 	}
+}
+
+void ANonePlayerCharacter::NpcTakeDamaged(float setHP, AController* EventInstigator, int32 AttackInstigatorID)
+{
+	float InputDamage = EnermyStatComponent->GetCurrentHP() - setHP;
+	FDamageEvent evt;
+	TakeDamage(InputDamage, evt, EventInstigator, EventInstigator->GetPawn());
 }
 
 

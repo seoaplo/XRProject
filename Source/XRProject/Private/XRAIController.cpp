@@ -30,10 +30,10 @@ AXRAIController::AXRAIController()
 
 	EnermyPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("EnermySensing"));
 	SightConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
-	SightConfig->SightRadius = 500.f;
-	SightConfig->LoseSightRadius = 500.f + 50.f;
-	SightConfig->PeripheralVisionAngleDegrees = 75.f;
-	SightConfig->SetMaxAge(5.f);
+	SightConfig->SightRadius = 2000.f;
+	SightConfig->LoseSightRadius = 2000.f + 50.f;
+	SightConfig->PeripheralVisionAngleDegrees = 85.f;
+	SightConfig->SetMaxAge(10.f);
 
 	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
