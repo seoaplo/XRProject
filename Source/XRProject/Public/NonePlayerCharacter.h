@@ -144,7 +144,8 @@ public:
 
 
 
-
+	UFUNCTION(BlueprintCallable)
+		void NpcTakeDamaged(float setHP, class AController* EventInstigator, int32 AttackInstigatorID);
 
 
 
