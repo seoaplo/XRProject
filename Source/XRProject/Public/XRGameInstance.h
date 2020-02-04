@@ -44,6 +44,7 @@ private:
 	UPROPERTY()
 		UMapManager* MapManager;
 private:
+	UPROPERTY(BlueprintReadWrite,EditAnywhere,Meta =(AllowPrivateAccess=true))
 	bool  IsSuper = false;
 private:
 	void HandleEnterZone(class InputStream& input); /*첫 입장시 초기화 패킷*/
