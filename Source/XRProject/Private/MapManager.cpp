@@ -2,6 +2,7 @@
 
 
 #include "MapManager.h"
+#include "XRGameInstance.h"
 #include "XRPlayerController.h"
 
 bool UMapManager::Init()
@@ -267,7 +268,16 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
 	
+		//CurrentData.ID
+
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
+		//auto GameInstance = Cast <UXRGameInstance>(GetGameInstance());
+
+		//if(CurrentData.ID)
+		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.ID, GetWorld(), Player);
+		
+
+
 		if (Player)
 		{
 			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
