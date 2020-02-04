@@ -287,6 +287,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 
 			if (ActionID < 1000)
 			{
+				AttackOverlapList.Reset();
 				//AICon->StopMovement();
 				SetActorLocation(Location);
 				SetActorRotation(Rotator);
