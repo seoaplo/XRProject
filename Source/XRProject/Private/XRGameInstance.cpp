@@ -48,6 +48,7 @@ void UXRGameInstance::Init()
 
 void UXRGameInstance::Shutdown()
 {
+	GetNetMgr().Close();
     NetworkManager->StopThread();
     UNetworkManager::Instance = nullptr;
 }

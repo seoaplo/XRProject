@@ -62,7 +62,6 @@ void AIngameGameMode::Tick(float deltatime)
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	GetNetMgr().Close();
 }
 
 void AIngameGameMode::SpawnRemotePlayer()

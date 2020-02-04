@@ -31,6 +31,10 @@ enum class ENetworkCSOpcode : uint16_t
 
 	kMonsterHitCharacter = 1010,
 	kSendChatRequest = 1011,
+
+	kRequestCharacterWait = 1020,
+	kRequestCharacterSprint = 1021,
+
 };
 
 
@@ -68,4 +72,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyMatchResult = 1013,
 	kNotifyMatchCanceled = 1014,
 	kNotifyChat = 1015,
+
+	kNotifyCharacterWait = 1020,
+	kNotifyCharacterSprint = 1021,
 };
