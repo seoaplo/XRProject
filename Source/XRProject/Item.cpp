@@ -22,3 +22,8 @@ EItemType UItem::GetItemType()
 {
 	return ItemType;
 }
+
+UTexture2D* UItem::GetIcon()
+{
+	return nullptr;
+}

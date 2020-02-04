@@ -98,6 +98,20 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
 	 OnStatChange.Broadcast();
  }
 
+ bool UCharacterStatComponent::GetStatDataFromServer(InputStream& input)
+ {
+	Current_HP = input.ReadFloat32();
+	Max_HP = input.ReadFloat32();
+	Attack_Min = input.ReadFloat32();
+	Attack_Max = input.ReadFloat32();
+	Attack_Range = input.ReadFloat32();
+	Attack_Speed = input.ReadFloat32();
+	Speed = input.ReadFloat32();
+	Defence = input.ReadFloat32();
+
+	return true;
+ }
+
 
 // Called every frame
 void UCharacterStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

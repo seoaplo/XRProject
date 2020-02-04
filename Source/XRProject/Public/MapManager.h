@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include <vector>
+#include <list>
 #include "NetworkOpcode.h"
 #include "MapPacketHelper.h"
 #include "NetworkManager.h"
@@ -15,27 +16,56 @@
 /**
  * 작성자 : 서승석
  */
+
+DECLARE_DELEGATE(CharacterDataProcess)
+
 UCLASS()
 class XRPROJECT_API UMapManager : public UObject
 {
 	GENERATED_BODY()
 public:
 	int64_t GetPlayerID() { return PlayerID; }
+	APlayerCharacter* GetPlayer() { return PlayerCharacter; }
 public:
-	bool Init(UWorld* world, UNetworkManager& networkmanager);
+	bool Init();
 	bool Clear();
 
 	// 맵에 입장
-	void ReadMapDataFromServer(InputStream& input);
-	bool SpawnPlayer(int64_t objectid, FVector position, FRotator rotator);
-	bool PossessPlayer(int64_t objectid, FVector position, FRotator rotator);
-	APlayerCharacter* FindPlayer(int64_t objectid);
+	void ReadMapDataFromServer(InputStream& Input);
+	void ReadPlayerFromServer(InputStream& Input);
+	void ReadPossesPlayerFromServer(InputStream& Input);
+	void ReadMosnterFromServer(InputStream& Input);
+	bool ReadPlayerSpawnFromServer(InputStream& Input);
+	bool ReadPlayerDeleteFromServer(InputStream& Input);
 
-	// 몬스터 스폰 함수
-	bool SpawnMonster(int32 MonsterID, int64_t objectid, FVector position, FRotator rotator);
+
+
+	// 오브젝트 탐색
+	APlayerCharacter* FindPlayer(int64_t ObjectID);
+	ANonePlayerCharacter* FindMonster(int64_t ObjectID);
+	
+	// 오픈 레벨
+	bool OpenMap(UWorld* World);
+	// 스폰 함수들
+	bool PlayerListSpawn(UWorld* world);
+	bool MonsterListSpawn(UWorld* world);
+	bool RemotePlayerSpawn(UWorld* world);
+	bool PossessPlayer(UWorld* World);
+
+	bool DeleteRemotePlayer(UWorld* World);
+public:
+	CharacterDataProcess Spawn_Character;
+	CharacterDataProcess Delete_Character;
 private:
+	UPROPERTY()
+	APlayerCharacter* PlayerCharacter;
+
+	int32_t LevelID;
 	int64_t PlayerID;
-	UWorld* World;
+	std::vector<CharacterData> CharacterDataList;
+	std::vector<MonsterData> MonsterDataList;
+
 	TMap<int64_t, APlayerCharacter*> CharacterList;
 	TMap<int64_t, ANonePlayerCharacter*> MonsterList;
+	TMap<int32_t, FName> MapList;
 };

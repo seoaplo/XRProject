@@ -8,8 +8,10 @@
 #include "XRPlayerController.h"
 #include "Engine/Engine.h"
 
+class APlayerCharacter;
 AIngameGameMode::AIngameGameMode()
 {
+	IsSuper = false;
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerControllerClass = AXRPlayerController::StaticClass();
 }
@@ -29,144 +31,33 @@ void AIngameGameMode::BeginPlay()
 	{
 		CurrentWidget->AddToViewport();
 	}
+	PrimaryActorTick.bCanEverTick = true;
 
+	IsSuper = Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper();
+	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
+	GetMapMgr().PlayerListSpawn(GetWorld());
+	GetMapMgr().MonsterListSpawn(GetWorld());
+	GetMapMgr().PossessPlayer(GetWorld());
 
-
-	MapManager = NewObject<UMapManager>();
-	MapMgr.Init(GetWorld(), GetNetMgr());
-
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
-		this, &AIngameGameMode::HandleEnterZone);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kSpawnCharacter)->BindUObject(
-		this, &AIngameGameMode::SpawnCharacterFromServer);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
-		this, &AIngameGameMode::UpdateCharacterPosition);
-
-
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kSetMonsterController)->BindUObject(
-		this, &AIngameGameMode::SetMonsterController);
-
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateMonsterAction)->BindUObject(
-		this, &AIngameGameMode::UpdateMonsterAction);
-
-	
-
-	std::string Ip = AccountManager::GetInstance().GetInGameIP();
-	int16 Port = AccountManager::GetInstance().GetInGamePort();
-	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&AIngameGameMode::SendConfirmRequest, this));
+	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
+	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
 }
+
 
 void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
+	if (Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper())
+	{
+		IsSuper = true;
+	}
 	GetNetMgr().Update();
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	MapMgr.Clear();
 	GetNetMgr().Close();
-}
-
-void AIngameGameMode::SendConfirmRequest()
-{
-	std::string ID = AccountManager::GetInstance().GetAccountID();
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kZoneConrifmRequest);
-	out.WriteCString(ID.c_str());
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
-}
-
-void AIngameGameMode::HandleEnterZone(InputStream & input)
-{
-	input.ReadInt32();
-	ReadMapData(input);
-	ReadBaseCharacterInfo(input);
-	ReadInventoryInfo(input);
-	ReadQuickSlot(input);
-}
-
-void AIngameGameMode::ReadBaseCharacterInfo(InputStream & input)
-{
-	int64 Id = input.ReadInt64();
-	FVector Location = input.ReadFVector();
-	FRotator Rotation = input.ReadFRotator();
-	float HP = input.ReadFloat32();
-	float MAXHP = input.ReadFloat32();
-	float AttackMin = input.ReadFloat32();
-	float AttackMax = input.ReadFloat32();
-	float AttackRange = input.ReadFloat32();
-	float AttackSpeed = input.ReadFloat32();
-	float Defense = input.ReadFloat32();
-	float Speed = input.ReadFloat32();
-	std::string Name = input.ReadCString();
-	int Level = input.ReadInt32();
-	int Gender = input.ReadInt32();
-	int FaceID = input.ReadInt32();
-	int HairID = input.ReadInt32();
-	int Str = input.ReadInt32();
-	int Dex = input.ReadInt32();
-	int Intel = input.ReadInt32();
-	float Stamina = input.ReadFloat32();
-	float MaxStamina = input.ReadFloat32();
-	
-	MapMgr.SpawnPlayer(Id, Location, Rotation);
-	MapMgr.PossessPlayer(Id, Location, Rotation);
-
-	int EquipmentSize = 4;
-	for (int i = 0; i < EquipmentSize; i++)
-	{
-		int Type = input.ReadInt32();
-		if (Type)
-		{
-			if (Type == 3)
-			{
-				int ID = input.ReadInt32();
-				int AddATK = input.ReadInt32();
-				int AddDEF = input.ReadInt32();
-				int AddSTR = input.ReadInt32();
-				int AddDex = input.ReadInt32();
-				int AddInt = input.ReadInt32();
-			}
-			int Count = input.ReadInt32();
-		}
-	}
-}
-
-void AIngameGameMode::ReadInventoryInfo(InputStream & input)
-{
-	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	if (GameInstance == nullptr) return;
-	UItemManager;
-	int Glod = input.ReadInt32();
-	Inventory::GetInstance().SetGold(Glod);
-	for (int i = 0; i < Inventory::GetInstance().GetInventorySize(); i++)
-	{
-		UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
-		if (newItem)
-		{
-			Inventory::GetInstance().AddItem(newItem, i);
-		}
-	}
-}
-
-void AIngameGameMode::ReadQuickSlot(InputStream & input)
-{
-	for (int i = 0; i < 10; i++)
-	{
-		int Type = input.ReadInt8();
-		if (Type)
-		{
-			int ID = input.ReadInt32();
-		}
-	}
-}
-
-void AIngameGameMode::ReadMapData(InputStream & input)
-{
-	MapMgr.ReadMapDataFromServer(input);
 }
 
 void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
@@ -182,7 +73,7 @@ void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
 	input >> TempData;
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-	
+
 	//Çì¾îÆÄÃ÷
 	FSoftObjectPath HairAssetPath = nullptr;
 	HairAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(TempData);
@@ -190,7 +81,6 @@ void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
 	HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &AIngameGameMode::LoadPartsComplete,
 		HairAssetPath, EPartsType::HAIR);
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
-	
 
 	input >> TempData;
 
@@ -223,7 +113,7 @@ void AIngameGameMode::PlayerCharacterItemChange(InputStream& input)
 	int Type = -888; int ID = 0;
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	input >> Type; input >> ID;
-	
+
 	if (Type < 0 || ID == 0)
 		check(false);
 
@@ -235,103 +125,13 @@ void AIngameGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Ty
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
 	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
-
-
-}
-void AIngameGameMode::SpawnCharacterFromServer(class InputStream& input)
-{
-	int64 Id = input.ReadInt64();
-	FVector Location = input.ReadFVector();
-	FRotator Rotation = input.ReadFRotator();
-
-	MapMgr.SpawnPlayer(Id, Location, Rotation);
-
-	float HP = input.ReadFloat32();
-	float MAXHP = input.ReadFloat32();
-	float AttackMin = input.ReadFloat32();
-	float AttackMax = input.ReadFloat32();
-	float AttackRange = input.ReadFloat32();
-	float AttackSpeed = input.ReadFloat32();
-	float Defense = input.ReadFloat32();
-	float Speed = input.ReadFloat32();
-	std::string Name = input.ReadCString();
-	int Level = input.ReadInt32();
-	int Gender = input.ReadInt32();
-	int FaceID = input.ReadInt32();
-	int HairID = input.ReadInt32();
-	int Str = input.ReadInt32();
-	int Dex = input.ReadInt32();
-	int Intel = input.ReadInt32();
-	float Stamina = input.ReadFloat32();
-	float MaxStamina = input.ReadFloat32();
-
-	int EquipmentSize = 4;
-	for (int i = 0; i < EquipmentSize; i++)
-	{
-		int Type = input.ReadInt32();
-		if (Type)
-		{
-			if (Type == 3)
-			{
-				int ID = input.ReadInt32();
-				int AddATK = input.ReadInt32();
-				int AddDEF = input.ReadInt32();
-				int AddSTR = input.ReadInt32();
-				int AddDex = input.ReadInt32();
-				int AddInt = input.ReadInt32();
-			}
-			int Count = input.ReadInt32();
-		}
-	}
-}
-void AIngameGameMode::UpdateCharacterPosition(class InputStream& input)
-{
-	int64 Id = input.ReadInt64();
-	int32 state = input.ReadInt32();
-	
-	FVector Location = input.ReadFVector();
-	FRotator Rotation = input.ReadFRotator();
-
-	APlayerCharacter* TargetPlayer = MapMgr.FindPlayer(Id);
-	if (TargetPlayer == nullptr) 
-	{
-		XRLOG(Warning, TEXT("Player not found"));
-		return;
-	}
-
-	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
-	if (aicon == nullptr)
-	{
-		XRLOG(Warning, TEXT("AICon not found"));
-		return;
-	}
-	else aicon->MoveToLocation(Location, 2, false, false);
-
 }
 
-void AIngameGameMode::SetMonsterController(InputStream& input)
+void AIngameGameMode::SpawnRemotePlayer()
 {
-	bool IsMonsterController = input.ReadBool();
-	IsSuper = IsMonsterController;
+	GetMapMgr().RemotePlayerSpawn(GetWorld());
 }
-
-void AIngameGameMode::UpdateMonsterAction(InputStream& input)
+void AIngameGameMode::DeleteRemotePlayer()
 {
-	auto firstPlayer = Cast<AXRPlayerController>(GetWorld()->GetFirstPlayerController());
-	if(firstPlayer)
-	{
-		if (!firstPlayer->IsSpuer())
-		{
-			int64 ObjID		=	input.ReadInt64();
-			int32 ActionID	=	input.ReadInt32();
-			FVector Location =	input.ReadFVector();
-			FRotator Rotator =	input.ReadFRotator();
-
-
-			GEngine->AddOnScreenDebugMessage(112, 5.f, FColor::Blue, FString::Printf(TEXT("Recv MonsterUpdate  ObjectID: %s, ActionID: %s, Location : %s, Rotator: %s"),
-				*FString::FromInt(ObjID), *FString::FromInt(ActionID),
-				*Location.ToString(),*Rotator.ToString()));
-		}
-	}
-
+	GetMapMgr().DeleteRemotePlayer(GetWorld());
 }

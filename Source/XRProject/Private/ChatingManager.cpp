@@ -1,4 +1,5 @@
 #include "ChatingManager.h"
+#include "ChatingWidget.h"
 #include "NetworkManager.h"
 #include "XRGameInstance.h"
 #include "IngameGameMode.h"

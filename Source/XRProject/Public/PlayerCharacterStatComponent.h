@@ -60,6 +60,6 @@ public:
 		void SetINT(int32 INT_);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		void SetGender(int32 Gender_);
-	
 
+	virtual bool GetStatDataFromServer(InputStream& input) override;
 };

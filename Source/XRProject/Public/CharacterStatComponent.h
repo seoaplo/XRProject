@@ -4,6 +4,7 @@
 
 #include "XRProject.h"
 #include "Components/ActorComponent.h"
+#include "InputStream.h"
 #include "CharacterStatComponent.generated.h"
 
 
@@ -81,6 +82,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		FString GetCharacterName() { return CharacterName; }
 
+	virtual bool GetStatDataFromServer(InputStream& input);
 
 	UPROPERTY(BlueprintAssignable)
 		FOnCharacterStatChange	OnStatChange;

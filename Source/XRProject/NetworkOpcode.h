@@ -3,6 +3,7 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
+
 	// LoginServer
 	kCreateAccountRequest = 0,
 	kLoginRequest,
@@ -14,22 +15,23 @@ enum class ENetworkCSOpcode : uint16_t
 	kCharacterDeleteRequest,
 	kCharacterSelectionRequest,
 
-	// ZoneServer
-	kZoneConrifmRequest = 1000,
-	kNotifyCurrentChrPosition,
-	kNotifyMonsterAction,
+    // ZoneServer
+    kZoneConrifmRequest = 1000,
+    kNotifyCurrentChrPosition = 1001,
+    kNotifyMonsterAction = 1002,
 
-	kInventoryUpdateRequest,
-	kQuickSlotUseRequest,
-	kEquipmentMountRequest,
+    kInventoryUpdateRequest = 1003,
+    kQuickSlotUseRequest = 1004,
+    kEquipmentMountRequest = 1005,
 
-	kMatchingRequest,
-	kMatchingConfirmRequest, // true / false
+    kMatchingRequest = 1006,
+    kMatchingConfirmRequest = 1007, // true / false
 
-	kCharacterAttack,
-	kCharcterHitSuccess,
+    kCharacterAttack = 1008,
+    kCharcterHitSuccess = 1009,
+    kMonsterHitCharacter = 1010,
+	kSendChatRequest = 1011,
 
-	kSendChatRequest,
 };
 
 
@@ -50,6 +52,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kUserEnterTheMap = 1000,
 	kSpawnCharacter,
 	kSetMonsterController,
+
 
 	kNotifyCharacterAttack,
 	kNotifyCharacterRolling,

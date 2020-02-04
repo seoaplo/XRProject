@@ -72,3 +72,20 @@ void UPlayerCharacterStatComponent::SetINT(int32 INT_)
 {
 	INT = INT_;
 }
+
+bool UPlayerCharacterStatComponent::GetStatDataFromServer(InputStream& input)
+{
+	Super::GetStatDataFromServer(input);
+	std::string Name = input.ReadCString();
+	Level = input.ReadInt32();
+	Gender = input.ReadInt32();
+	int FaceID = input.ReadInt32();
+	int HairID = input.ReadInt32();
+	STR = input.ReadInt32();
+	DEX = input.ReadInt32();
+	INT = input.ReadInt32();
+	CurrentStamina = input.ReadFloat32();
+	MaxStamina = input.ReadFloat32();
+
+	return true;
+}

@@ -10,6 +10,9 @@
 /**
  *
  */
+
+class UMapManager;
+
 UCLASS()
 class XRPROJECT_API AXRPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
@@ -18,22 +21,25 @@ class XRPROJECT_API AXRPlayerController : public APlayerController, public IGene
 
 public:
 
-	void BeginPlay() override;
-
+	virtual void	BeginPlay() override;
+	virtual void	SetupInputComponent()override;
+	void			TemporaryEnterZone();
 public:
-
-
+	void SetEnterZoneFunc(void(*Func)()) { EnterZoneFunc = Func; }
+public:
 	UFUNCTION(BlueprintCallable)
 		FORCEINLINE bool IsSpuer() const { return bIsSuper; }
 	UFUNCTION(BlueprintCallable)
 		void SetSpuer() { bIsSuper = true; }
-
 protected:
 private:
+	void(*EnterZoneFunc)();
+	
+private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
+
 		bool bIsSuper = false;
 
 	FGenericTeamId TeamId;
 	FGenericTeamId GetGenericTeamId() const;
-
 };
