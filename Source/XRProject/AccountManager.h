@@ -38,6 +38,6 @@ public:
 		else
 			return true;
 	};
-	APlayerCharacter* GetCurrentPlayerCharacter() { return CurrentPlayerCharacter; };
+	
 
 };

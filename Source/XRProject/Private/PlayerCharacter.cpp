@@ -80,19 +80,24 @@ APlayerCharacter::APlayerCharacter()
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
+	Equipments.BodyComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
+	Equipments.LegsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
+	Equipments.HandsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
 	Equipments.BodyComponent->SetupAttachment(GetMesh());
 	Equipments.LegsComponent->SetupAttachment(GetMesh());
 	Equipments.HandsComponent->SetupAttachment(GetMesh());
 	Equipments.WeaponComponent->SetupAttachment(GetMesh());
 	FaceComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, FaceSocket);
-	HairComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
+	HairComponent->AttachToComponent(FaceComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
 	Equipments.WeaponComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, WeaponSocket);
 
 	Equipments.BodyComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
-	Equipments.BodyComponent->SetAnimInstanceClass(AnimBP.Class);
+	//Equipments.BodyComponent->SetAnimInstanceClass(AnimBP.Class);
 
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
@@ -183,6 +188,7 @@ void APlayerCharacter::PostInitializeComponents()
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
 	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
+	MyAnimInstance->SetOwnerCharacter(this);
 
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
@@ -223,8 +229,7 @@ void APlayerCharacter::BeginPlay()
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
 	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
-	bool Ret = AccountManager::GetInstance().SetCurrentPlayerCharacter(this);
-	check(Ret);
+	
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
@@ -312,28 +317,7 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
 	}
-	//else if (Type == EPartsType::NUDEHAND)
-	//{
-	//	FSoftObjectPath HandAssetPath = nullptr;
-	//	HandAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
-	//	FStreamableDelegate HandAssetLoadDelegate;
-	//	HandAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
-	//		HandAssetPath, Type);
 
-	//	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HandAssetPath, HandAssetLoadDelegate);
-
-	//}
-	//else if (Type == EPartsType::NUDELEG)
-	//{
-	//	FSoftObjectPath LegAssetPath = nullptr;
-	//	LegAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
-	//	FStreamableDelegate LegAssetLoadDelegate;
-	//	LegAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
-	//		LegAssetPath, Type);
-
-	//	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(LegAssetPath, LegAssetLoadDelegate);
-
-	//}
 
 }
 

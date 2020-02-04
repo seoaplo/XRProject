@@ -194,7 +194,7 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
 	{
 		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
-		if (AccountManager::GetInstance().GetCurrentPlayerCharacter()->bIsMale)
+		if (TargetCharacter->bIsMale)
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.MaleMeshResourceID);
 		else
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
@@ -216,20 +216,14 @@ void UItemManager::LoadItemMeshAssetComplete(FSoftObjectPath AssetPath, UItem* I
 	if (EquipItem->DefaultInfo.Type != kWeaponTypeNumber)
 	{
 		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
-
-		if (Character == nullptr)
-			AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
-		else
-			Character->ChangeEquipment(Item, LoadedMesh.Get());
+		
+		Character->ChangeEquipment(Item, LoadedMesh.Get());
 	}
 	else
 	{
 		TSoftObjectPtr<UStaticMesh> LoadedMesh(AssetPath);
 
-		if (Character == nullptr)
-			AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
-		else
-			Character->ChangeEquipment(Item, LoadedMesh.Get());
+		Character->ChangeEquipment(Item, LoadedMesh.Get());
 	}
 
 }

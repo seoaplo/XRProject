@@ -44,11 +44,15 @@ UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
 
 }
 
+void UPlayerCharacterAnimInstance::SetOwnerCharacter(APlayerCharacter * MyCharacter)
+{
+	this->MyCharacter = MyCharacter;
+}
+
 void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	MyCharacter = AccountManager::GetInstance().GetCurrentPlayerCharacter();
-
+	
 	if (MyCharacter)
 	{
 		//CharacterSpeed = MyCharacter->GetCharacterMovement()->Velocity.Size(); //ÁÖÀÇ : velocity crash
@@ -57,6 +61,14 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsSprint = MyCharacter->bIsSprint;
 		bIsCharacterDead = MyCharacter->bIsCharacterDead;
 		bIsHit = MyCharacter->bIsHit;
+
+
+		int amove = -1;
+		int cmove = -1;
+		amove = bIsMove == false ? 0 : 1;
+		cmove = MyCharacter->bIsMove == false ? 0 : 1;
+		UE_LOG(LogTemp, Warning, TEXT("AnimbIsMove : %d /// CharbIsMove : %d"),
+			amove, cmove);
 	}
 
 }

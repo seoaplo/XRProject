@@ -31,8 +31,6 @@ void UXRGameInstance::Init()
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterPosition);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
-		this, &UXRGameInstance::GiveDamageToCharacter);
 		
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
@@ -168,27 +166,6 @@ void UXRGameInstance::UpdateMonsterAction(InputStream& input)
 	}
 }
 
-
-void UXRGameInstance::GiveDamageToCharacter(InputStream & input)
-{
-	int64 AttackerID = input.ReadInt64();
-	int64 VictimID = input.ReadInt64();
-	float HitDamage = input.ReadFloat32();
-
-	//ANonePlayerCharacter* Attacker = MapMgr.FindPlayer(AttackerID);
-	ANonePlayerCharacter* Attacker = nullptr;
-	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(VictimID);
-
-	TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-	FDamageEvent DamageEvent(ValidDamageTypeClass);
-
-	if (Attacker && TargetPlayer)
-	{
-		TargetPlayer->TakeDamage(HitDamage, DamageEvent, Attacker->GetController(), Attacker);
-		TargetPlayer->TakeDamage(HitDamage, DamageEvent, nullptr, nullptr);
-	}
-
-}
 
 void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 {

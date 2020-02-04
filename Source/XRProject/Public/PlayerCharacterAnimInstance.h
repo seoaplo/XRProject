@@ -51,6 +51,8 @@ public:
 		UAnimMontage* AttackMontageOnlyPlay;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* HitMontage;
+	
+	void SetOwnerCharacter(APlayerCharacter* MyCharacter);
 
 public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
