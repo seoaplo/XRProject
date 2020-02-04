@@ -218,26 +218,18 @@ void UItemManager::LoadItemMeshAssetComplete(FSoftObjectPath AssetPath, UItem* I
 		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
 		if (Character == nullptr)
-		{
 			AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
-		}
 		else
-		{
 			Character->ChangeEquipment(Item, LoadedMesh.Get());
-		}
 	}
 	else
 	{
 		TSoftObjectPtr<UStaticMesh> LoadedMesh(AssetPath);
 
 		if (Character == nullptr)
-		{
 			AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangeEquipment(Item, LoadedMesh.Get());
-		}
 		else
-		{
 			Character->ChangeEquipment(Item, LoadedMesh.Get());
-		}
 	}
 
 }

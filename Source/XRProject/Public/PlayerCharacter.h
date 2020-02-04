@@ -166,7 +166,7 @@ public:
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
-	void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //���, ���̽� �� ���� ��ȯ
+	void ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset); //���, ���̽� �� ���� ��ȯ
 	
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
 		class AActor* DamageCauser) override;

@@ -301,7 +301,7 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 			FaceAssetPath, EPartsType::FACE);
 		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
 	}
-	else //¸Ç¸ö, ¸ÇÁÖ¸Ô, ¸Ç´Ù¸®
+	else
 	{
 		FSoftObjectPath ETCAssetPath = nullptr;
 		ETCAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
@@ -312,6 +312,28 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
 	}
+	//else if (Type == EPartsType::NUDEHAND)
+	//{
+	//	FSoftObjectPath HandAssetPath = nullptr;
+	//	HandAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+	//	FStreamableDelegate HandAssetLoadDelegate;
+	//	HandAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
+	//		HandAssetPath, Type);
+
+	//	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HandAssetPath, HandAssetLoadDelegate);
+
+	//}
+	//else if (Type == EPartsType::NUDELEG)
+	//{
+	//	FSoftObjectPath LegAssetPath = nullptr;
+	//	LegAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+	//	FStreamableDelegate LegAssetLoadDelegate;
+	//	LegAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
+	//		LegAssetPath, Type);
+
+	//	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(LegAssetPath, LegAssetLoadDelegate);
+
+	//}
 
 }
 
@@ -361,27 +383,29 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, UStaticMesh* SmMesh)
 	Equipments.WeaponComponent->SetStaticMesh(SmMesh);
 }
 
-void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh * PartsMesh)
+void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset)
 {
+	TSoftObjectPtr<USkeletalMesh> LoadedMesh(PartAsset);
+
 	if (Type == EPartsType::HAIR)
 	{
-		HairComponent->SetSkeletalMesh(PartsMesh);
+		HairComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 	else if (Type == EPartsType::FACE)
 	{
-		FaceComponent->SetSkeletalMesh(PartsMesh);
+		FaceComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 	else if (Type == EPartsType::NUDEBODY)
 	{
-		Equipments.BodyComponent->SetSkeletalMesh(PartsMesh);
+		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 	else if (Type == EPartsType::NUDEHAND)
 	{
-		Equipments.HandsComponent->SetSkeletalMesh(PartsMesh);
+		Equipments.HandsComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 	else if (Type == EPartsType::NUDELEG)
 	{
-		Equipments.LegsComponent->SetSkeletalMesh(PartsMesh);
+		Equipments.LegsComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 }
 
@@ -495,9 +519,9 @@ void APlayerCharacter::ContinueCombo()
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
 {
-	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
-
-	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
+	//TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
+	//AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
+	this->ChangePartsComponentsMesh(Type, AssetPath);
 
 }
 

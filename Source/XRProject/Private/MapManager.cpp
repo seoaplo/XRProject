@@ -267,19 +267,46 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 	if (World == nullptr) return false;
 	for (auto& CurrentData : CharacterDataList)
 	{
+		FActorSpawnParameters Param;
+		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		AActor* actor =
 			World->SpawnActor
-			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
-	
-		//CurrentData.ID
+			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
+		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
+		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
 
-		APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
-		//auto GameInstance = Cast <UXRGameInstance>(GetGameInstance());
+		for (int ii = 0; ii < CurrentData.kEquipmentArraySize; ii++)
+		{
+			/*¸Ç¸öÀÏ ¶§ */
+			if (CurrentData.EquipArray[ii].ID == -1)
+			{
+				//FEquipmentTableResource* EqTable;
 
-		//if(CurrentData.ID)
-		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.ID, GetWorld(), Player);
-		
+				const int32 kMalePrimaryBody = 130;
+				const int32 kMalePrimaryHand = 140;
+				const int32 kMalePrimaryLeg = 150;
+				const int32 kMalePrimaryWeapon = 3300001;
 
+				switch (ii)
+				{
+					case 0:
+						Player->ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+						break;
+					case 1:
+						Player->ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+						break;
+					case 2:
+						Player->ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+						break;
+					case 3:
+						GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+							Player->GetWorld(), Player);
+						break;
+				}
+			}
+			else
+				GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.EquipArray[ii].ID, GetWorld(), Player);
+		}
 
 		if (Player)
 		{

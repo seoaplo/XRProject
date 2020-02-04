@@ -31,6 +31,8 @@ struct Equipment
 
 struct CharacterData
 {
+	const int32 kEquipmentArraySize = 4;
+
 	// Actor Spawn Data
 	int64_t ObjectID = -1;
 	FVector Location = FVector(0, 0, 0);
