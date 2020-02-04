@@ -17,7 +17,7 @@ void APotalTrigger::BeginPlay()
 
 void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* OtherActor)
 {
-	int64_t TargetID;
+	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this)) 
 	{	
 		BeginOverlapDelegate.ExecuteIfBound(ObjectID, OtherActor);
@@ -25,7 +25,7 @@ void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* 
 }
 void APotalTrigger::OnOverlapEnd(class AActor* OverlappedActor, class AActor* OtherActor)
 {
-	int64_t TargetID;
+	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this))
 	{
 		EndOverlapDelegate.ExecuteIfBound(ObjectID, OtherActor);

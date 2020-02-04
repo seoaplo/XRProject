@@ -3,7 +3,6 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
-
 	// LoginServer
 	kCreateAccountRequest = 0,
 	kLoginRequest,
@@ -15,23 +14,23 @@ enum class ENetworkCSOpcode : uint16_t
 	kCharacterDeleteRequest,
 	kCharacterSelectionRequest,
 
-    // ZoneServer
-    kZoneConrifmRequest = 1000,
-    kNotifyCurrentChrPosition = 1001,
-    kNotifyMonsterAction = 1002,
+	// ZoneServer
+	kZoneConrifmRequest = 1000,
+	kNotifyCurrentChrPosition = 1001,
+	kNotifyMonsterAction = 1002,
 
-    kInventoryUpdateRequest = 1003,
-    kQuickSlotUseRequest = 1004,
-    kEquipmentMountRequest = 1005,
+	kInventoryUpdateRequest = 1003,
+	kQuickSlotUseRequest = 1004,
+	kEquipmentMountRequest = 1005,
 
-    kMatchingRequest = 1006,
-    kMatchingConfirmRequest = 1007, // true / false
+	kMatchingRequest = 1006,
+	kMatchingConfirmRequest = 1007, // true / false
 
-    kCharacterAttack = 1008,
-    kCharcterHitSuccess = 1009,
-    kMonsterHitCharacter = 1010,
+	kCharacterAttack = 1008,
+	kCharcterHitSuccess = 1009,
+
+	kMonsterHitCharacter = 1010,
 	kSendChatRequest = 1011,
-
 };
 
 
@@ -50,24 +49,23 @@ enum class ENetworkSCOpcode : uint16_t
 
 	// ZoneServer
 	kUserEnterTheMap = 1000,
-	kSpawnCharacter,
-	kSetMonsterController,
+	kSpawnCharacter = 1002,
+	kSetMonsterController = 1003,
 
+	kNotifyCharacterAttack = 1004,
+	kNotifyCharacterRolling = 1005,
+	kActorDamaged = 1006,
 
-	kNotifyCharacterAttack,
-	kNotifyCharacterRolling,
-	kActorDamaged,
+	kExitCharacter = 1007,
+	kUpdateCharacterPosition = 1008,
+	kUpdateMonsterAction = 1009,
 
-	kExitCharacter,
-	kUpdateCharacterPosition,
-	kUpdateMonsterAction,
+	kSpawnMonster = 1010,
 
-	kSpawnMonster,
+	kInventoryUpdate = 1011,
+	kQuickSlotUpdate = 1012,
 
-	kInventoryUpdate,
-	kQuickSlotUpdate,
-
-	kNotifyMatchResult,
-	kNotifyMatchCanceled,
-
+	kNotifyMatchResult = 1013,
+	kNotifyMatchCanceled = 1014,
+	kNotifyChat = 1015,
 };

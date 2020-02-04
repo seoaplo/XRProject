@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "XRGameInstance.h"
+#include "ChatingManager.h"
 #include "Inventory.h"
 #include "XRAIController.h"
 #include "XRPlayerController.h"
+#include "IngameGameMode.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -28,16 +30,18 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateMonsterAction)->BindUObject(
 		this, &UXRGameInstance::UpdateMonsterAction);
 
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyChat)->BindUObject(
+		this, &UXRGameInstance::NotifyChat);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterPosition);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::GiveDamageToCharacter);
 		
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
 	
 
@@ -217,87 +221,6 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 
 }
 
-//
-//void AIngameGameMode::SpawnCharacterFromServer(class InputStream& input)
-//{
-//	int64 Id = input.ReadInt64();
-//	FVector Location = input.ReadFVector();
-//	FRotator Rotation = input.ReadFRotator();
-//
-//	MapMgr.SpawnPlayer(Id, Location, Rotation);
-//
-//	float HP = input.ReadFloat32();
-//	float MAXHP = input.ReadFloat32();
-//	float AttackMin = input.ReadFloat32();
-//	float AttackMax = input.ReadFloat32();
-//	float AttackRange = input.ReadFloat32();
-//	float AttackSpeed = input.ReadFloat32();
-//	float Defense = input.ReadFloat32();
-//	float Speed = input.ReadFloat32();
-//	std::string Name = input.ReadCString();
-//	int Level = input.ReadInt32();
-//	int Gender = input.ReadInt32();
-//	int FaceID = input.ReadInt32();
-//	int HairID = input.ReadInt32();
-//	int Str = input.ReadInt32();
-//	int Dex = input.ReadInt32();
-//	int Intel = input.ReadInt32();
-//	float Stamina = input.ReadFloat32();
-//	float MaxStamina = input.ReadFloat32();
-//
-//	APlayerCharacter* Character = nullptr;
-//	Character = GetMapMgr().FindPlayer(Id);
-//	if (Character == nullptr)
-//		check(false);
-//
-//	int EquipmentSize = 4;
-//	for (int i = 0; i < EquipmentSize; i++)
-//	{
-//		int Type = input.ReadInt32();
-//		if (Type)
-//		{
-//			if (Type == 3)
-//			{
-//				int ID = input.ReadInt32();
-//				int AddATK = input.ReadInt32();
-//				int AddDEF = input.ReadInt32();
-//				int AddSTR = input.ReadInt32();
-//				int AddDex = input.ReadInt32();
-//				int AddInt = input.ReadInt32();
-//			}
-//			int Count = input.ReadInt32();
-//		}
-//	}
-//}
-//
-//
-//void AIngameGameMode::SetMonsterController(InputStream& input)
-//{
-//	bool IsMonsterController = input.ReadBool();
-//	IsSuper = IsMonsterController;
-//}
-//
-//void AIngameGameMode::UpdateMonsterAction(InputStream& input)
-//{
-//	auto firstPlayer = Cast<AXRPlayerController>(GetWorld()->GetFirstPlayerController());
-//	if (firstPlayer)
-//	{
-//		if (!firstPlayer->IsSpuer())
-//		{
-//			int64 ObjID = input.ReadInt64();
-//			int32 ActionID = input.ReadInt32();
-//			FVector Location = input.ReadFVector();
-//			FRotator Rotator = input.ReadFRotator();
-//
-//
-//			GEngine->AddOnScreenDebugMessage(112, 5.f, FColor::Blue, FString::Printf(TEXT("Recv MonsterUpdate  ObjectID: %s, ActionID: %s, Location : %s, Rotator: %s"),
-//				*FString::FromInt(ObjID), *FString::FromInt(ActionID),
-//				*Location.ToString(), *Rotator.ToString()));
-//		}
-//	}
-//
-//}
-
 void UXRGameInstance::ActorDamaged(InputStream& input)
 {
 
@@ -316,9 +239,14 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 
 		//AttackedCharacter->TakeDamage(AttackSetHp,FDamageEvent(),AttackerMonster->GetController(), AttackerMonster);
 	}
-	
+}
 
 
-
-
+void UXRGameInstance::NotifyChat(class InputStream& input)
+{
+	int32_t Type;
+	std::string ChatString;
+	input >> Type;
+	input >> ChatString;
+	ChatingManager::GetInstance().ReceiveChat(Type, ChatString);
 }
