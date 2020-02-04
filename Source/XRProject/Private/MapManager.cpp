@@ -85,8 +85,7 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 {
 	for (int iCount = 0; iCount < CharacterDataList.size() - 1; iCount++)
 	{
-		CharacterData CurrentData;
-
+		CharacterData& CurrentData = CharacterDataList[iCount];
 
 		Input >> CurrentData.ObjectID;
 		Input >> CurrentData.Location;
