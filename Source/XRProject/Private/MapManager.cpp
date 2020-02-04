@@ -304,7 +304,7 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 				}
 			}
 			else
-				GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.EquipArray[ii].ID, GetWorld(), Player);
+				GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.EquipArray[ii].ID, World, Player);
 		}
 
 		if (Player)
