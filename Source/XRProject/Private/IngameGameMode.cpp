@@ -32,38 +32,20 @@ void AIngameGameMode::BeginPlay()
 	}
 	PrimaryActorTick.bCanEverTick = true;
 
-	std::string Ip = AccountManager::GetInstance().GetInGameIP();
-	int16 Port = AccountManager::GetInstance().GetInGamePort();
-	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&AIngameGameMode::SendConfirmRequest, this));
 	IsSuper = Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper();
+	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
+	GetMapMgr().PlayerListSpawn(GetWorld());
+	GetMapMgr().MonsterListSpawn(GetWorld());
+	GetMapMgr().PossessPlayer(GetWorld());
+
+	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
+	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
 }
 
-void AIngameGameMode::SendConfirmRequest()
-{
-	std::string ID = AccountManager::GetInstance().GetAccountID();
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kZoneConrifmRequest);
-	out.WriteCString(ID.c_str());
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
-
-}
 
 void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
-	if (GetMapMgr().InitComplete)
-	{
-		PlayerControllerClass = AXRPlayerController::StaticClass();
-		GetMapMgr().PlayerListSpawn(GetWorld());
-		GetMapMgr().MonsterListSpawn(GetWorld());
-		GetMapMgr().InitComplete = false;
-	}
-	if (GetMapMgr().PlayerSpawnReady)
-	{
-		GetMapMgr().RemotePlayerSpawn(GetWorld());
-		GetMapMgr().PlayerSpawnReady = false;
-	}
 	if (Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper())
 	{
 		IsSuper = true;
@@ -74,7 +56,6 @@ void AIngameGameMode::Tick(float deltatime)
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	GetMapMgr().Clear();
 	GetNetMgr().Close();
 }
 
@@ -99,7 +80,6 @@ void AIngameGameMode::PlayerCharacterInitializeFromServer(InputStream & input)
 	HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &AIngameGameMode::LoadPartsComplete,
 		HairAssetPath, EPartsType::HAIR);
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
-
 
 	input >> TempData;
 
@@ -144,6 +124,13 @@ void AIngameGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Ty
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
 
 	AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
+}
 
-
+void AIngameGameMode::SpawnRemotePlayer()
+{
+	GetMapMgr().RemotePlayerSpawn(GetWorld());
+}
+void AIngameGameMode::DeleteRemotePlayer()
+{
+	GetMapMgr().DeleteRemotePlayer(GetWorld());
 }

@@ -23,6 +23,7 @@ public:
 public:
     virtual void Init() override;
     virtual void Shutdown() override;
+	void ReqEnterZone();
 
     FORCEINLINE UNetworkManager& GetNetworkManager() {
         return *NetworkManager;
@@ -47,6 +48,7 @@ private:
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Meta =(AllowPrivateAccess=true))
 	bool  IsSuper = false;
 private:
+	void SendConfirmRequest(); /*존 입장 확인용*/
 	void HandleEnterZone(class InputStream& input); /*첫 입장시 초기화 패킷*/
 	/* 아래 4개의 함수는 HandleEnterZone에서 사용 될 함수로 각자 구현 요망*/
 	void ReadBaseCharacterInfo(class InputStream& input); /*캐릭터 정보 읽기*/
@@ -57,6 +59,8 @@ private:
 	void UpdateCharacterPosition(class InputStream& input);
 	void SetMonsterController(class InputStream& input);
 	void UpdateMonsterAction(class InputStream& input);
+	void GiveDamageToCharacter(class InputStream& input);
+	void UpdateCharacterMotion(class InputStream& input);
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-

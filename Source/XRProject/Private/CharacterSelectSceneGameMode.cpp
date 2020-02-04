@@ -31,6 +31,8 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
+
+
 	//헤어파츠
 	FSoftObjectPath HairAssetPath = nullptr;
 	FPartsResource* HairResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Hair)), TEXT("t"));
@@ -105,11 +107,6 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kMigrateZoneNotify)->BindUObject(
 		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
 
-	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
-	int16 Port = AccountManager::GetInstance().GetLobbyPort();
-	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&ACharacterSelectSceneGameMode::SendConfirmRequest, this));
-
-
 	/*캐릭터 선택창 카메라 배치*/
 	MainCameraLocation = FVector(0.0f, 2740.0f, 290.0f);
 	CharacterActorLocation = MainCameraLocation + FVector(100.0f, 0.0f, 0.0f);
@@ -118,6 +115,13 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 
 	APlayerController* CurrentController = UGameplayStatics::GetPlayerController(this, 0);
 	CurrentController->SetViewTarget(MainCamera);
+
+	std::string Ip = AccountManager::GetInstance().GetLobbyIP();
+	int16 Port = AccountManager::GetInstance().GetLobbyPort();
+	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&ACharacterSelectSceneGameMode::SendConfirmRequest, this));
+
+
+
 
 }
 
@@ -170,7 +174,6 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
 		input >> Info.weapon_itemid; input >> Info.gender;
 
-
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
 
@@ -191,7 +194,8 @@ void ACharacterSelectSceneGameMode::HandleMigrateZone(InputStream& input)
 	AccountManager::GetInstance().SetInGamePort(InGamePort);
 
 	GetNetMgr().Close();
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("LEVEL_Village"));
+	
+	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
@@ -212,8 +216,6 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	input >> Info.x; input >> Info.y; input >> Info.z;
 	input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
 	input >> Info.weapon_itemid; input >> Info.gender;
-
-
 	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 		CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
 

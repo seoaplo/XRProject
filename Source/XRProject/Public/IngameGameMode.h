@@ -39,11 +39,13 @@ public:
 	/*Hair나 Face같은 아이템이 아닌 파츠들을 교체할 때 사용하는 코드. 패킷에 의해 제어됨*/
 	void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
 
-	void SendConfirmRequest(); /*존 입장 확인용*/
 public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltatime) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
+
+	void SpawnRemotePlayer();
+	void DeleteRemotePlayer();
 private:
 	FTimerHandle PacketExcuteTimerHandle;
 private:

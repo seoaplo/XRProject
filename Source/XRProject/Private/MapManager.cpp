@@ -4,14 +4,18 @@
 #include "MapManager.h"
 #include "XRPlayerController.h"
 
-bool UMapManager::CheckReady;
-
 bool UMapManager::Init()
 {
 	PlayerID = -1;
-	UMapManager::CheckReady = false;
-	InitComplete = false;
-	PlayerSpawnReady = false;
+	LevelID = -1;
+	Spawn_Character.Unbind();
+	Delete_Character.Unbind();
+
+	MapList.Add(100, TEXT("LEVEL_Village"));
+	MapList.Add(111, TEXT("LEVEL_Zone_1"));
+	MapList.Add(112, TEXT("LEVEL_Zone_2"));
+	MapList.Add(113, TEXT("LEVLE_Boss"));
+
 	return true;
 }
 bool UMapManager::Clear()
@@ -42,6 +46,8 @@ void UMapManager::ReadMapDataFromServer(InputStream& Input)
 {
 	int32_t characterlistsize = 0;
 	int32_t monsterlistsize = 0;
+
+	Input >> LevelID;
 
 	Input >> characterlistsize;
 	CharacterDataList.resize(characterlistsize + 1);
@@ -79,7 +85,7 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 {
 	for (int iCount = 0; iCount < CharacterDataList.size() - 1; iCount++)
 	{
-		CharacterData& CurrentData = CharacterDataList[iCount];
+		CharacterData CurrentData;
 
 
 		Input >> CurrentData.ObjectID;
@@ -177,7 +183,11 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	}
 	PlayerID = CurrentData.ObjectID;
 }
-
+bool UMapManager::ReadPlayerDeleteFromServer(InputStream& Input)
+{
+	Delete_Character.ExecuteIfBound();
+	return true;
+}
 
 APlayerCharacter* UMapManager::FindPlayer(int64_t objectid)
 {
@@ -189,11 +199,6 @@ ANonePlayerCharacter* UMapManager::FindMonster(int64_t ObjectID)
 	ANonePlayerCharacter* FindedMonster = MonsterList.FindRef(ObjectID);
 	return FindedMonster;
 }
-void UMapManager::TemporaryEnterZone()
-{
-	CheckReady = !CheckReady;
-}
-
 bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 {
 	CharacterData CurrentData;
@@ -240,6 +245,17 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 		}
 	}
 	CharacterDataList.push_back(CurrentData);
+	Spawn_Character.ExecuteIfBound();
+	return true;
+}
+
+bool UMapManager::OpenMap(UWorld* World)
+{
+	if (World == nullptr) return false;
+	FName* LevelName = MapList.Find(LevelID);
+	if (LevelName == nullptr) return false;
+
+	UGameplayStatics::OpenLevel(World, *LevelName);
 	return true;
 }
 bool UMapManager::PlayerListSpawn(UWorld* World)
@@ -266,13 +282,16 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			CharacterList.Add(CurrentData.ObjectID, Player);
 		}
 	}
-
+	CharacterDataList.clear();
+	return true;
+}
+bool UMapManager::PossessPlayer(UWorld* World)
+{
 	APlayerCharacter* Player = CharacterList.FindRef(PlayerID);
+	if (Player == nullptr) return false;
 	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(World->GetPlayerControllerIterator()->Get());
 	if (MyPlayerController == nullptr) return false;
 	MyPlayerController->Possess(Player);
-	MyPlayerController->SetEnterZoneFunc(&UMapManager::TemporaryEnterZone);
-
 	return true;
 }
 bool UMapManager::MonsterListSpawn(UWorld* World)
@@ -301,32 +320,15 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 			MonsterList.Add(CurrentData.ObjectID, Monster);
 		}
 	}
+	MonsterDataList.clear();
 	return true;
 }
 
 bool UMapManager::RemotePlayerSpawn(UWorld* world)
 {
-	if (World == nullptr) return false;
-	auto& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
-	{
-		AActor* actor =
-			World->SpawnActor
-			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
-
-		APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
-		if (Player)
-		{
-			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
-			if (CheckPlayer != nullptr)
-			{
-				Player->Destroy();
-				return false;
-			}
-			if (Player->PlayerStatComp == nullptr) return false;
-
-			//Player->PlayerStatComp->GetStatDataFromServer(Input);
-			CharacterList.Add(CurrentData.ObjectID, Player);
-		}
-	}
-	return true;
+	return PlayerListSpawn(world);
+}
+bool UMapManager::DeleteRemotePlayer(UWorld* World)
+{
+	return false;
 }
