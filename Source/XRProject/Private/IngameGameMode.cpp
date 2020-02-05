@@ -34,7 +34,6 @@ void AIngameGameMode::BeginPlay()
 	PrimaryActorTick.bCanEverTick = true;
 
 	IsSuper = Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper();
-	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
 	GetMapMgr().PlayerListSpawn(GetWorld());
 	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());

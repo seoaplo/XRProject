@@ -157,7 +157,7 @@ void UXRGameInstance::SetMonsterController(InputStream& input)
 {
 	bool IsMonsterController = input.ReadBool();
 	IsSuper = IsMonsterController;
-
+	XRLOG(Warning, TEXT("SetMonCon"));
 }
 
 void UXRGameInstance::UpdateMonsterAction(InputStream& input)

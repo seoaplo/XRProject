@@ -55,7 +55,6 @@ enum class ENetworkSCOpcode : uint16_t
 
 	// ZoneServer
 	kUserEnterTheMap = 1000,
-	kSpawnCharacter = 1002,
 	kSetMonsterController = 1003,
 
 	kNotifyCharacterAttack = 1004,
@@ -78,4 +77,5 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyCharacterWait = 1020,
 	kNotifyCharacterSprint = 1021,
 
+	kSpawnCharacter = 1500,
 };
