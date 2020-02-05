@@ -144,7 +144,7 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 
 	/*캐릭터 선택창 카메라 배치*/
 	MainCameraLocation = FVector(-120.0f, 2740.0f, 200.0f);
-	CharacterActorLocation = MainCameraLocation + FVector(100.0f, 0.0f, 0.0f);
+	CharacterActorLocation = MainCameraLocation + FVector(210.0f, 0.0f, 0.0f);
 	MainCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(),
 		MainCameraLocation, FRotator::ZeroRotator);
 

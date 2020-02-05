@@ -257,15 +257,17 @@ void APlayerCharacter::MoveForward(float Value)
 	}
 	else
 	{
-		bIsMove = false;
-		
-		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterWait);
-		out << this->ObjectID;
-		out << this->GetActorLocation();
-		out.CompletePacketBuild();
-		GetNetMgr().SendPacket(out);
+		if (bIsMove == true)
+		{
+			OutputStream out;
+			out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterWait);
+			out << this->ObjectID;
+			out << this->GetActorLocation();
+			out.CompletePacketBuild();
+			GetNetMgr().SendPacket(out);
+		}
 
+		bIsMove = false;
 	}
 
 }
