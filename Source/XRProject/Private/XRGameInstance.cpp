@@ -29,6 +29,10 @@ void UXRGameInstance::Init()
 		this, &UXRGameInstance::SetMonsterController);
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateMonsterAction)->BindUObject(
 		this, &UXRGameInstance::UpdateMonsterAction);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterWait)->BindUObject(
+		this, &UXRGameInstance::CharacterWait);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterSprint)->BindUObject(
+		this, &UXRGameInstance::CharacterSprint);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyChat)->BindUObject(
 		this, &UXRGameInstance::NotifyChat);
@@ -142,13 +146,34 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 		return;
 	}
 
+
 	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
 	if (aicon == nullptr)
 	{
 		XRLOG(Warning, TEXT("AICon not found"));
 		return;
 	}
-	else aicon->MoveToLocation(Location, 2, false, false);
+	else
+	{
+		aicon->MoveToLocation(Location, 2, false, false);
+	}
+
+	//TargetPlayer->bIsMove = true;
+
+	//FName CurrentSectionName = TargetPlayer->MyAnimInstance->
+	//	Montage_GetCurrentSection(TargetPlayer->MyAnimInstance->MoveMontageOnlyPlay);
+	//
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentSEction : %s"), *(CurrentSectionName.ToString()));
+
+	//if (CurrentSectionName != FName("RunSection")
+	//	&& CurrentSectionName != FName("SprintSection"))
+	//{
+	//	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RunSection"));
+	//	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	//	UE_LOG(LogTemp, Warning, TEXT("RunSection Playing"));
+	//}
+
 
 }
 
@@ -179,13 +204,12 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 	FVector TargetLocation = input.ReadFVector();
 	FRotator TargetRotation = input.ReadFRotator();
 
-
-
 	APlayerCharacter* TargetPlayer = nullptr;
 	TargetPlayer = MapManager->FindPlayer(ObjectID);
 
 	if (TargetPlayer)
 	{
+		TargetPlayer->SetActorRotation(TargetRotation);
 		TargetPlayer->MyAnimInstance->PlayAttackOnlyPlayMontage();
 		TargetPlayer->MyAnimInstance->JumpToComboMontageSection(MotionID);
 
@@ -201,7 +225,6 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 
 void UXRGameInstance::ActorDamaged(InputStream& input)
 {
-
 	int32 AttackerType = input.ReadInt32();
 	int64 AttackerID = input.ReadInt64();
 	int32 AttackedType = input.ReadInt32();
@@ -227,4 +250,37 @@ void UXRGameInstance::NotifyChat(class InputStream& input)
 	input >> Type;
 	input >> ChatString;
 	ChatingManager::GetInstance().ReceiveChat(Type, ChatString);
+}
+
+void UXRGameInstance::CharacterWait(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
+	FVector TargetPos = input.ReadFVector();
+
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
+	
+	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
+	//TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 ==  어색해.
+	
+	//TargetPlayer->bIsMove = false;
+	
+	TargetPlayer->bIsSprint = false;
+	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+
+	UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
+}
+
+void UXRGameInstance::CharacterSprint(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
+
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
+
+	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("SprintSection"));
+	//TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
+	TargetPlayer->bIsSprint = true;
+	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
 }

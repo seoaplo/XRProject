@@ -2,12 +2,16 @@
 
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
+#include "WidgetTree.h"
 #include "XRGameInstance.h"
 #include "Animation/AnimBlueprint.h"
 #include "AccountManager.h"
 #include "Components/InputComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "NonePlayerCharacter.h"
+#include "NickNameWidget.h"
+
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -19,9 +23,23 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
+	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
+	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
+	
+	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	NameTag->SetupAttachment(GetRootComponent());
+	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
+
 	if (AnimBP.Succeeded())
 	{
 		AnimInstance = AnimBP.Class;
+	}
+	else
+		check(false);
+
+	if (RemoteAnimBP.Succeeded())
+	{
+		RemoteAnimInstance = AnimBP.Class;
 	}
 	else
 		check(false);
@@ -87,6 +105,7 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.HandsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	Equipments.BodyComponent->SetupAttachment(GetMesh());
 	Equipments.LegsComponent->SetupAttachment(GetMesh());
@@ -102,7 +121,16 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 
+	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
+	CapsuleSize = FVector2D(90.0f, 34.0f);
+	MeshLocationVector = FVector(0.0f, 0.0f, -90.0f);
+	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
 
+	this->GetMesh()->SetRelativeScale3D(ScaleVector);
+	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
+	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
+	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
+	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
 	ComboCount = 1;
 	bIsMove = false;
@@ -111,6 +139,8 @@ APlayerCharacter::APlayerCharacter()
 	bIsSprint = false;
 	bIsCharacterDead = false;
 	bIsHit = false;
+	bIsPlayer = false;
+	bInitialized = false;
 
 #pragma region TESTCODE
 
@@ -151,14 +181,35 @@ void APlayerCharacter::Tick(float deltatime)
 				GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
 				out.CompletePacketBuild();
 				GetNetMgr().SendPacket(out);
+
+				bIsMove = true;
+			}
+			else
+			{
+				if (bIsMove == true)
+				{
+					OutputStream out;
+					out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterWait);
+					out << this->ObjectID;
+					out << this->GetActorLocation();
+					out.CompletePacketBuild();
+					GetNetMgr().SendPacket(out);
+				}
+
+				bIsMove = false;
 			}
 		}
 		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Velocity : %s"), *GetCharacterMovement()->Velocity.ToString()));
 	}
+	else
+	{
+		if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+			bIsMove = true;
+		else	
+			bIsMove = false;
+	}
 
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
-	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
-	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 
 
@@ -184,11 +235,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
-	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
-	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
-	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
-	MyAnimInstance->SetOwnerCharacter(this);
+
 
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
@@ -216,17 +263,11 @@ void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
 
-
-	ScaleVector = FVector(2.5f, 2.5f, 2.5f);
-	CapsuleSize = FVector2D(22.0f, 8.0f);
-	MeshLocationVector = FVector(0.0f, 0.0f, -22.0f);
-	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
-
-	this->SetActorRelativeScale3D(ScaleVector);
-	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
-	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
-	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
-	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
+	UNickNameWidget* NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
+	if (NickNameWidget)
+	{
+		NameTag->SetWidget(NickNameWidget);
+	}
 
 	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
 	
@@ -242,23 +283,20 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead)
+	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead )
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
+		if (bInitialized == false)
+			check(false);
+
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
-		bIsMove = true;
 	}
-	else
-	{
-		bIsMove = false;
-	}
-
 }
 
 void APlayerCharacter::MoveRight(float Value)
@@ -273,9 +311,7 @@ void APlayerCharacter::MoveRight(float Value)
 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
-		bIsMove = true;
 	}
-
 }
 
 
@@ -437,17 +473,20 @@ void APlayerCharacter::Attack()
 	{
 		bIsAttack = true;
 		MyAnimInstance->PlayAttackMontage();
+		
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out << ComboCount;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
 	}
 	else
 		bSavedCombo = true;
 
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
-	out << ComboCount;
-	out << GetActorLocation();
-	out << GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
+
 
 }
 
@@ -460,14 +499,99 @@ void APlayerCharacter::Sprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	bIsSprint = true;
-	UE_LOG(LogTemp, Warning, TEXT("Sprint"));
+
+	if (Cast<APlayerController>(GetController()))
+	{
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterSprint);
+		out << this->ObjectID;
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
+		UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Send"));
+	}
 }
 
 void APlayerCharacter::SprintEnd()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 	bIsSprint = false;
+
 	UE_LOG(LogTemp, Warning, TEXT("Sprint END"));
+}
+
+void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterData & Data)
+{
+	bInitialized = true;
+
+	bIsPlayer = bIsPlayerCharacter;
+
+	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
+
+	if (bIsPlayerCharacter)
+	{
+		Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+		MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+		MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+		MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
+	}
+	else
+	{
+		Equipments.BodyComponent->SetAnimInstanceClass(RemoteAnimInstance);
+		MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+	}
+		MyAnimInstance->SetOwnerCharacter(this);
+	
+		ObjectID = Data.ObjectID;
+		PlayerStatComp->SetCurrentHP(Data.Current_HP);
+		PlayerStatComp->SetMaxHP(Data.Max_HP);
+		PlayerStatComp->SetAttack_Min(Data.Attack_Min);
+		PlayerStatComp->SetAttack_Max(Data.Attack_Max);
+		PlayerStatComp->SetAttack_Range(Data.Attack_Range);
+		PlayerStatComp->SetAttack_Speed(Data.Attack_Speed);
+		PlayerStatComp->SetSpeed(Data.Speed);
+		PlayerStatComp->SetDefence(Data.Defence);
+		PlayerStatComp->SetLevel(Data.Level);
+		PlayerStatComp->SetGender(Data.Gender);
+		PlayerStatComp->SetSTR(Data.STR);
+		PlayerStatComp->SetDEX(Data.DEX);
+		PlayerStatComp->SetINT(Data.INT);
+		PlayerStatComp->SetCurrentStamina(Data.CurrentStamina);
+		PlayerStatComp->SetMaxStamina(Data.MaxStamina);
+
+		for (int ii = 0; ii < Data.kEquipmentArraySize; ii++)
+		{
+			/*¸Ç¸öÀÏ ¶§ */
+			if (Data.EquipArray[ii].ID == -1)
+			{
+				//FEquipmentTableResource* EqTable;
+
+				const int32 kMalePrimaryBody = 130;
+				const int32 kMalePrimaryHand = 140;
+				const int32 kMalePrimaryLeg = 150;
+				const int32 kMalePrimaryWeapon = 3300001;
+
+				switch (ii)
+				{
+				case 0:
+					ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+					break;
+				case 1:
+					ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+					break;
+				case 2:
+					ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+					break;
+				case 3:
+					GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+						GameInstance->GetWorld(), this);
+					break;
+				}
+			}
+			else
+				GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Data.EquipArray[ii].ID, GetWorld(), this);
+		}
+
 }
 
 void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -500,6 +624,16 @@ void APlayerCharacter::ContinueCombo()
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
 		XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
+
+
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out << ComboCount;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
 	}
 }
 
@@ -516,29 +650,42 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 	UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 
-	ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
-	if (NPC)
+	if (Cast<APlayerController>(GetController()))
 	{
-
-		for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
+		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
+		if (NPC)
 		{
-			if (FlagNpc == NPC)
-				return;
+
+			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
+			{
+				if (FlagNpc == NPC)
+					return;
+			}
+
+			int64 EnemyID = NPC->ObjectID;
+			int64 MyID = this->ObjectID;
+
+			OutputStream out;
+			out.WriteOpcode(ENetworkCSOpcode::kCharcterHitSuccess);
+			out << MyID;
+			out << EnemyID;
+			out << this->GetActorLocation();
+			out << this->GetActorRotation();
+			out.CompletePacketBuild();
+			GetNetMgr().SendPacket(out);
+
+			AttackOverlapList.push_back(NPC);
+
 		}
-
-		int64 EnemyID = NPC->ObjectID;
-		int64 MyID = this->ObjectID;
-	
-		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterCreateRequest);
-		out << MyID;
-		out << EnemyID;
-		out << this->GetActorLocation();
-		out << this->GetActorRotation();
-		out.CompletePacketBuild();
-		GetNetMgr().SendPacket(out);
-
-		AttackOverlapList.push_back(NPC);
-
 	}
+}
+
+void APlayerCharacter::SetIsPlayer(bool is)
+{
+	bIsPlayer = is;
+}
+
+bool APlayerCharacter::GetIsPlayer()
+{
+	return bIsPlayer;
 }

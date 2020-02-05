@@ -10,6 +10,9 @@
 #include "MapManager.h"
 #include "XRGameInstance.generated.h"
 
+const float kSprintMovementSpeed = 750.0f;
+const float kNormalMovementSpeed = 450.0f;
+
 class UIngameGameMode;
 /**
  * 
@@ -18,6 +21,8 @@ UCLASS()
 class XRPROJECT_API UXRGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+
+
 
 public:
 	bool GetIsSuper() { return IsSuper; }
@@ -61,6 +66,8 @@ private:
 	void UpdateMonsterAction(class InputStream& input);
 	void UpdateCharacterMotion(class InputStream& input);
 	void ActorDamaged(class InputStream& input);
+	void CharacterWait(class InputStream& input);
+	void CharacterSprint(class InputStream& input);
 
 	void NotifyChat(class InputStream& input);
 

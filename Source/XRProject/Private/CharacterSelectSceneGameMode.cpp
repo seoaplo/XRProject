@@ -90,9 +90,6 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	else
 		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
 
-
-	
-
 	MyComponent->Gender = Info.gender;
 }
 
@@ -146,8 +143,8 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
 
 	/*캐릭터 선택창 카메라 배치*/
-	MainCameraLocation = FVector(-50.0f, 2740.0f, 170.0f);
-	CharacterActorLocation = MainCameraLocation + FVector(100.0f, 0.0f, 0.0f);
+	MainCameraLocation = FVector(-120.0f, 2740.0f, 200.0f);
+	CharacterActorLocation = MainCameraLocation + FVector(210.0f, 0.0f, 0.0f);
 	MainCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(),
 		MainCameraLocation, FRotator::ZeroRotator);
 
@@ -212,8 +209,17 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
 		input >> Info.weapon_itemid; input >> Info.gender;
 
+		CharacterData InitData;
+		InitData.EquipArray[0].ID = Info.armor_itemid;
+		InitData.EquipArray[1].ID = Info.hand_itemid;
+		InitData.EquipArray[2].ID = Info.shoes_itemid;
+		InitData.EquipArray[3].ID = Info.weapon_itemid;
+
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, -200.0f, 0.0f));
+
+		Character->InitializeCharacter(false, InitData);
+		Character->SetActorEnableCollision(false);
 
 		CreatePlayerCharacter(Character, Info);
 		Character->SetActorHiddenInGame(true);
@@ -256,6 +262,15 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	input >> Info.weapon_itemid; input >> Info.gender;
 	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 		CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
+
+	CharacterData InitData;
+	InitData.EquipArray[0].ID = Info.armor_itemid;
+	InitData.EquipArray[1].ID = Info.hand_itemid;
+	InitData.EquipArray[2].ID = Info.shoes_itemid;
+	InitData.EquipArray[3].ID = Info.weapon_itemid;
+
+	Character->InitializeCharacter(false, InitData);
+	Character->SetActorEnableCollision(false);
 
 	CreatePlayerCharacter(Character, Info);
 	Character->SetActorHiddenInGame(true);
