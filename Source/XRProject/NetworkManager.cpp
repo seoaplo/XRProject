@@ -230,7 +230,7 @@ void UNetworkManager::ReceivePacket()
             if (BufferLength >= PacketLength) {
                 InputStream input(PacketBuffer + ReadLength, PacketLength, 2);
                 {
-                    
+                     
                     std::lock_guard<std::mutex> lock(InputPacketQueueGuard);
 
 
