@@ -24,7 +24,7 @@ public:
 public:
     virtual void Init() override;
     virtual void Shutdown() override;
-	void ReqEnterZone();
+	void LobbytoGame();
     FORCEINLINE UNetworkManager& GetNetworkManager() {
         return *NetworkManager;
 

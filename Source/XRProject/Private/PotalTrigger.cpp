@@ -2,6 +2,8 @@
 
 
 #include "PotalTrigger.h"
+#include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
 
 APotalTrigger::APotalTrigger()
 {
@@ -13,6 +15,7 @@ APotalTrigger::APotalTrigger()
 void APotalTrigger::BeginPlay()
 {
 	Super::BeginPlay();
+	SetActorHiddenInGame(false);
 }
 
 void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* OtherActor)
@@ -20,14 +23,23 @@ void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* 
 	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this)) 
 	{	
-		BeginOverlapDelegate.ExecuteIfBound(ObjectID, OtherActor);
+		BeginOverlapDelegate.ExecuteIfBound(OtherActor);
+		SetSize(10);
 	}
 }
+
+
 void APotalTrigger::OnOverlapEnd(class AActor* OverlappedActor, class AActor* OtherActor)
 {
 	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this))
 	{
-		EndOverlapDelegate.ExecuteIfBound(ObjectID, OtherActor);
+		EndOverlapDelegate.ExecuteIfBound(OtherActor);
 	}
+}
+
+void APotalTrigger::SetSize(float SphereRadius)
+{
+	USphereComponent* Shpere = Cast<USphereComponent>(GetCollisionComponent());
+	SetActorScale3D(FVector(SphereRadius, SphereRadius, SphereRadius));
 }

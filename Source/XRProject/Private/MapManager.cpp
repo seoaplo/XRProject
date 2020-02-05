@@ -5,17 +5,24 @@
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 
-bool UMapManager::Init()
+UMapManager::UMapManager()
 {
-	PlayerID = -1;
-	LevelID = -1;
-	Spawn_Character.Unbind();
-	Delete_Character.Unbind();
-
 	MapList.Add(100, TEXT("LEVEL_Village"));
 	MapList.Add(111, TEXT("LEVEL_Zone_1"));
 	MapList.Add(112, TEXT("LEVEL_Zone_2"));
 	MapList.Add(113, TEXT("LEVLE_Boss"));
+}
+bool UMapManager::Init()
+{
+	PlayerID = -1;
+	LevelID = -1;
+
+	MapPotalData.MapID = -1;
+	MapPotalData.Location = FVector(0.0f, 0.0f, 0.0f);
+	MapPotalData.Distance = 0.0f;
+
+	Spawn_Character.Unbind();
+	Delete_Character.Unbind();
 
 	return true;
 }
@@ -31,11 +38,18 @@ bool UMapManager::Clear()
 		Monster.Value->Destroy();
 	}
 
+	if (MapPotal != nullptr)
+	{
+		MapPotal->Destroy();
+		MapPotal = nullptr;
+	}
 	CharacterList.Reset();
 	MonsterList.Reset();
 
 	CharacterDataList.clear();
 	MonsterDataList.clear();
+
+	InPotalPlayerList.clear();
 
 	return true;
 }
@@ -58,7 +72,12 @@ void UMapManager::ReadMapDataFromServer(InputStream& Input)
 	MonsterDataList.resize(monsterlistsize);
 	ReadMosnterFromServer(Input);
 }
-
+void UMapManager::ReadPotalTriggerFromServer(InputStream& Input)
+{
+	MapPotalData.MapID = Input.ReadInt32();
+	MapPotalData.Location = Input.ReadFVector();
+	MapPotalData.Distance = Input.ReadFloat32();
+}
 void UMapManager::ReadMosnterFromServer(InputStream& Input)
 {
 
@@ -261,6 +280,27 @@ bool UMapManager::OpenMap(UWorld* World)
 	UGameplayStatics::OpenLevel(World, *LevelName);
 	return true;
 }
+
+bool UMapManager::PotalTriggerSpawn(UWorld* world)
+{
+
+	if (MapPotalData.MapID < 0) return false;
+
+	FActorSpawnParameters Param;
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AActor* actor =
+		world->SpawnActor
+		(APotalTrigger::StaticClass(), &MapPotalData.Location, &FRotator(0,0,0), Param);
+
+	if (actor == nullptr) return false;
+	MapPotal = Cast<APotalTrigger>(actor);
+	MapPotal->MapID = MapPotalData.MapID;
+
+	MapPotal->BeginOverlapDelegate.BindUObject(this, UMapManager::PotalInPlayer);
+	MapPotal->EndOverlapDelegate.BindUObject(this, UMapManager::PotalOutPlayer);
+
+	return true;
+}
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
@@ -271,6 +311,9 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 		AActor* actor =
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
+		
+		if (actor == nullptr) return false;
+ 		
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
 
@@ -373,4 +416,48 @@ bool UMapManager::RemotePlayerSpawn(UWorld* world)
 bool UMapManager::DeleteRemotePlayer(UWorld* World)
 {
 	return false;
+}
+void UMapManager::PotalInPlayer(AActor* Character)
+{
+	APlayerCharacter* Player = Cast<APlayerCharacter>(Character);
+	if (Player == nullptr) return;
+
+	const int64_t* Key = CharacterList.FindKey(Player);
+	if (Key == nullptr) return;
+
+	auto FindKey = std::find(InPotalPlayerList.front, InPotalPlayerList.end, *Key);
+	if (FindKey == InPotalPlayerList.end())
+	{
+		InPotalPlayerList.push_back(*Key);
+	}
+	if (InPotalPlayerList.size() == CharacterList.GetAllocatedSize())
+	{
+		SendChangeZoneFromClient();
+	}
+}
+void UMapManager::PotalOutPlayer(AActor* Character)
+{
+	APlayerCharacter* Player = Cast<APlayerCharacter>(Character);
+	if (Player == nullptr) return;
+
+	const int64_t* Key = CharacterList.FindKey(Player);
+	if (Key == nullptr) return;
+
+	auto FindKey = std::find(InPotalPlayerList.front, InPotalPlayerList.end, *Key);
+	if (FindKey != InPotalPlayerList.end())
+	{
+		InPotalPlayerList.erase(FindKey);
+	}
+}
+// 서버로 데이터 송신
+void UMapManager::SendChangeZoneFromClient()
+{
+	XRLOG(Warning, TEXT("ZoneChange"));
+
+	std::string ID = AccountManager::GetInstance().GetAccountID();
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kZoneConrifmRequest);
+	out.WriteInt32(MapPotalData.MapID);
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
 }

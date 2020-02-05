@@ -53,7 +53,7 @@ void UXRGameInstance::Shutdown()
     UNetworkManager::Instance = nullptr;
 }
 
-void UXRGameInstance::ReqEnterZone()
+void UXRGameInstance::LobbytoGame()
 {
 	std::string Ip = AccountManager::GetInstance().GetInGameIP();
 	int16 Port = AccountManager::GetInstance().GetInGamePort();
