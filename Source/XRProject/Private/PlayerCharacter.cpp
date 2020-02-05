@@ -2,14 +2,22 @@
 
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
+#include "WidgetTree.h"
 #include "XRGameInstance.h"
 #include "Animation/AnimBlueprint.h"
 #include "AccountManager.h"
 #include "Components/InputComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "NonePlayerCharacter.h"
+#include "NickNameWidget.h"
+
 APlayerCharacter::APlayerCharacter()
 {
+	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	NameTag->SetupAttachment(GetRootComponent());
+	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
+
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -209,7 +217,13 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
-
+	//
+	UNickNameWidget* NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
+	if (NickNameWidget)
+	{
+		NameTag->SetWidget(NickNameWidget);
+	}
+	//
 
 	ScaleVector = FVector(2.5f, 2.5f, 2.5f);
 	CapsuleSize = FVector2D(22.0f, 8.0f);
@@ -387,6 +401,9 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh 
 
 float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEvent, AController * EventInstigator, AActor * DamageCauser)
 {
+	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	XRLOG(Warning, TEXT("Player SetHP  : %f"), Damage);
 	ANonePlayerCharacter* NPC = nullptr;
 	if (DamageCauser != nullptr)
 	{

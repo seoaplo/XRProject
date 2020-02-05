@@ -11,6 +11,7 @@
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
+#include "UserWidget.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
@@ -88,6 +89,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
+	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
+		class UWidgetComponent* NameTag;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
