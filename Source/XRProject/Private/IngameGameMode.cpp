@@ -34,7 +34,6 @@ void AIngameGameMode::BeginPlay()
 	PrimaryActorTick.bCanEverTick = true;
 
 	IsSuper = Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper();
-	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
 	GetMapMgr().PlayerListSpawn(GetWorld());
 	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
@@ -62,9 +61,7 @@ void AIngameGameMode::Tick(float deltatime)
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	GetNetMgr().Close();
 }
-
 
 void AIngameGameMode::SpawnRemotePlayer()
 {
