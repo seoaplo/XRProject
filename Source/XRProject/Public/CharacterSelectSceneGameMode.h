@@ -51,8 +51,12 @@ public:
 
 public:
 	std::vector<APlayerCharacter*> CharacterList; // ���� ������ ������ ĳ������ ����Ʈ(��Ŷ���� �޾ƿ;� �Ѵ�.)
+	
+public:
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Camera")
+		ACameraActor* MainCamera;
 private:
-	ACameraActor* MainCamera;
+
 	FVector MainCameraLocation;
 	FVector CharacterActorLocation;
 	class UDataTable* PartsDataTable; //Hair, Face ���������̺�

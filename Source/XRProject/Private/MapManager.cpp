@@ -2,6 +2,7 @@
 
 
 #include "MapManager.h"
+#include "XRGameInstance.h"
 #include "XRPlayerController.h"
 
 bool UMapManager::Init()
@@ -85,8 +86,7 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 {
 	for (int iCount = 0; iCount < CharacterDataList.size() - 1; iCount++)
 	{
-		CharacterData CurrentData;
-
+		CharacterData& CurrentData = CharacterDataList[iCount];
 
 		Input >> CurrentData.ObjectID;
 		Input >> CurrentData.Location;
@@ -266,11 +266,20 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 	if (World == nullptr) return false;
 	for (auto& CurrentData : CharacterDataList)
 	{
+		FActorSpawnParameters Param;
+		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		AActor* actor =
 			World->SpawnActor
-			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator);
-	
-		APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
+			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
+		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
+
+		if(CurrentData.ObjectID != PlayerID)
+			Player->InitializeCharacter(false, CurrentData);
+		else
+			Player->InitializeCharacter(true, CurrentData);
+
+		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
+
 		if (Player)
 		{
 			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);

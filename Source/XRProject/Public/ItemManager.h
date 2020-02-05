@@ -50,7 +50,7 @@ public:
 	void GetIcon(UTexture2D* OutTexture, int ID);
 	TOptional<UItem*> CreateItem(class InputStream& input);
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
-	void BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter = nullptr);
+	void BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter);
 	void LoadItemMeshAssetComplete(FSoftObjectPath AssetPath, UItem* Item, APlayerCharacter* Character);
 
 };

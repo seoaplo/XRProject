@@ -228,9 +228,19 @@ void UNetworkManager::ReceivePacket()
                 break;
             int64 PacketLength = *reinterpret_cast<uint16*>(PacketBuffer + ReadLength);
             if (BufferLength >= PacketLength) {
-                InputStream input(PacketBuffer, PacketLength, 2);
+                InputStream input(PacketBuffer + ReadLength, PacketLength, 2);
                 {
+                     
                     std::lock_guard<std::mutex> lock(InputPacketQueueGuard);
+
+
+                    int16_t opcode = *reinterpret_cast<uint16*>(PacketBuffer + ReadLength + 2);
+                    if (opcode == static_cast<uint16>(ENetworkSCOpcode::kSpawnCharacter)) {
+                        UE_LOG(LogTemp, Warning, TEXT("kSpawnCharacter"));
+                    }
+                    else if (opcode == static_cast<uint16>(ENetworkSCOpcode::kSetMonsterController)) {
+                        UE_LOG(LogTemp, Warning, TEXT("SetMonsterController"));
+                    }
                     InputPacketQueue.push_back(input);
                 }
                 ReadLength += PacketLength;

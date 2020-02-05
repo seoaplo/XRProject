@@ -1,9 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "XRGameInstance.h"
+#include "ChatingManager.h"
 #include "Inventory.h"
 #include "XRAIController.h"
 #include "XRPlayerController.h"
+#include "IngameGameMode.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -27,17 +29,21 @@ void UXRGameInstance::Init()
 		this, &UXRGameInstance::SetMonsterController);
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateMonsterAction)->BindUObject(
 		this, &UXRGameInstance::UpdateMonsterAction);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterWait)->BindUObject(
+		this, &UXRGameInstance::CharacterWait);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterSprint)->BindUObject(
+		this, &UXRGameInstance::CharacterSprint);
 
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyChat)->BindUObject(
+		this, &UXRGameInstance::NotifyChat);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterPosition);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
-		this, &UXRGameInstance::GiveDamageToCharacter);
 		
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
 
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
 	
 
@@ -46,6 +52,7 @@ void UXRGameInstance::Init()
 
 void UXRGameInstance::Shutdown()
 {
+	GetNetMgr().Close();
     NetworkManager->StopThread();
     UNetworkManager::Instance = nullptr;
 }
@@ -139,13 +146,34 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 		return;
 	}
 
+
 	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
 	if (aicon == nullptr)
 	{
 		XRLOG(Warning, TEXT("AICon not found"));
 		return;
 	}
-	else aicon->MoveToLocation(Location, 2, false, false);
+	else
+	{
+		aicon->MoveToLocation(Location, 2, false, false);
+	}
+
+	//TargetPlayer->bIsMove = true;
+
+	//FName CurrentSectionName = TargetPlayer->MyAnimInstance->
+	//	Montage_GetCurrentSection(TargetPlayer->MyAnimInstance->MoveMontageOnlyPlay);
+	//
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentSEction : %s"), *(CurrentSectionName.ToString()));
+
+	//if (CurrentSectionName != FName("RunSection")
+	//	&& CurrentSectionName != FName("SprintSection"))
+	//{
+	//	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RunSection"));
+	//	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	//	UE_LOG(LogTemp, Warning, TEXT("RunSection Playing"));
+	//}
+
 
 }
 
@@ -154,7 +182,7 @@ void UXRGameInstance::SetMonsterController(InputStream& input)
 {
 	bool IsMonsterController = input.ReadBool();
 	IsSuper = IsMonsterController;
-
+	XRLOG(Warning, TEXT("SetMonCon"));
 }
 
 void UXRGameInstance::UpdateMonsterAction(InputStream& input)
@@ -169,27 +197,6 @@ void UXRGameInstance::UpdateMonsterAction(InputStream& input)
 }
 
 
-void UXRGameInstance::GiveDamageToCharacter(InputStream & input)
-{
-	int64 AttackerID = input.ReadInt64();
-	int64 VictimID = input.ReadInt64();
-	float HitDamage = input.ReadFloat32();
-
-	//ANonePlayerCharacter* Attacker = MapMgr.FindPlayer(AttackerID);
-	ANonePlayerCharacter* Attacker = nullptr;
-	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(VictimID);
-
-	TSubclassOf<UDamageType> const ValidDamageTypeClass = TSubclassOf<UDamageType>(UDamageType::StaticClass());
-	FDamageEvent DamageEvent(ValidDamageTypeClass);
-
-	if (Attacker && TargetPlayer)
-	{
-		TargetPlayer->TakeDamage(HitDamage, DamageEvent, Attacker->GetController(), Attacker);
-		TargetPlayer->TakeDamage(HitDamage, DamageEvent, nullptr, nullptr);
-	}
-
-}
-
 void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 {
 	int64 ObjectID = input.ReadInt64();
@@ -197,13 +204,12 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 	FVector TargetLocation = input.ReadFVector();
 	FRotator TargetRotation = input.ReadFRotator();
 
-
-
 	APlayerCharacter* TargetPlayer = nullptr;
 	TargetPlayer = MapManager->FindPlayer(ObjectID);
 
 	if (TargetPlayer)
 	{
+		TargetPlayer->SetActorRotation(TargetRotation);
 		TargetPlayer->MyAnimInstance->PlayAttackOnlyPlayMontage();
 		TargetPlayer->MyAnimInstance->JumpToComboMontageSection(MotionID);
 
@@ -217,90 +223,8 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 
 }
 
-//
-//void AIngameGameMode::SpawnCharacterFromServer(class InputStream& input)
-//{
-//	int64 Id = input.ReadInt64();
-//	FVector Location = input.ReadFVector();
-//	FRotator Rotation = input.ReadFRotator();
-//
-//	MapMgr.SpawnPlayer(Id, Location, Rotation);
-//
-//	float HP = input.ReadFloat32();
-//	float MAXHP = input.ReadFloat32();
-//	float AttackMin = input.ReadFloat32();
-//	float AttackMax = input.ReadFloat32();
-//	float AttackRange = input.ReadFloat32();
-//	float AttackSpeed = input.ReadFloat32();
-//	float Defense = input.ReadFloat32();
-//	float Speed = input.ReadFloat32();
-//	std::string Name = input.ReadCString();
-//	int Level = input.ReadInt32();
-//	int Gender = input.ReadInt32();
-//	int FaceID = input.ReadInt32();
-//	int HairID = input.ReadInt32();
-//	int Str = input.ReadInt32();
-//	int Dex = input.ReadInt32();
-//	int Intel = input.ReadInt32();
-//	float Stamina = input.ReadFloat32();
-//	float MaxStamina = input.ReadFloat32();
-//
-//	APlayerCharacter* Character = nullptr;
-//	Character = GetMapMgr().FindPlayer(Id);
-//	if (Character == nullptr)
-//		check(false);
-//
-//	int EquipmentSize = 4;
-//	for (int i = 0; i < EquipmentSize; i++)
-//	{
-//		int Type = input.ReadInt32();
-//		if (Type)
-//		{
-//			if (Type == 3)
-//			{
-//				int ID = input.ReadInt32();
-//				int AddATK = input.ReadInt32();
-//				int AddDEF = input.ReadInt32();
-//				int AddSTR = input.ReadInt32();
-//				int AddDex = input.ReadInt32();
-//				int AddInt = input.ReadInt32();
-//			}
-//			int Count = input.ReadInt32();
-//		}
-//	}
-//}
-//
-//
-//void AIngameGameMode::SetMonsterController(InputStream& input)
-//{
-//	bool IsMonsterController = input.ReadBool();
-//	IsSuper = IsMonsterController;
-//}
-//
-//void AIngameGameMode::UpdateMonsterAction(InputStream& input)
-//{
-//	auto firstPlayer = Cast<AXRPlayerController>(GetWorld()->GetFirstPlayerController());
-//	if (firstPlayer)
-//	{
-//		if (!firstPlayer->IsSpuer())
-//		{
-//			int64 ObjID = input.ReadInt64();
-//			int32 ActionID = input.ReadInt32();
-//			FVector Location = input.ReadFVector();
-//			FRotator Rotator = input.ReadFRotator();
-//
-//
-//			GEngine->AddOnScreenDebugMessage(112, 5.f, FColor::Blue, FString::Printf(TEXT("Recv MonsterUpdate  ObjectID: %s, ActionID: %s, Location : %s, Rotator: %s"),
-//				*FString::FromInt(ObjID), *FString::FromInt(ActionID),
-//				*Location.ToString(), *Rotator.ToString()));
-//		}
-//	}
-//
-//}
-
 void UXRGameInstance::ActorDamaged(InputStream& input)
 {
-
 	int32 AttackerType = input.ReadInt32();
 	int64 AttackerID = input.ReadInt64();
 	int32 AttackedType = input.ReadInt32();
@@ -316,9 +240,47 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 
 		//AttackedCharacter->TakeDamage(AttackSetHp,FDamageEvent(),AttackerMonster->GetController(), AttackerMonster);
 	}
+}
+
+
+void UXRGameInstance::NotifyChat(class InputStream& input)
+{
+	int32_t Type;
+	std::string ChatString;
+	input >> Type;
+	input >> ChatString;
+	ChatingManager::GetInstance().ReceiveChat(Type, ChatString);
+}
+
+void UXRGameInstance::CharacterWait(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
+	FVector TargetPos = input.ReadFVector();
+
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	
+	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
+	//TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 ==  어색해.
+	
+	//TargetPlayer->bIsMove = false;
+	
+	TargetPlayer->bIsSprint = false;
+	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 
+	UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
+}
 
+void UXRGameInstance::CharacterSprint(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
 
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 
+	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("SprintSection"));
+	//TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
+	TargetPlayer->bIsSprint = true;
+	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
 }

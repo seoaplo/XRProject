@@ -7,7 +7,6 @@
 #include "Engine.h"
 #include "BaseCharacter.h"
 #include "ItemEquipment.h"
-//#include "Engine/BlueprintGeneratedClass.h"
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
@@ -101,6 +100,8 @@ public:
 		class USkeletalMeshComponent* HairComponent;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		TSubclassOf<UAnimInstance> RemoteAnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -131,7 +132,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsSprint;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
-		bool bSavedCombo; //�޺� �������̸�, �����޺��� ������ �� ����
+		bool bSavedCombo;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		int32 ComboCount;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
@@ -149,6 +150,8 @@ private:
 	bool bForwardKeyIsNeutral;
 	std::vector<ANonePlayerCharacter*> AttackOverlapList;
 	int32 CurrentComboCount;
+	bool bIsPlayer;
+	bool bInitialized;
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -165,12 +168,15 @@ public:
 	void Roll();
 	void Sprint();
 	void SprintEnd();
+	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
 
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
-	void ChangePartsComponentsMesh(EPartsType Type, USkeletalMesh* PartsMesh); //���, ���̽� �� ���� ��ȯ
-	
+	void ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset);
+	void SetIsPlayer(bool is);
+	bool GetIsPlayer();
+
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
 		class AActor* DamageCauser) override;
 	

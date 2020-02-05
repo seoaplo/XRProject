@@ -10,6 +10,10 @@
 #include "MapManager.h"
 #include "XRGameInstance.generated.h"
 
+const float kSprintMovementSpeed = 750.0f;
+const float kNormalMovementSpeed = 450.0f;
+
+class UIngameGameMode;
 /**
  * 
  */
@@ -18,13 +22,14 @@ class XRPROJECT_API UXRGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
+
+
 public:
 	bool GetIsSuper() { return IsSuper; }
 public:
     virtual void Init() override;
     virtual void Shutdown() override;
 	void ReqEnterZone();
-
     FORCEINLINE UNetworkManager& GetNetworkManager() {
         return *NetworkManager;
 
@@ -59,9 +64,13 @@ private:
 	void UpdateCharacterPosition(class InputStream& input);
 	void SetMonsterController(class InputStream& input);
 	void UpdateMonsterAction(class InputStream& input);
-	void GiveDamageToCharacter(class InputStream& input);
 	void UpdateCharacterMotion(class InputStream& input);
 	void ActorDamaged(class InputStream& input);
+	void CharacterWait(class InputStream& input);
+	void CharacterSprint(class InputStream& input);
+
+	void NotifyChat(class InputStream& input);
+
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-

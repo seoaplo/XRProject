@@ -1,11 +1,10 @@
 #pragma once
+#include "CustomSingleton.h"
+#include "Item.h"
 
 const int kInventoryHeight = 6;
 const int kInventoryWidth = 5;
 const int kMaxInventorySlotSize = kInventoryHeight * kInventoryWidth;
-
-#include "CustomSingleton.h"
-#include "Item.h"
 
 class Inventory : public CustomSingleton<Inventory>
 {

@@ -52,9 +52,44 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 		FaceAssetPath, EPartsType::FACE, Character);
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
 
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.armor_itemid, GetWorld(), Character);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.hand_itemid, GetWorld(), Character);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
+
+	if (Info.armor_itemid == -1)
+	{
+		FSoftObjectPath NudeAssetPath = nullptr;
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Face)), TEXT("t"));
+		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
+		FStreamableDelegate NudeAssetLoadDelegate;
+		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
+			NudeAssetPath, EPartsType::NUDEBODY, Character);
+		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(NudeAssetPath, NudeAssetLoadDelegate);
+	}
+	else
+		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.armor_itemid, GetWorld(), Character);
+	if (Info.hand_itemid == -1)
+	{
+		FSoftObjectPath NudeAssetPath = nullptr;
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Face)), TEXT("t"));
+		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
+		FStreamableDelegate NudeAssetLoadDelegate;
+		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
+			NudeAssetPath, EPartsType::NUDEHAND, Character);
+		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(NudeAssetPath, NudeAssetLoadDelegate);
+	}
+	else
+		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.hand_itemid, GetWorld(), Character);
+	if (Info.shoes_itemid == -1)
+	{
+		FSoftObjectPath NudeAssetPath = nullptr;
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Face)), TEXT("t"));
+		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
+		FStreamableDelegate NudeAssetLoadDelegate;
+		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
+			NudeAssetPath, EPartsType::NUDELEG, Character);
+		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(NudeAssetPath, NudeAssetLoadDelegate);
+	}
+	else
+		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
+
 	MyComponent->Gender = Info.gender;
 }
 
@@ -108,8 +143,8 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 		this, &ACharacterSelectSceneGameMode::HandleMigrateZone);
 
 	/*캐릭터 선택창 카메라 배치*/
-	MainCameraLocation = FVector(0.0f, 2740.0f, 290.0f);
-	CharacterActorLocation = MainCameraLocation + FVector(100.0f, 0.0f, 0.0f);
+	MainCameraLocation = FVector(-120.0f, 2740.0f, 200.0f);
+	CharacterActorLocation = MainCameraLocation + FVector(210.0f, 0.0f, 0.0f);
 	MainCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(),
 		MainCameraLocation, FRotator::ZeroRotator);
 
@@ -174,8 +209,17 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
 		input >> Info.weapon_itemid; input >> Info.gender;
 
+		CharacterData InitData;
+		InitData.EquipArray[0].ID = Info.armor_itemid;
+		InitData.EquipArray[1].ID = Info.hand_itemid;
+		InitData.EquipArray[2].ID = Info.shoes_itemid;
+		InitData.EquipArray[3].ID = Info.weapon_itemid;
+
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
-			CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
+			CharacterActorLocation, FRotator(0.0f, -200.0f, 0.0f));
+
+		Character->InitializeCharacter(false, InitData);
+		Character->SetActorEnableCollision(false);
 
 		CreatePlayerCharacter(Character, Info);
 		Character->SetActorHiddenInGame(true);
@@ -218,6 +262,15 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	input >> Info.weapon_itemid; input >> Info.gender;
 	APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 		CharacterActorLocation, FRotator(0.0f, 180.0f, 0.0f));
+
+	CharacterData InitData;
+	InitData.EquipArray[0].ID = Info.armor_itemid;
+	InitData.EquipArray[1].ID = Info.hand_itemid;
+	InitData.EquipArray[2].ID = Info.shoes_itemid;
+	InitData.EquipArray[3].ID = Info.weapon_itemid;
+
+	Character->InitializeCharacter(false, InitData);
+	Character->SetActorEnableCollision(false);
 
 	CreatePlayerCharacter(Character, Info);
 	Character->SetActorHiddenInGame(true);

@@ -27,15 +27,19 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	if (ATTACK_MONTAGE_ONLYPLAY.Succeeded())
 	{
 		AttackMontageOnlyPlay = ATTACK_MONTAGE_ONLYPLAY.Object;
+	}	
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		MOVE_MONTAGE_ONLYPLAY(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/MoveMontageOnlyPlay.MoveMontageOnlyPlay'"));
+	if (MOVE_MONTAGE_ONLYPLAY.Succeeded())
+	{
+		MoveMontageOnlyPlay = MOVE_MONTAGE_ONLYPLAY.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		HIT_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/HitMontage.HitMontage'"));
 	if (HIT_MONTAGE.Succeeded())
 		HitMontage = HIT_MONTAGE.Object;
-
-
-
 
 }
 
@@ -44,11 +48,15 @@ UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
 
 }
 
+void UPlayerCharacterAnimInstance::SetOwnerCharacter(APlayerCharacter * MyCharacter)
+{
+	this->MyCharacter = MyCharacter;
+}
+
 void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-	MyCharacter = AccountManager::GetInstance().GetCurrentPlayerCharacter();
-
+	
 	if (MyCharacter)
 	{
 		//CharacterSpeed = MyCharacter->GetCharacterMovement()->Velocity.Size(); //¡÷¿« : velocity crash
@@ -87,6 +95,11 @@ void UPlayerCharacterAnimInstance::PlayAttackOnlyPlayMontage()
 	float ret = Montage_Play(AttackMontageOnlyPlay, 1.f);
 }
 
+void UPlayerCharacterAnimInstance::PlayMoveOnlyPlayMontage()
+{
+	float ret = Montage_Play(MoveMontageOnlyPlay, 1.f);
+}
+
 void UPlayerCharacterAnimInstance::PlayHitMontage()
 {
 	float ret = Montage_Play(HitMontage, 1.f);
@@ -104,8 +117,8 @@ void UPlayerCharacterAnimInstance::JumpToComboMontageSection(int32 Section)
 	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%d"), Section)));
 }
 
-void UPlayerCharacterAnimInstance::JumpToReloadMontageSection(int32 Section)
+void UPlayerCharacterAnimInstance::JumpToMoveMontageSection(FString Section)
 {
-	check((Section <= 4));
-	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%dR"), Section)));
+	Montage_JumpToSection(FName(*Section));
 }
+
