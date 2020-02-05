@@ -209,9 +209,16 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		input >> Info.armor_itemid; input >> Info.hand_itemid; input >> Info.shoes_itemid;
 		input >> Info.weapon_itemid; input >> Info.gender;
 
+		CharacterData InitData;
+		InitData.EquipArray[0].ID = Info.armor_itemid;
+		InitData.EquipArray[1].ID = Info.hand_itemid;
+		InitData.EquipArray[2].ID = Info.shoes_itemid;
+		InitData.EquipArray[3].ID = Info.weapon_itemid;
+
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, -200.0f, 0.0f));
 
+		Character->InitializeCharacter(false, InitData);
 		Character->SetActorEnableCollision(false);
 
 		CreatePlayerCharacter(Character, Info);

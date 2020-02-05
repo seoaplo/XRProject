@@ -97,6 +97,8 @@ public:
 		class USkeletalMeshComponent* HairComponent;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		TSubclassOf<UAnimInstance> RemoteAnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -145,6 +147,8 @@ private:
 	bool bForwardKeyIsNeutral;
 	std::vector<ANonePlayerCharacter*> AttackOverlapList;
 	int32 CurrentComboCount;
+	bool bIsPlayer;
+	bool bInitialized;
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -161,13 +165,16 @@ public:
 	void Roll();
 	void Sprint();
 	void SprintEnd();
-	void InitializeCharacter(CharacterData& Data);
+	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
 
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
 	void ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset); //���, ���̽� �� ���� ��ȯ
 	
+	void SetIsPlayer(bool is);
+	bool GetIsPlayer();
+
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
 		class AActor* DamageCauser) override;
 	

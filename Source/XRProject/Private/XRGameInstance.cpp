@@ -158,16 +158,21 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 		aicon->MoveToLocation(Location, 2, false, false);
 	}
 
+	//TargetPlayer->bIsMove = true;
 
-	FName CurrentSectionName = TargetPlayer->MyAnimInstance->Montage_GetCurrentSection();
-	if (CurrentSectionName != FName("RunSection")
-		&& CurrentSectionName != FName("SprintSection"))
-	{
-		TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-		TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RunSection"));
-		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
-		UE_LOG(LogTemp, Warning, TEXT("RunSection Received"));
-	}
+	//FName CurrentSectionName = TargetPlayer->MyAnimInstance->
+	//	Montage_GetCurrentSection(TargetPlayer->MyAnimInstance->MoveMontageOnlyPlay);
+	//
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentSEction : %s"), *(CurrentSectionName.ToString()));
+
+	//if (CurrentSectionName != FName("RunSection")
+	//	&& CurrentSectionName != FName("SprintSection"))
+	//{
+	//	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RunSection"));
+	//	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	//	UE_LOG(LogTemp, Warning, TEXT("RunSection Playing"));
+	//}
 
 
 }
@@ -254,9 +259,13 @@ void UXRGameInstance::CharacterWait(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	
-	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
-	TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 
+	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
+	//TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 ==  어색해.
+	
+	//TargetPlayer->bIsMove = false;
+	
+	TargetPlayer->bIsSprint = false;
 	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 
 	UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
@@ -268,8 +277,10 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 
-	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("SprintSection"));
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("SprintSection"));
+	//TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
+	TargetPlayer->bIsSprint = true;
 	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
 }

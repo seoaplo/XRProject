@@ -272,57 +272,13 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
+
+		if(CurrentData.ObjectID != PlayerID)
+			Player->InitializeCharacter(false, CurrentData);
+		else
+			Player->InitializeCharacter(true, CurrentData);
+
 		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
-
-		Player->ObjectID = CurrentData.ObjectID;
-		Player->PlayerStatComp->SetCurrentHP(CurrentData.Current_HP);
-		Player->PlayerStatComp->SetMaxHP(CurrentData.Max_HP);
-		Player->PlayerStatComp->SetAttack_Min(CurrentData.Attack_Min);
-		Player->PlayerStatComp->SetAttack_Max(CurrentData.Attack_Max);
-		Player->PlayerStatComp->SetAttack_Range(CurrentData.Attack_Range);
-		Player->PlayerStatComp->SetAttack_Speed(CurrentData.Attack_Speed);
-		Player->PlayerStatComp->SetSpeed(CurrentData.Speed);
-		Player->PlayerStatComp->SetDefence(CurrentData.Defence);
-		Player->PlayerStatComp->SetLevel(CurrentData.Level);
-		Player->PlayerStatComp->SetGender(CurrentData.Gender);
-		Player->PlayerStatComp->SetSTR(CurrentData.STR);
-		Player->PlayerStatComp->SetDEX(CurrentData.DEX);
-		Player->PlayerStatComp->SetINT(CurrentData.INT);
-		Player->PlayerStatComp->SetCurrentStamina(CurrentData.CurrentStamina);
-		Player->PlayerStatComp->SetMaxStamina(CurrentData.MaxStamina);
-
-		for (int ii = 0; ii < CurrentData.kEquipmentArraySize; ii++)
-		{
-			/*¸Ç¸öÀÏ ¶§ */
-			if (CurrentData.EquipArray[ii].ID == -1)
-			{
-				//FEquipmentTableResource* EqTable;
-
-				const int32 kMalePrimaryBody = 130;
-				const int32 kMalePrimaryHand = 140;
-				const int32 kMalePrimaryLeg = 150;
-				const int32 kMalePrimaryWeapon = 3300001;
-
-				switch (ii)
-				{
-					case 0:
-						Player->ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
-						break;
-					case 1:
-						Player->ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
-						break;
-					case 2:
-						Player->ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
-						break;
-					case 3:
-						GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
-							Player->GetWorld(), Player);
-						break;
-				}
-			}
-			else
-				GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.EquipArray[ii].ID, World, Player);
-		}
 
 		if (Player)
 		{
