@@ -69,14 +69,6 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
 
-	
-}
-
-void ANonePlayerCharacter::PossessedBy(AController* Cntr)
-{
-	Super::PossessedBy(Cntr);
-	AICon = Cast<AXRAIController>(GetController());
-	XRLOG(Warning,TEXT("%s PossessedBy %s"),*GetName(),*Cntr->GetName())
 		if (CurrentLoadState == ECharacterLoadState::READY && CurrentLifeState == ECharacterLifeState::ALIVE)
 		{
 			auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
@@ -88,6 +80,14 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 				}
 			}
 		}
+	
+}
+
+void ANonePlayerCharacter::PossessedBy(AController* Cntr)
+{
+	Super::PossessedBy(Cntr);
+	AICon = Cast<AXRAIController>(GetController());
+	XRLOG(Warning, TEXT("%s PossessedBy %s"), *GetName(), *Cntr->GetName())
 }
 
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -255,24 +255,25 @@ void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent,
 	auto castPlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (castPlayerCharacter)
 	{
-		auto FindListCharacter = AttackOverlapList.Find(castPlayerCharacter);
-		if (!AttackOverlapList.IsValidIndex(FindListCharacter))
+		auto PlayerCon = Cast<APlayerController>(castPlayerCharacter->GetController());
+		if (PlayerCon)
 		{
-			AttackOverlapList.AddUnique(castPlayerCharacter);
-			XRLOG(Warning, TEXT("OverlapPlayer"));
-			OutputStream out;
-			out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
-			out << ObjectID;
-			out << castPlayerCharacter->ObjectID;
-			out << 1;
-			out << GetActorLocation();
-			out << GetActorRotation();
-			out.CompletePacketBuild();
-			GetNetMgr().SendPacket(out);
-		
-
+			auto FindListCharacter = AttackOverlapList.Find(castPlayerCharacter);
+			if (!AttackOverlapList.IsValidIndex(FindListCharacter))
+			{
+				AttackOverlapList.AddUnique(castPlayerCharacter);
+				XRLOG(Warning, TEXT("OverlapPlayer"));
+				OutputStream out;
+				out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
+				out << ObjectID;
+				out << castPlayerCharacter->ObjectID;
+				out << 1;
+				out << GetActorLocation();
+				out << GetActorRotation();
+				out.CompletePacketBuild();
+				GetNetMgr().SendPacket(out);
+			}
 		}
-
 	}
 }
 

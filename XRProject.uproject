@@ -12,7 +12,8 @@
 				"Engine",
 				"UMG",
 				"CoreUObject",
-				"UMGEditor"
+				"UMGEditor",
+				"AIModule"
 			]
 		}
 	]
