@@ -15,6 +15,8 @@
 /*
 //작성자 조재진
 */
+
+
 UENUM()
 enum class NPCType : uint8
 {
@@ -32,6 +34,8 @@ public:
 	UPROPERTY(EditAnywhere)
 		int32 AggroGaze = 0;
 };
+
+
 
 
 USTRUCT(BlueprintType)
@@ -66,6 +70,7 @@ public:
 };
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcHitReactDelegate);
 
 /**
  *
@@ -111,6 +116,13 @@ private:
 
 	///사용자 정의 변수///
 public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bInBattle;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bCanNextAttack;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bCanHitReaction;
+
 	UPROPERTY()
 		class UDataTable* NPCDataTable;
 
@@ -131,7 +143,8 @@ public:
 		virtual void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
 
 
-
+	UFUNCTION(BlueprintCallable)
+		virtual void SetInBattle(bool battle);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<APlayerCharacter*> AttackOverlapList;

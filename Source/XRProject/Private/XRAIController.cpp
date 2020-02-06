@@ -31,8 +31,8 @@ AXRAIController::AXRAIController()
 
 	EnermyPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("EnermySensing"));
 	SightConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
-	SightConfig->SightRadius = 2000.f;
-	SightConfig->LoseSightRadius = 2000.f + 50.f;
+	SightConfig->SightRadius = 1000.f;
+	SightConfig->LoseSightRadius = 1000.f + 50.f;
 	SightConfig->PeripheralVisionAngleDegrees = 85.f;
 	SightConfig->SetMaxAge(10.f);
 

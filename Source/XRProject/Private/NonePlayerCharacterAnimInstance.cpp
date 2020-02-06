@@ -14,6 +14,7 @@ void UNonePlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (NpcCharacter)
 	{
 		CurrentSpeed = NpcCharacter->GetVelocity().Size();
+		bInBattle = NpcCharacter->bInBattle;
 	}
 }
 

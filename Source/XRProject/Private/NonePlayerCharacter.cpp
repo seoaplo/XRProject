@@ -28,11 +28,11 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
 
-
+	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
 	
-	AIControllerClass = AXRAIController::StaticClass();
+	AIControllerClass = AXRAIController::StaticClass(); 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -60,9 +60,6 @@ void ANonePlayerCharacter::BeginPlay()
 {
 	ACharacter::BeginPlay();
 	
-
-
-
 
 
 }
@@ -96,6 +93,15 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	EnermyStatComponent->SetCurrentHP(EnermyStatComponent->GetCurrentHP() - DamageAmount);
+
+	auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	if (npcAnim)
+	{
+		if (!npcAnim->IsAnyMontagePlaying())
+		{
+			npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
+		}
+	}
 	return DamageAmount;
 }
 
@@ -271,6 +277,12 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	GetNetMgr().SendPacket(out);
 }
 
+void ANonePlayerCharacter::SetInBattle(bool battle)
+{
+	bInBattle = battle;
+	SendAction(2000, FVector(bInBattle, 0, 0), FRotator(0, 0, 0));
+}
+
 void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 {
 	auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
@@ -287,6 +299,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 				AttackOverlapList.Reset();
 				AICon->StopMovement();
 				SetActorLocation(Location);
+				
 				SetActorRotation(Rotator);
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (npcAnim)
@@ -297,6 +310,17 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			else if (ActionID >= 1000)
 			{
 				AICon->MoveToLocation(Location, 2, false, false);
+			}
+			else if (ActionID == 2000)
+			{
+				if (FMath::IsNearlyZero(Location.X))
+				{
+					bInBattle = false;
+				}
+				else
+				{
+					bInBattle = true;
+				}
 			}
 		}
 	}
