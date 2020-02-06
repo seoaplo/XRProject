@@ -2,17 +2,22 @@
 
 
 #include "PotalTrigger.h"
+#include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
+#include "XRGameInstance.h"
 
 APotalTrigger::APotalTrigger()
 {
 	//Register Events
 	OnActorBeginOverlap.AddDynamic(this, &APotalTrigger::OnOverlapBegin);
 	OnActorEndOverlap.AddDynamic(this, &APotalTrigger::OnOverlapEnd);
+
 }
 
 void APotalTrigger::BeginPlay()
 {
 	Super::BeginPlay();
+	SetActorHiddenInGame(false);
 }
 
 void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* OtherActor)
@@ -20,14 +25,22 @@ void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* 
 	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this)) 
 	{	
-		BeginOverlapDelegate.ExecuteIfBound(ObjectID, OtherActor);
+		GetMapMgr().PotalInPlayer(OtherActor);
 	}
 }
+
+
 void APotalTrigger::OnOverlapEnd(class AActor* OverlappedActor, class AActor* OtherActor)
 {
 	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this))
 	{
-		EndOverlapDelegate.ExecuteIfBound(ObjectID, OtherActor);
+		EndOverlapDelegate.ExecuteIfBound(OtherActor);
 	}
+}
+
+void APotalTrigger::SetSize(float SphereRadius)
+{
+	USphereComponent* Shpere = Cast<USphereComponent>(GetCollisionComponent());
+	SetActorScale3D(FVector(SphereRadius, SphereRadius, SphereRadius));
 }

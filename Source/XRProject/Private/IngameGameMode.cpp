@@ -11,7 +11,6 @@
 class APlayerCharacter;
 AIngameGameMode::AIngameGameMode()
 {
-	IsSuper = false;
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerControllerClass = AXRPlayerController::StaticClass();
 }
@@ -33,7 +32,6 @@ void AIngameGameMode::BeginPlay()
 	}
 	PrimaryActorTick.bCanEverTick = true;
 
-	IsSuper = Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper();
 	GetMapMgr().PlayerListSpawn(GetWorld());
 	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
@@ -51,10 +49,6 @@ void AIngameGameMode::BeginPlay()
 void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
-	if (Cast<UXRGameInstance>(GetGameInstance())->GetIsSuper())
-	{
-		IsSuper = true;
-	}
 	GetNetMgr().Update();
 }
 

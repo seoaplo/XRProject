@@ -5,17 +5,20 @@
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 
-bool UMapManager::Init()
+UMapManager::UMapManager()
 {
-	PlayerID = -1;
-	LevelID = -1;
-	Spawn_Character.Unbind();
-	Delete_Character.Unbind();
-
 	MapList.Add(100, TEXT("LEVEL_Village"));
 	MapList.Add(111, TEXT("LEVEL_Zone_1"));
 	MapList.Add(112, TEXT("LEVEL_Zone_2"));
 	MapList.Add(113, TEXT("LEVLE_Boss"));
+}
+bool UMapManager::Init()
+{
+	PlayerID = -1;
+	LevelID = -1;
+
+	Spawn_Character.Unbind();
+	Delete_Character.Unbind();
 
 	return true;
 }
@@ -30,7 +33,6 @@ bool UMapManager::Clear()
 	{
 		Monster.Value->Destroy();
 	}
-
 	CharacterList.Reset();
 	MonsterList.Reset();
 
@@ -58,7 +60,6 @@ void UMapManager::ReadMapDataFromServer(InputStream& Input)
 	MonsterDataList.resize(monsterlistsize);
 	ReadMosnterFromServer(Input);
 }
-
 void UMapManager::ReadMosnterFromServer(InputStream& Input)
 {
 
@@ -261,6 +262,7 @@ bool UMapManager::OpenMap(UWorld* World)
 	UGameplayStatics::OpenLevel(World, *LevelName);
 	return true;
 }
+
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
@@ -271,6 +273,9 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 		AActor* actor =
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
+		
+		if (actor == nullptr) return false;
+ 		
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 
 		if(CurrentData.ObjectID != PlayerID)
@@ -346,4 +351,21 @@ bool UMapManager::RemotePlayerSpawn(UWorld* world)
 bool UMapManager::DeleteRemotePlayer(UWorld* World)
 {
 	return false;
+}
+void UMapManager::PotalInPlayer(AActor* OtherCharacter)
+{
+	APlayerCharacter* Character = Cast<APlayerCharacter>(OtherCharacter);
+	if (PlayerCharacter != Character) return;
+
+	SendChangeZoneFromClient();
+}
+// 서버로 데이터 송신
+void UMapManager::SendChangeZoneFromClient()
+{
+	XRLOG(Warning, TEXT("ZoneChange"));
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kRequestChangeZone);
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
 }

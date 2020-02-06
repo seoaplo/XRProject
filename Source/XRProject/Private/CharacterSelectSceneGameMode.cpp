@@ -241,7 +241,7 @@ void ACharacterSelectSceneGameMode::HandleMigrateZone(InputStream& input)
 
 	GetNetMgr().Close();
 	
-	Cast<UXRGameInstance>(GetGameInstance())->ReqEnterZone();
+	Cast<UXRGameInstance>(GetGameInstance())->LobbytoGame();
 }
 
 void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)

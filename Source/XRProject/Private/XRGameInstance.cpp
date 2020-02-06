@@ -49,8 +49,6 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterDead)->BindUObject(
 		this, &UXRGameInstance::CharacterDead);
 
-
-	
 }
 
 void UXRGameInstance::Shutdown()
@@ -60,7 +58,7 @@ void UXRGameInstance::Shutdown()
     UNetworkManager::Instance = nullptr;
 }
 
-void UXRGameInstance::ReqEnterZone()
+void UXRGameInstance::LobbytoGame()
 {
 	std::string Ip = AccountManager::GetInstance().GetInGameIP();
 	int16 Port = AccountManager::GetInstance().GetInGamePort();
@@ -89,6 +87,8 @@ void UXRGameInstance::HandleEnterZone(InputStream & input)
 	ReadQuickSlot(input);
 	MapManager->OpenMap(GetWorld());
 }
+
+
 
 void UXRGameInstance::ReadBaseCharacterInfo(InputStream & input)
 {

@@ -10,6 +10,7 @@
 #include "NetworkManager.h"
 #include "PlayerCharacter.h"
 #include "NonePlayerCharacter.h"
+#include "PotalTrigger.h"
 #include "UObject/NoExportTypes.h"
 #include "MapManager.generated.h"
 
@@ -17,12 +18,15 @@
  * 작성자 : 서승석
  */
 
+
 DECLARE_DELEGATE(CharacterDataProcess)
 
 UCLASS()
 class XRPROJECT_API UMapManager : public UObject
 {
 	GENERATED_BODY()
+public:
+	UMapManager();
 public:
 	int64_t GetPlayerID() { return PlayerID; }
 	APlayerCharacter* GetPlayer() { return PlayerCharacter; }
@@ -38,7 +42,8 @@ public:
 	bool ReadPlayerSpawnFromServer(InputStream& Input);
 	bool ReadPlayerDeleteFromServer(InputStream& Input);
 
-
+	// 서버로 데이터 송신
+	void SendChangeZoneFromClient();
 
 	// 오브젝트 탐색
 	APlayerCharacter* FindPlayer(int64_t ObjectID);
@@ -46,12 +51,14 @@ public:
 	
 	// 오픈 레벨
 	bool OpenMap(UWorld* World);
-	// 스폰 함수들
 	bool PlayerListSpawn(UWorld* world);
 	bool MonsterListSpawn(UWorld* world);
+	//bool TriggerListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
 	bool PossessPlayer(UWorld* World);
-
+	// 포탈 관련 함수
+	void PotalInPlayer(AActor* OtherCharacter);
+	// 삭제
 	bool DeleteRemotePlayer(UWorld* World);
 public:
 	CharacterDataProcess Spawn_Character;

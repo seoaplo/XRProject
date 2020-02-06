@@ -24,8 +24,6 @@ public:
 	AIngameGameMode();
 	virtual ~AIngameGameMode();
 public:
-	bool GetIsSuper() { return IsSuper; }
-public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_GameMode")
 		TSubclassOf<UInGameMainWidget> MainWidget;
 	UPROPERTY()
@@ -47,7 +45,5 @@ public:
 	void NotifyMatchCanceled(class InputStream& input);
 private:
 	FTimerHandle PacketExcuteTimerHandle;
-private:
-	bool IsSuper;
 };
 
