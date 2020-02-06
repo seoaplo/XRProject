@@ -284,6 +284,8 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	out << Rotator;
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
+
+	XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 }
 
 void ANonePlayerCharacter::SetInBattle(bool battle)
@@ -303,6 +305,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
 
+			XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 			if (ActionID < 1000)
 			{
 				AttackOverlapList.Reset();
@@ -316,7 +319,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 					PlayAnimMontage(npcAnim->NpcAttackMontage[ActionID]);
 				}
 			}
-			else if (ActionID >= 1000)
+			else if (ActionID == 1000)
 			{
 				AICon->MoveToLocation(Location, 2, false, false);
 			}
