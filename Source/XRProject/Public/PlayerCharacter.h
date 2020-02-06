@@ -158,6 +158,8 @@ private:
 	bool bInitialized;
 	bool bIsTestMode;
 	int32 CurrentAttackID;
+	float ForwardValue; //앞 방향키를 누르고 있는가(-1~1)
+	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
 
 public:
 	virtual void Tick(float Deltatime) override;

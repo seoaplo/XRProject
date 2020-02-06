@@ -148,7 +148,8 @@ APlayerCharacter::APlayerCharacter()
 	bIsPlayer = false;
 	bInitialized = false;
 	bIsTestMode = false;
-
+	ForwardValue = 0.0f;
+	RightValue = 0.0f;
 	
 
 #pragma region TESTCODE
@@ -288,6 +289,10 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float Value)
 {
+	ForwardValue = Value;
+
+	UE_LOG(LogTemp, Warning, TEXT("%f"), Value);
+
 	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead )
 		return;
 
@@ -306,6 +311,8 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
+	RightValue = Value;
+
 	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead)
 		return;
 
@@ -451,7 +458,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 	PlayerStatComp->SetCurrentHP(Damage);
 	
 	if(bIsTestMode == false)
-		UHealthBarWidget::GetInatance()->ApplyHp(PlayerStatComp->GetCurrentHP());
+		UHealthBarWidget::GetInatance()->ApplyHp(this->PlayerStatComp->GetCurrentHP());
 
 
 	//MyAnimInstance->StopAttackMontage();
@@ -510,6 +517,13 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
+	//FMath::IsNearlyEqual
+	//if (ForwardValue > 1.0f && RightValue == 0.0f)
+	//	this->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
+
+
+
+	//this->SetActorRotation(Rot);
 	bIsRolling = true;
 }
 
