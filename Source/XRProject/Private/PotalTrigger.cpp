@@ -4,12 +4,14 @@
 #include "PotalTrigger.h"
 #include "Components/SphereComponent.h"
 #include "DrawDebugHelpers.h"
+#include "XRGameInstance.h"
 
 APotalTrigger::APotalTrigger()
 {
 	//Register Events
 	OnActorBeginOverlap.AddDynamic(this, &APotalTrigger::OnOverlapBegin);
 	OnActorEndOverlap.AddDynamic(this, &APotalTrigger::OnOverlapEnd);
+
 }
 
 void APotalTrigger::BeginPlay()
@@ -23,8 +25,7 @@ void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* 
 	int64_t TargetID = 0;
 	if (OtherActor && (OtherActor != this)) 
 	{	
-		BeginOverlapDelegate.ExecuteIfBound(OtherActor);
-		SetSize(10);
+		GetMapMgr().PotalInPlayer(OtherActor);
 	}
 }
 

@@ -19,12 +19,6 @@
  */
 
 
-struct PotalData
-{
-	int MapID = -1;
-	FVector Location = FVector(0, 0, 0);
-	float Distance = 0.0f;
-};
 DECLARE_DELEGATE(CharacterDataProcess)
 
 UCLASS()
@@ -42,7 +36,6 @@ public:
 
 	// 맵에 입장
 	void ReadMapDataFromServer(InputStream& Input);
-	void ReadPotalTriggerFromServer(InputStream& Input);
 	void ReadPlayerFromServer(InputStream& Input);
 	void ReadPossesPlayerFromServer(InputStream& Input);
 	void ReadMosnterFromServer(InputStream& Input);
@@ -58,16 +51,13 @@ public:
 	
 	// 오픈 레벨
 	bool OpenMap(UWorld* World);
-	// 스폰 함수들
-	bool PotalTriggerSpawn(APotalTrigger* WorldPotalTrigger);
 	bool PlayerListSpawn(UWorld* world);
 	bool MonsterListSpawn(UWorld* world);
 	//bool TriggerListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
 	bool PossessPlayer(UWorld* World);
 	// 포탈 관련 함수
-	void PotalInPlayer(AActor* Character);
-	void PotalOutPlayer(AActor* Character);
+	void PotalInPlayer(AActor* OtherCharacter);
 	// 삭제
 	bool DeleteRemotePlayer(UWorld* World);
 public:
@@ -77,10 +67,6 @@ private:
 	UPROPERTY()
 	APlayerCharacter* PlayerCharacter;
 
-	UPROPERTY()
-		APotalTrigger* MapPotal;
-
-	PotalData MapPotalData;
 	int32_t LevelID;
 	int64_t PlayerID;
 	std::vector<CharacterData> CharacterDataList;
@@ -89,6 +75,4 @@ private:
 	TMap<int64_t, APlayerCharacter*> CharacterList;
 	TMap<int64_t, ANonePlayerCharacter*> MonsterList;
 	TMap<int32_t, FName> MapList;
-
-	std::list<int64_t> InPotalPlayerList;
 };

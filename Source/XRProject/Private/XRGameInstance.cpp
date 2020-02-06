@@ -45,9 +45,6 @@ void UXRGameInstance::Init()
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
-	
-
-	
 }
 
 void UXRGameInstance::Shutdown()
@@ -86,6 +83,8 @@ void UXRGameInstance::HandleEnterZone(InputStream & input)
 	ReadQuickSlot(input);
 	MapManager->OpenMap(GetWorld());
 }
+
+
 
 void UXRGameInstance::ReadBaseCharacterInfo(InputStream & input)
 {

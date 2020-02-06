@@ -35,6 +35,7 @@ enum class ENetworkCSOpcode : uint16_t
 	kRequestCharacterWait = 1020,
 	kRequestCharacterSprint = 1021,
 
+	kRequestChangeZone = 1022,
 };
 
 
