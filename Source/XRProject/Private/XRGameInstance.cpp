@@ -160,24 +160,6 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		aicon->MoveToLocation(Location, 2, false, false);
 	}
-
-	//TargetPlayer->bIsMove = true;
-
-	//FName CurrentSectionName = TargetPlayer->MyAnimInstance->
-	//	Montage_GetCurrentSection(TargetPlayer->MyAnimInstance->MoveMontageOnlyPlay);
-	//
-	//UE_LOG(LogTemp, Warning, TEXT("CurrentSEction : %s"), *(CurrentSectionName.ToString()));
-
-	//if (CurrentSectionName != FName("RunSection")
-	//	&& CurrentSectionName != FName("SprintSection"))
-	//{
-	//	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	//	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RunSection"));
-	//	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
-	//	UE_LOG(LogTemp, Warning, TEXT("RunSection Playing"));
-	//}
-
-
 }
 
 
@@ -288,12 +270,6 @@ void UXRGameInstance::CharacterWait(InputStream& input)
 	FVector TargetPos = input.ReadFVector();
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
-	
-	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
-	//TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 ==  어색해.
-	
-	//TargetPlayer->bIsMove = false;
 	
 	TargetPlayer->bIsSprint = false;
 	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;

@@ -69,7 +69,7 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
 
-	if (CurrentLoadState == ECharacterLoadState::READY)
+	if (CurrentLoadState == ECharacterLoadState::READY && CurrentLifeState == ECharacterLifeState::ALIVE)
 	{
 		auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
 		if (ingameMode)
@@ -316,7 +316,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 					PlayAnimMontage(npcAnim->NpcAttackMontage[ActionID]);
 				}
 			}
-			else if (ActionID >= 1000)
+			else if (ActionID == 1000)
 			{
 				AICon->MoveToLocation(Location, 2, false, false);
 			}
