@@ -76,4 +76,6 @@ enum class ENetworkSCOpcode : uint16_t
 
 	kNotifyCharacterWait = 1020,
 	kNotifyCharacterSprint = 1021,
+
+	kNotifySpawnPotal = 1022,
 };

@@ -67,6 +67,10 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsHit = MyCharacter->bIsHit;
 	}
 
+	//if (bIsHit)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("HIT ON"));
+	//}
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
@@ -82,6 +86,12 @@ void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 	{
 		MyCharacter->bIsRolling = false;
 	}
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
+{
+	MyCharacter->bIsHit = false;
+	bIsHit = false;
 }
 
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
@@ -108,7 +118,7 @@ void UPlayerCharacterAnimInstance::PlayHitMontage()
 
 void UPlayerCharacterAnimInstance::StopAttackMontage()
 {
-
+	Montage_Stop(0.0f, AttackMontage);
 }
 
 void UPlayerCharacterAnimInstance::JumpToComboMontageSection(int32 Section)

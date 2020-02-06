@@ -11,6 +11,8 @@
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "UserWidget.h"
+#include "HealthBarWidget.h"
+#include "XRPlayerController.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
@@ -115,10 +117,12 @@ public:
 		FVector ScaleVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
 		FVector2D CapsuleSize;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
 		FVector MeshLocationVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
 		FVector WeaponScaleVector;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
+		FVector NameTagLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
@@ -152,6 +156,9 @@ private:
 	int32 CurrentComboCount;
 	bool bIsPlayer;
 	bool bInitialized;
+	bool bIsTestMode;
+	int32 CurrentAttackID;
+
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -169,6 +176,7 @@ public:
 	void Sprint();
 	void SprintEnd();
 	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
+	
 
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
@@ -176,6 +184,8 @@ public:
 	void ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset);
 	void SetIsPlayer(bool is);
 	bool GetIsPlayer();
+	bool GetIsTestMode();
+	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
 		class AActor* DamageCauser) override;
@@ -189,6 +199,11 @@ public:
 		void ContinueCombo();
 	UFUNCTION()
 		void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
+	UFUNCTION(BlueprintCallable, Category ="C_TEST")
+		void TestInitialize();
+
+		virtual	void OnDead() override;
+
 
 	float SumSec = 0;
 };

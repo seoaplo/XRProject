@@ -64,12 +64,15 @@ public:
 		void AnimNotify_CheckNextComboValid();
 	UFUNCTION()
 		void AnimNotify_RollingEnd();
+	UFUNCTION()
+		void AnimNotify_HitMotionEnd();
 
 	void PlayAttackMontage();
 	void PlayAttackOnlyPlayMontage();
 	void PlayMoveOnlyPlayMontage();
 	void StopAttackMontage();
 	void PlayHitMontage();
+	
 
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToMoveMontageSection(FString Section);

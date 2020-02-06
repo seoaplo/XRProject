@@ -237,7 +237,25 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 		ANonePlayerCharacter* AttackerMonster = MapManager->FindMonster(AttackerID);
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
 
-		//AttackedCharacter->TakeDamage(AttackSetHp,FDamageEvent(),AttackerMonster->GetController(), AttackerMonster);
+		if (AttackerMonster)
+		{
+			if (AttackedCharacter == MapManager->GetPlayer())
+				AttackedCharacter->TakeDamage(AttackSetHp, FDamageEvent(), AttackerMonster->GetController(), AttackerMonster);
+			else
+				AttackedCharacter->MyAnimInstance->PlayHitMontage();
+		}
+
+	}
+	else if (AttackerType == 0)
+	{
+		APlayerCharacter* AttackerCharacter = MapManager->FindPlayer(AttackerID);
+		ANonePlayerCharacter* AttackedMonster = MapManager->FindMonster(AttackedID);
+
+		if (AttackerCharacter)
+		{
+			AttackedMonster->NpcTakeDamaged(AttackSetHp, AttackerCharacter->GetController(), AttackerCharacter->ObjectID);
+			UE_LOG(LogTemp, Warning, TEXT("Monster Damaged. ginstance258"));
+		}
 	}
 }
 
@@ -282,4 +300,20 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	TargetPlayer->bIsSprint = true;
 	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+}
+
+
+void UXRGameInstance::CharacterHit(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
+	int32 AttackType = input.ReadInt32();
+
+
+
+}
+
+void UXRGameInstance::CharacterDead(InputStream& input)
+{
+
+
 }

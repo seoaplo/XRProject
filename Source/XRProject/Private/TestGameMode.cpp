@@ -20,9 +20,13 @@ ATestGameMode::~ATestGameMode()
 
 void ATestGameMode::BeginPlay()
 {
-	Super::BeginPlay();
 
-	FVector Loc = FVector(0.0f, 0.0f, 200.0f);
+	Super::BeginPlay();
+	
+	auto GameInstance = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+
+
+	FVector Loc = FVector(100.0f, 100.0f, 100.0f);
 	FRotator Rot = FRotator(0.0f, 0.0f, 0.0f);
 	FActorSpawnParameters param;
 	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -30,6 +34,19 @@ void ATestGameMode::BeginPlay()
 		(ANonePlayerCharacter::StaticClass(), &Loc, &Rot, param);
 
 	ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
+
+
+
+
+	Loc = FVector(100.0f, 0.0f, 200.0f);
+	Rot = FRotator(0.0f, 0.0f, 0.0f);
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	AActor* actor2 = GetWorld()->SpawnActor
+	(APlayerCharacter::StaticClass(), &Loc, &Rot, param);
+
+	APlayerCharacter* Character = Cast<APlayerCharacter>(actor2);
+	Character->TestInitialize();
+
 	
 }
 
