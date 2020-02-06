@@ -77,9 +77,19 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 				if (ingameMode->GetIsSuper())
 				{
 					AICon->RunAI();
+
+						SumSec += DeltaTime;
+						if (SumSec >= 0.2f) {
+							SumSec = 0.0f;
+							SendAction(1000, GetActorLocation(), GetActorRotation());
+						}
+					
 				}
 			}
 		}
+
+
+
 	
 }
 
@@ -288,7 +298,7 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
 
-	XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+	//XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 }
 
 void ANonePlayerCharacter::SetInBattle(bool battle)
@@ -312,8 +322,8 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			if (ActionID < 1000)
 			{
 				AttackOverlapList.Reset();
-				AICon->StopMovement();
-				SetActorLocation(Location);
+				//AICon->StopMovement();
+				//SetActorLocation(Location);
 				
 				SetActorRotation(Rotator);
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
@@ -325,6 +335,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			else if (ActionID == 1000)
 			{
 				AICon->MoveToLocation(Location, 2, false, false);
+				AICon->SetControlRotation(Rotator);
 			}
 			else if (ActionID == 2000)
 			{
