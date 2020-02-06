@@ -617,7 +617,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		{
 			NickNameWidget->SettingName(this->PlayerStatComp->GetCharacterName());
 			NickNameWidget->SettingLevel(this->PlayerStatComp->GetLevel());
-			NickNameWidget->SettingTitle(TEXT("집에가고싶은"));
+			NickNameWidget->SettingTitle(TEXT("Title Sample"));
 			NameTag->SetWidget(NickNameWidget);
 		}
 		NameTag->SetRelativeLocation(NameTagLocation);
@@ -784,4 +784,26 @@ bool APlayerCharacter::GetIsPlayer()
 bool APlayerCharacter::GetIsTestMode()
 {
 	return bIsTestMode;
+}
+
+UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
+{
+	switch (Type)
+	{
+		case EEquipmentsType::BODY:
+			return Equipments.BodyItem;
+			break;
+		case EEquipmentsType::HANDS:
+			return Equipments.HandsItem;
+			break;
+		case EEquipmentsType::LEGS:
+			return Equipments.LegsItem;
+			break;
+		case EEquipmentsType::WEAPON:
+			return Equipments.WeaponItem;
+			break;
+	}
+
+	check(false);
+	return nullptr;
 }
