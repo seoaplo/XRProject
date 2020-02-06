@@ -7,6 +7,10 @@
 #include "CharacterStatComponent.h"
 #include "BaseCharacter.generated.h"
 
+
+/*
+//작성자 조재진
+*/
 UENUM()
 enum class ECharacterLoadState : uint8
 {
@@ -22,6 +26,10 @@ enum class ECharacterLifeState : uint8
 	ALIVE,
 	DEAD
 };
+
+
+
+
 
 
 
@@ -72,6 +80,7 @@ public:
 
 	UPROPERTY()
 		int64 ObjectID;
+
 
 
 protected:

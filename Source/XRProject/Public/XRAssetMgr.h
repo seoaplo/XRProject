@@ -35,7 +35,7 @@ public:
 private:
 
 	TMap<uint32,TArray<struct FAssetData>> AssetDatas;
-	TMap<FString,struct FSoftObjectPath> AssetSoftPathList;
+	TMap<int32,struct FSoftObjectPath> AssetSoftPathList;
 
 	UPROPERTY()
 	class UDataTable* ResourceDataTable;

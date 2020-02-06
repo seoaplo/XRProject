@@ -27,7 +27,7 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
 
  void UCharacterStatComponent::SetCurrentHP(float NewHP) { 
 	 Current_HP = FMath::Clamp(NewHP, 0.f, Max_HP);
-	 if (Current_HP >= 0.f)
+	 if (Current_HP <= 0.f)
 	 {
 		 OnHPZero.Broadcast();
 	 }
@@ -51,7 +51,7 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
  const float UCharacterStatComponent::GetMaxHP() const { return Max_HP; }
 
  void UCharacterStatComponent::SetMaxHP(float NewHP) {
-	 Max_HP = FMath::Min(NewHP, 0.f); 
+	 Max_HP = FMath::Max(NewHP, 0.f); 
 	 OnStatChange.Broadcast();
  }
 
@@ -59,7 +59,7 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
  const float UCharacterStatComponent::GetAttack_Min() const { return Attack_Min; }
 
  void UCharacterStatComponent::SetAttack_Min(float NewAttack_Min) { 
-	 Attack_Min = FMath::Min(NewAttack_Min, 0.f); 
+	 Attack_Min = FMath::Max(NewAttack_Min, 0.f);
 	 OnStatChange.Broadcast();
  }
 
@@ -73,21 +73,21 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
  const float UCharacterStatComponent::GetAttack_Range() const { return Attack_Range; }
 
  void UCharacterStatComponent::SetAttack_Range(float NewAttack_Range) { 
-	 Attack_Range = FMath::Min(NewAttack_Range, 0.f);
+	 Attack_Range = FMath::Max(NewAttack_Range, 0.f);
 	 OnStatChange.Broadcast();
  }
 
  const float UCharacterStatComponent::GetAttack_Speed() const { return Attack_Speed; }
 
  void UCharacterStatComponent::SetAttack_Speed(float NewAttack_Speed) { 
-	 Attack_Speed = FMath::Min(NewAttack_Speed, 0.f);
+	 Attack_Speed = FMath::Max(NewAttack_Speed, 0.f);
 	 OnStatChange.Broadcast();
  }
 
  const float UCharacterStatComponent::GetSpeed() const { return Speed; }
 
  void UCharacterStatComponent::SetSpeed(float NewSpeed) { 
-	 Speed = FMath::Min(NewSpeed, 0.f); 
+	 Speed = FMath::Max(NewSpeed, 0.f);
 	 OnStatChange.Broadcast();
  }
 

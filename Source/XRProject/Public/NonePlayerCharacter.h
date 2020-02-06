@@ -12,7 +12,9 @@
 #include "NetworkManager.h"
 #include "NonePlayerCharacterAnimInstance.h"
 #include "NonePlayerCharacter.generated.h"
-
+/*
+//작성자 조재진
+*/
 UENUM()
 enum class NPCType : uint8
 {
@@ -28,7 +30,7 @@ public:
 	UPROPERTY(EditAnywhere)
 		ABaseCharacter* AggroCharacter;
 	UPROPERTY(EditAnywhere)
-		int32 AggroGaze=0;
+		int32 AggroGaze = 0;
 };
 
 
@@ -43,6 +45,10 @@ public:
 		int32 MonsterSkeletalID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 		int32 MonsterAnimBP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		int32 MonsterBT;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		int32 MonsterBB;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 		float MonsterMaxHP;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
@@ -62,7 +68,7 @@ public:
 
 
 /**
- * 
+ *
  */
 UCLASS()
 class XRPROJECT_API ANonePlayerCharacter : public ABaseCharacter
@@ -76,7 +82,7 @@ public:
 	virtual void	Tick(float DeltaTime)	override;
 	virtual void	PossessedBy(AController* Cntr) override;
 	virtual float	TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	
+
 protected:
 private:
 
@@ -86,14 +92,14 @@ private:
 	///사용자 정의 함수///
 public:
 	UFUNCTION()
-	void DetectTarget(const TArray<AActor*>& DetectingPawn);
-	void SetCharacterLoadState(ECharacterLoadState NewState) override;
-	void SetCharacterLifeState(ECharacterLifeState NewState) override;
-	void OnDead() override;
+		virtual void DetectTarget(const TArray<AActor*>& DetectingPawn);
+	virtual void SetCharacterLoadState(ECharacterLoadState NewState) override;
+	virtual void SetCharacterLifeState(ECharacterLifeState NewState) override;
+	virtual void OnDead() override;
 	virtual void GetNPCInfoFromTable(int32 NpcID);
 
 	UFUNCTION(BlueprintCallable)
-		void NpcLoadStart(int32 npcID);
+		virtual void NpcLoadStart(int32 npcID);
 
 
 protected:
@@ -106,28 +112,28 @@ private:
 	///사용자 정의 변수///
 public:
 	UPROPERTY()
-	class UDataTable* NPCDataTable;
+		class UDataTable* NPCDataTable;
 
 
 	UFUNCTION(BlueprintCallable)
-	ABaseCharacter* GetTarget() const { return Target; }
+		ABaseCharacter* GetTarget() const { return Target; }
 
 	UFUNCTION(BlueprintCallable)
-	void SetTarget(ABaseCharacter* NewTarget) { Target = NewTarget; }
+		virtual void SetTarget(ABaseCharacter* NewTarget) { Target = NewTarget; }
 
 
 
 	UFUNCTION(BlueprintCallable)
-		void AttackCheck (UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, 
+		virtual void AttackCheck(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 			UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION(BlueprintCallable)
-		void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
+		virtual void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
 
 
 
 
-	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<APlayerCharacter*> AttackOverlapList;
 
 
@@ -139,13 +145,13 @@ public:
 
 
 
-	void ExcuteRecvNpcAction(InputStream& input);
+	virtual void ExcuteRecvNpcAction(InputStream& input);
 
 
 
 
 	UFUNCTION(BlueprintCallable)
-		void NpcTakeDamaged(float setHP, class AController* EventInstigator, int32 AttackInstigatorID);
+		virtual void NpcTakeDamaged(float setHP, class AController* EventInstigator, int32 AttackInstigatorID);
 
 
 
@@ -156,18 +162,24 @@ protected:
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		TArray<ABaseCharacter*>		AggroList;
-	
 
-	UPROPERTY(BlueprintReadOnly,VisibleAnywhere,Meta =(AllowPrivateAccess = true))
-		ABaseCharacter*				Target;
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		UCharacterStatComponent*	EnermyStatComponent;
-	
-	
+		ABaseCharacter* Target;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		UCharacterStatComponent* EnermyStatComponent;
+
+
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		int32 SkelID;
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		int32 AnimBPID;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		int32 BTID;
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		int32 BBID;
+
+
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		class AXRAIController* AICon;

@@ -6,6 +6,17 @@
 
 
 
+void UNonePlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	auto NpcCharacter = Cast<ANonePlayerCharacter>(TryGetPawnOwner());
+	if (NpcCharacter)
+	{
+		CurrentSpeed = NpcCharacter->GetVelocity().Size();
+	}
+}
+
 void UNonePlayerCharacterAnimInstance::AnimNotify_AttackColliOn()
 {
 	XRLOG(Warning, TEXT("AttackColliOn"));
