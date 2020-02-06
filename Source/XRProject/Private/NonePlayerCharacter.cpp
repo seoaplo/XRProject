@@ -69,17 +69,7 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
 
-	if (CurrentLoadState == ECharacterLoadState::READY)
-	{
-		auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
-		if (ingameMode)
-		{
-			if (ingameMode->GetIsSuper())
-			{
-				AICon->RunAI();
-			}
-		}
-	}
+	
 }
 
 void ANonePlayerCharacter::PossessedBy(AController* Cntr)
@@ -87,6 +77,17 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 	Super::PossessedBy(Cntr);
 	AICon = Cast<AXRAIController>(GetController());
 	XRLOG(Warning,TEXT("%s PossessedBy %s"),*GetName(),*Cntr->GetName())
+		if (CurrentLoadState == ECharacterLoadState::READY && CurrentLifeState == ECharacterLifeState::ALIVE)
+		{
+			auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
+			if (ingameMode)
+			{
+				if (ingameMode->GetIsSuper())
+				{
+					AICon->RunAI();
+				}
+			}
+		}
 }
 
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -188,6 +189,7 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 	case ECharacterLifeState::DEAD:
 	{
 		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Dead")));
+		SetActorEnableCollision(false);
 		auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		AICon->StopAI();
 		if (npcAnim)
