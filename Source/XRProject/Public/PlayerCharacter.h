@@ -176,7 +176,6 @@ public:
 	void Sprint();
 	void SprintEnd();
 	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
-	
 
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);

@@ -734,11 +734,6 @@ void APlayerCharacter::OnDead()
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
 	
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterDead);
-	out << this->ObjectID;
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
 	UE_LOG(LogTemp, Warning, TEXT("Character Is Dead!"));
 }
 
