@@ -78,6 +78,7 @@ public:
 	const int32 kMaxComboCount = 4;
 	const float kSprintMovementSpeed = 750.0f;
 	const float kNormalMovementSpeed = 450.0f;
+
 public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
@@ -87,6 +88,7 @@ public:
 		float MovementSpeed;
 	UPROPERTY()
 		bool bIsMale; //���� üũ�� ���� bool��.
+
 
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -117,6 +119,8 @@ public:
 		FVector ScaleVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
 		FVector2D CapsuleSize;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+		float RollingSpeed;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
 		FVector MeshLocationVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")

@@ -85,6 +85,7 @@ void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 	if (IsValid(MyCharacter))
 	{
 		MyCharacter->bIsRolling = false;
+		bIsRolling = false;
 	}
 }
 

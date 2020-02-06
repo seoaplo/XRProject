@@ -150,6 +150,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsTestMode = false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
+	RollingSpeed = 10.0f;
 	
 
 #pragma region TESTCODE
@@ -223,7 +224,11 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 
-
+	if (bIsRolling)
+	{
+		//SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
+		GetMovementComponent()->AddInputVector(GetActorForwardVector() * deltatime * RollingSpeed);
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputComponent)
@@ -517,13 +522,29 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
-	//FMath::IsNearlyEqual
-	//if (ForwardValue > 1.0f && RightValue == 0.0f)
-	//	this->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
+	if (bIsRolling)
+		return;
 
+	//무식한건 아는데 당장 생각이 안남
+	float Yaw = 0.0f;
+	if (ForwardValue > 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 0.0f;
+	else if (ForwardValue > 0.0f && RightValue > 0.0f)
+		Yaw = 45.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue > 0.0f)
+		Yaw = 90.0f;
+	else if (ForwardValue < 0.0f && RightValue > 0.0f)
+		Yaw = 135.0f;
+	else if (ForwardValue < 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 180.0f;  //-180?
+	else if (ForwardValue < 0.0f && RightValue < 0.0f)
+		Yaw = -135.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue < 0.0f)
+		Yaw = -90.0f;
+	else if (ForwardValue > 0.0f && RightValue < 0.0f)
+		Yaw = -45.0f;
 
-
-	//this->SetActorRotation(Rot);
+	this->SetActorRotation(CameraComponent->GetComponentRotation() +  FRotator(0.0f, Yaw, 0.0f));
 	bIsRolling = true;
 }
 

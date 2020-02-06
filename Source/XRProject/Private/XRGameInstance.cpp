@@ -317,4 +317,5 @@ void UXRGameInstance::CharacterDead(InputStream& input)
 	int64 TargetID = input.ReadInt64();
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	TargetPlayer->bIsCharacterDead;
+	TargetPlayer->SetCharacterLifeState(ECharacterLifeState::DEAD);
 }
