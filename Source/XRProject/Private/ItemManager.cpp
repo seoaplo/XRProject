@@ -30,7 +30,7 @@ UItemManager::~UItemManager()
 {
 }
 
-TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
+UItem* UItemManager::CreateItem(InputStream & input)
 {
 	EItemType Type = (EItemType)input.ReadInt32();
 	if (EquipmentItemDataTable == nullptr)
@@ -49,7 +49,14 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		if (Table == nullptr)
 			check(false);
 		UItemETC* Item = NewObject<UItemETC>();
-		Item->SetCount(input.ReadInt32());
+		Item->DefaultInfo.ID = Table->IconID;
+		Item->DefaultInfo.Name = Table->Name;
+		Item->DefaultInfo.Type = Table->Type;
+		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->SetCount(Count);
+		Item->ItemType = EItemType::ETC;
+		Item->AddToRoot();
 		return Item;
 		break;
 	}
@@ -61,7 +68,16 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		if (Table == nullptr)
 			check(false);
 		UItemConsumption* Item = NewObject<UItemConsumption>();
-		Item->SetCount(input.ReadInt32());
+		Item->DefaultInfo.ID = Table->IconID;
+		Item->DefaultInfo.Name = Table->Name;
+		Item->DefaultInfo.Type = Table->Type;
+		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.RecoveryHP = Table->RecoveryHP;
+		Item->DefaultInfo.RecoveryStamina = Table->RecoveryStamina;
+		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->SetCount(Count);
+		Item->ItemType = EItemType::CONSUMPTION;
+		Item->AddToRoot();
 		return Item;
 		break;
 	}
@@ -98,6 +114,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		Item->DefaultInfo.ReqINT = Table->RequiredINT;
 		Item->DefaultInfo.ToolTip = Table->ToolTip;
 		Item->ItemType = EItemType::EQUIPMENT;
+		Item->AddToRoot();
 		int Count = input.ReadInt32();
 		return Item;
 		break;

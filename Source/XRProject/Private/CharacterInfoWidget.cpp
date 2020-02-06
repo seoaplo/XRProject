@@ -1,5 +1,6 @@
 #include "CharacterInfoWidget.h"
 
+UCharacterInfoWidget* UCharacterInfoWidget::CharacterInfoInstance = nullptr;
 
 UCharacterInfoWidget::UCharacterInfoWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
@@ -8,6 +9,11 @@ UCharacterInfoWidget::UCharacterInfoWidget(const FObjectInitializer& ObjectIniti
 	HandSlot = nullptr;
 	FootSlot = nullptr;
 	WeaponSlot = nullptr;
+}
+
+UCharacterInfoWidget* UCharacterInfoWidget::GetInstance()
+{
+	return CharacterInfoInstance;
 }
 
 void UCharacterInfoWidget::SetVisible(bool IsVisible)
@@ -35,12 +41,17 @@ void UCharacterInfoWidget::SwitchVisible()
 
 void UCharacterInfoWidget::SetSlot(USlotWidget * Body, USlotWidget * Hand, USlotWidget * Foot, USlotWidget * Weapon)
 {
-	Body->Index = 100;
-	Hand->Index = 101;
-	Foot->Index = 102;
-	Weapon->Index = 103;
+	Body->Index = 0;
+	Hand->Index = 1;
+	Foot->Index = 2;
+	Weapon->Index = 3;
+	Body->IsEquipment = true;
+	Hand->IsEquipment = true;
+	Foot->IsEquipment = true;
+	Weapon->IsEquipment = true;
 	BodySlot = Body;
 	HandSlot = Hand;
 	FootSlot = Foot;
 	WeaponSlot = Weapon;
+	CharacterInfoInstance = this;
 }

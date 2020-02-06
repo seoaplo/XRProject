@@ -17,9 +17,12 @@ class XRPROJECT_API UInventoryWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	UInventoryWidget(const FObjectInitializer& ObjectInitializer);
-private:
+public:
 	std::vector<USlotWidget*> list;
 	bool bIsVisible;
+	static UInventoryWidget* InventoryInstance;
+public:
+	static UInventoryWidget* GetInstance();
 public:
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void SetVisible(bool IsVisible);

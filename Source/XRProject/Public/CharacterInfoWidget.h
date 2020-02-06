@@ -24,6 +24,9 @@ private:
 	USlotWidget* WeaponSlot;
 	bool bIsVisible;
 public:
+	static UCharacterInfoWidget* CharacterInfoInstance;
+	static UCharacterInfoWidget* GetInstance();
+public:
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void SetVisible(bool IsVisible);
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")

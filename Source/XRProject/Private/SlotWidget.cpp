@@ -1,6 +1,10 @@
 #include "SlotWidget.h"
 #include "..\Public\SlotWidget.h"
+#include "NetworkManager.h"
 #include "Inventory.h"
+#include "ItemETC.h"
+#include "ItemConsumption.h"
+#include "ItemEquipment.h"
 
 USlotWidget::USlotWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
@@ -11,7 +15,29 @@ UTexture2D * USlotWidget::GetIcon()
 {
 	if (!IsEmpty())
 	{
-		return SlotObject->GetIcon();
+		switch (SlotObject->ItemType)
+		{
+		case EItemType::ETC:
+		{
+			UItemETC* Temp = Cast<UItemETC>(SlotObject);
+			if(Temp) return Temp->GetIcon();
+			break;
+		}
+		case EItemType::CONSUMPTION:
+		{
+			UItemConsumption* Temp = Cast<UItemConsumption>(SlotObject);
+			if (Temp) return Temp->GetIcon();
+			break;
+		}
+		case EItemType::EQUIPMENT:
+		{
+			UItemEquipment* Temp = Cast<UItemEquipment>(SlotObject);
+			if (Temp) return Temp->GetIcon();
+			break;
+		}
+		default:
+			break;
+		}
 	}
 	return nullptr;
 }
@@ -32,33 +58,14 @@ bool USlotWidget::IsEmpty()
 
 void USlotWidget::SetSlotObject()
 {
-	if (Index >= 0 || Inventory::GetInstance().GetInventorySize() > Index)
+	if (Index < 0 || Inventory::GetInstance().GetInventorySize() < Index) return;
+	if(IsEquipment)
 	{
-		SlotObject = Inventory::GetInstance().GetItem(Index);
+		//SlotObject = GetItem;
 	}
 	else
 	{
-		switch (Index)
-		{
-		case 100:
-		{
-			break;
-		}
-		case 101:
-		{
-			break;
-		}
-		case 102:
-		{
-			break;
-		}
-		case 103:
-		{
-			break;
-		}
-		default:
-			break;
-		}
+		SlotObject = Inventory::GetInstance().GetItem(Index);
 	}
 	Update();
 }
@@ -68,10 +75,13 @@ void USlotWidget::DropIn(UUserWidget * SlotWidget)
 	USlotWidget* Target = Cast<USlotWidget>(SlotWidget);
 	if (Target)
 	{
-		if (Inventory::GetInstance().ExchangeItem(Index, Target->Index))
-		{
-			SetSlotObject();
-			Target->SetSlotObject();
-		}
+		OutputStream Out;
+		Out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
+		Out << (int8)IsEquipment;
+		Out << (int32)Index;
+		Out << (int8)Target->IsEquipment;
+		Out << (int32)Target->Index;
+		Out.CompletePacketBuild();
+		UNetworkManager::GetInstance().SendPacket(Out);
 	}
 }

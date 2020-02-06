@@ -29,4 +29,5 @@ public:
 	UItem* GetItem(int index); // 아이템 객체 리턴
 	bool AddItem(UItem* item, int index = -1); // -1의 경우 빈 슬롯 찾아서 넣기, 그 외의 경우 해당 인덱스에
 	bool ExchangeItem(int index1, int index2);
+	void UpdateSlot(int index, UItem* Item);
 };

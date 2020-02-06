@@ -6,6 +6,7 @@
 #include "XRAIController.h"
 #include "XRPlayerController.h"
 #include "IngameGameMode.h"
+#include "InventoryWidget.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -42,6 +43,9 @@ void UXRGameInstance::Init()
 		
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
+
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kInventoryUpdate)->BindUObject(
+		this, &UXRGameInstance::UpdateInventory);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
@@ -101,7 +105,7 @@ void UXRGameInstance::ReadInventoryInfo(InputStream & input)
 	Inventory::GetInstance().SetGold(Glod);
 	for (int i = 0; i < Inventory::GetInstance().GetInventorySize(); i++)
 	{
-		UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+		UItem* newItem = GameInstance->ItemManager->CreateItem(input);
 		if (newItem)
 		{
 			Inventory::GetInstance().AddItem(newItem, i);
@@ -126,6 +130,26 @@ void UXRGameInstance::ReadMapData(InputStream & input)
 	MapManager->ReadMapDataFromServer(input);
 }
 
+void UXRGameInstance::UpdateInventory(InputStream & input)
+{
+	Inventory::GetInstance();
+	for (int i = 0; i < 2; i++)
+	{
+		bool IsEquip = input.ReadBool();
+		int SlotNum = input.ReadInt32();
+		if (IsEquip)
+		{
+			
+		}
+		else
+		{
+			UItem* Item = ItemManager->CreateItem(input);
+			Inventory::GetInstance().UpdateSlot(SlotNum, Item);
+			UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
+		}
+	}
+
+}
 
 void UXRGameInstance::SpawnCharacterFromServer(class InputStream& input)
 {
