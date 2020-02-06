@@ -733,6 +733,12 @@ void APlayerCharacter::OnDead()
 {
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
+	
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterDead);
+	out << this->ObjectID;
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
 	UE_LOG(LogTemp, Warning, TEXT("Character Is Dead!"));
 }
 
@@ -806,4 +812,10 @@ UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
 
 	check(false);
 	return nullptr;
+}
+
+void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item)
+{
+	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
+	GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
 }

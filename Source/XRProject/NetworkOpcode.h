@@ -35,8 +35,8 @@ enum class ENetworkCSOpcode : uint16_t
 
 	kRequestCharacterWait = 1020,
 	kRequestCharacterSprint = 1021,
-
 	kRequestChangeZone = 1022,
+	kRequestCharacterDead = 1023,
 };
 
 
@@ -81,5 +81,6 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyCharacterSprint = 1021,
 
 	kNotifySpawnPotal = 1022,
+	kNotifyCharacterDead = 1023,
 
 };

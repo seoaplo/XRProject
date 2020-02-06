@@ -46,6 +46,9 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
 	
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterDead)->BindUObject(
+		this, &UXRGameInstance::CharacterDead);
+
 
 	
 }
@@ -304,26 +307,14 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 
-	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("SprintSection"));
-	//TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
-
 	TargetPlayer->bIsSprint = true;
+	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
-}
-
-
-void UXRGameInstance::CharacterHit(InputStream& input)
-{
-	int64 TargetID = input.ReadInt64();
-	int32 AttackType = input.ReadInt32();
-
-
-
 }
 
 void UXRGameInstance::CharacterDead(InputStream& input)
 {
-
-
+	int64 TargetID = input.ReadInt64();
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
+	TargetPlayer->bIsCharacterDead;
 }

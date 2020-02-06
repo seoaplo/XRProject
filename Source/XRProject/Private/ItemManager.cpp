@@ -181,7 +181,7 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 		return;
 
 	UItem* RetItem = nullptr;
-	APlayerCharacter* CurrentTargetCharacter = TargetCharacter;
+
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
@@ -201,7 +201,30 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 	}
 	FStreamableDelegate AssetLoadDelegate;
 	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
-		AssetPath, RetItem, CurrentTargetCharacter);
+		AssetPath, RetItem, TargetCharacter);
+
+	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
+}
+
+void UItemManager::BuildItem(UItem* Item, UWorld* World, APlayerCharacter* TargetCharacter)
+{
+	UItem* RetItem = Item;
+
+	FSoftObjectPath AssetPath = nullptr;
+	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(World));
+
+	if (RetItem->GetItemType() == EItemType::EQUIPMENT)
+	{
+		UItemEquipment* EquipmentItem = Cast<UItemEquipment>(RetItem);
+		if (TargetCharacter->bIsMale)
+			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.MaleMeshResourceID);
+		else
+			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
+	}
+	
+	FStreamableDelegate AssetLoadDelegate;
+	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
+		AssetPath, RetItem, TargetCharacter);
 
 	GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, AssetLoadDelegate);
 }

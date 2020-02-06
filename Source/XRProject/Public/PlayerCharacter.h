@@ -186,6 +186,7 @@ public:
 	bool GetIsPlayer();
 	bool GetIsTestMode();
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
+	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);
 
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
 		class AActor* DamageCauser) override;
