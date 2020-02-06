@@ -68,6 +68,8 @@ private:
 	void ActorDamaged(class InputStream& input);
 	void CharacterWait(class InputStream& input);
 	void CharacterSprint(class InputStream& input);
+	void CharacterHit(class InputStream& input);
+	void CharacterDead(class InputStream& input);
 
 	void NotifyChat(class InputStream& input);
 

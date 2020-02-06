@@ -189,8 +189,14 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Dead")));
 		auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		AICon->StopAI();
-
-		npcAnim->Montage_Play(npcAnim->GetDeadMontage());
+		if (npcAnim)
+		{
+			npcAnim->Montage_Play(npcAnim->GetDeadMontage());
+		}
+		else
+		{
+			XRLOG(Warning, TEXT("NpcAnimInstance Lost"));
+		}
 
 
 		break;
@@ -257,7 +263,10 @@ void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent,
 			out << GetActorRotation();
 			out.CompletePacketBuild();
 			GetNetMgr().SendPacket(out);
+		
+
 		}
+
 	}
 }
 

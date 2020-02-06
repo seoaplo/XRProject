@@ -74,9 +74,9 @@ UNickNameWidget::UNickNameWidget(const FObjectInitializer& ObjectInitializer) : 
 	NameBlock->ShadowColorAndOpacity.A = .5;
 	TitleBlock->ShadowColorAndOpacity.A = .5;
 
-	LevelBlock->Font.Size = 10;
-	NameBlock->Font.Size = 12;
-	TitleBlock->Font.Size = 10;
+	LevelBlock->Font.Size = 14;
+	NameBlock->Font.Size = 16;
+	TitleBlock->Font.Size = 14;
 
 	std::wstring WSN(L"NickName");
 	std::wstring WST(L"Beginner");
@@ -92,7 +92,8 @@ void UNickNameWidget::SettingLevel(int Level)
 {
 	FString StrLevel;
 	StrLevel.AppendInt(Level);
-	FText TextLevel = FText::FromString(StrLevel);
+	FString StrLevel2 = L"Lv." + StrLevel;
+	FText TextLevel = FText::FromString(StrLevel2);
 	LevelBlock->SetText(TextLevel);
 }
 

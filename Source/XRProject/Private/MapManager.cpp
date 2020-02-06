@@ -167,7 +167,7 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{
-		Equipment& CurrentEquip = CurrentData.EquipArray[EquipmentSize];
+		Equipment& CurrentEquip = CurrentData.EquipArray[i];
 		CurrentEquip.Type = Input.ReadInt32();
 		if (CurrentEquip.Type)
 		{
@@ -231,7 +231,7 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{
-		Equipment& CurrentEquip = CurrentData.EquipArray[EquipmentSize];
+		Equipment& CurrentEquip = CurrentData.EquipArray[i];
 		CurrentEquip.Type = Input.ReadInt32();
 		if (CurrentEquip.Type)
 		{
