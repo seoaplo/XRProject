@@ -41,7 +41,7 @@ public:
 
 	UFUNCTION()
 		void AnimNotify_AttackColliOff();
-	
+
 
 protected:
 

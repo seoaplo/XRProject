@@ -4,6 +4,8 @@
 #include "NonePlayerCharacterAnimInstance.h"
 #include "NonePlayerCharacter.h"
 
+
+
 void UNonePlayerCharacterAnimInstance::AnimNotify_AttackColliOn()
 {
 	XRLOG(Warning, TEXT("AttackColliOn"));
