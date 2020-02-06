@@ -7,7 +7,9 @@
 #include "InputStream.h"
 #include "CharacterStatComponent.generated.h"
 
-
+/*
+//작성자 조재진
+*/
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterStatChange);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCharacterHPIsZero);
 

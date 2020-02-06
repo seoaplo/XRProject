@@ -7,16 +7,18 @@
 
 #include "NonePlayerCharacterAnimInstance.generated.h"
 
-/**
- * 
- */
+/*
+//작성자 조재진
+*/
 UCLASS()
 class XRPROJECT_API UNonePlayerCharacterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
 
+
 public:
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 protected:
 private:
 
@@ -26,13 +28,18 @@ private:
 public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
+		float CurrentSpeed;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
+		bool bInBattle;
+
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		TArray<UAnimMontage*> NpcAttackMontage;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* NpcTakeDamageMontage;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* NpcDeadMontage;
-
-
 	UFUNCTION(BlueprintCallable)
 		UAnimMontage* GetDeadMontage() { return NpcDeadMontage; }
 	
@@ -41,7 +48,7 @@ public:
 
 	UFUNCTION()
 		void AnimNotify_AttackColliOff();
-	
+
 
 protected:
 

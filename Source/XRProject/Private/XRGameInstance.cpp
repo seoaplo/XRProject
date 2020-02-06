@@ -180,8 +180,17 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 void UXRGameInstance::SetMonsterController(InputStream& input)
 {
 	bool IsMonsterController = input.ReadBool();
+	if (IsMonsterController)
+	{
+		XRLOG(Warning, TEXT("You are set up Super User "));
+	}
+	else
+	{
+		XRLOG(Warning, TEXT("You are set up General User "));
+	}
+
 	IsSuper = IsMonsterController;
-	XRLOG(Warning, TEXT("SetMonCon"));
+	
 }
 
 void UXRGameInstance::UpdateMonsterAction(InputStream& input)

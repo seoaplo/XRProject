@@ -28,11 +28,11 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
 
-
+	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
 	
-	AIControllerClass = AXRAIController::StaticClass();
+	AIControllerClass = AXRAIController::StaticClass(); 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -43,7 +43,7 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 
 	GetMesh()->SetCollisionProfileName(TEXT("NPCMesh"));
-	GetMesh()->SetGenerateOverlapEvents(true);
+	GetMesh()->SetGenerateOverlapEvents(false);
 
 	GetMesh()->OnComponentBeginOverlap.AddDynamic(this, &ANonePlayerCharacter::AttackCheck);
 
@@ -62,9 +62,6 @@ void ANonePlayerCharacter::BeginPlay()
 	
 
 
-
-
-
 }
 
 
@@ -72,32 +69,17 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
 
-	//auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
-	auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
-
-	if(ingameMode)
+	if (CurrentLoadState == ECharacterLoadState::READY)
 	{
-		if (ingameMode->GetIsSuper())
+		auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
+		if (ingameMode)
 		{
-			AICon->RunAI();
-
-			//SumSec += DeltaTime;
-			//if (SumSec >= 0.1f) {
-			//	SumSec -= 0.1f;
-
-			//	if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
-			//	{
-			//		SendAction(1000, GetActorLocation(), GetActorRotation());
-			//		GEngine->AddOnScreenDebugMessage(500, 5.0f, FColor::Red, FString::Printf(TEXT("Monster Send Location : %s"), *GetActorLocation().ToString()));
-			//		GEngine->AddOnScreenDebugMessage(501, 5.0f, FColor::Red, FString::Printf(TEXT("Monster Send Rotator : %s"), *GetActorRotation().ToString()));
-
-			//	}
-			//}
+			if (ingameMode->GetIsSuper())
+			{
+				AICon->RunAI();
+			}
 		}
 	}
-
-
-	//GetMesh()->GetBodyInstance(FName("monster_UndeadSpearman_w"))->
 }
 
 void ANonePlayerCharacter::PossessedBy(AController* Cntr)
@@ -111,6 +93,15 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	EnermyStatComponent->SetCurrentHP(EnermyStatComponent->GetCurrentHP() - DamageAmount);
+
+	auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	if (npcAnim)
+	{
+		if (!npcAnim->IsAnyMontagePlaying())
+		{
+			npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
+		}
+	}
 	return DamageAmount;
 }
 
@@ -134,16 +125,25 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 	case ECharacterLoadState::PREINIT:
 	{
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : PREINIT")));
-		SetCharacterLoadState(ECharacterLoadState::LOADING);
+	
+
 		SetCharacterLifeState(ECharacterLifeState::SPAWN);
+		SetCharacterLoadState(ECharacterLoadState::LOADING);
 		break;
 	}
 	case ECharacterLoadState::LOADING:
 	{
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : LOADING")));
 		EnermyStatComponent->OnHPZero.AddDynamic(this, &ANonePlayerCharacter::OnDead);
-		SetSkelResource(SkelID, AnimBPID);
-
+		if (AICon)
+		{
+			AICon->LoadAI(BTID, BBID);
+		}
+		else
+		{
+			XRLOG(Warning, TEXT("LOST AICONTROLLER"));
+		}
+		GetCharacterMovement()->MaxWalkSpeed = EnermyStatComponent->GetSpeed();
 		GetCapsuleComponent()->SetCapsuleHalfHeight(75.f);
 		GetCapsuleComponent()->SetCapsuleRadius(16.5f);
 
@@ -152,6 +152,7 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 		
 		NpcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		
+		SetSkelResource(SkelID, AnimBPID);
 		break;
 	}
 	case ECharacterLoadState::READY:
@@ -225,6 +226,9 @@ void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 
 			SkelID = ResourceTableRow->MonsterSkeletalID;
 			AnimBPID = ResourceTableRow->MonsterAnimBP;
+			BTID = ResourceTableRow->MonsterBT;
+			BBID = ResourceTableRow->MonsterBB;
+
 			EnermyStatComponent->SetMaxHP(ResourceTableRow->MonsterMaxHP);
 			EnermyStatComponent->SetAttack_Min(ResourceTableRow->MonsterAttackMin);
 			EnermyStatComponent->SetAttack_Max(ResourceTableRow->MonsterAttackMax);
@@ -241,7 +245,7 @@ void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 void ANonePlayerCharacter::NpcLoadStart(int32 npcID)
 {
 	GetNPCInfoFromTable(npcID);
-	SetCharacterLoadState(ECharacterLoadState::LOADING);
+	SetCharacterLoadState(ECharacterLoadState::PREINIT);
 }
 
 void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -282,15 +286,19 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	GetNetMgr().SendPacket(out);
 }
 
+void ANonePlayerCharacter::SetInBattle(bool battle)
+{
+	bInBattle = battle;
+	SendAction(2000, FVector(bInBattle, 0, 0), FRotator(0, 0, 0));
+}
+
 void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 {
-	//auto ingameMode = Cast<AXRProjectGameModeBase>(GetWorld()->GetAuthGameMode());
 	auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
 	if (ingameMode)
 	{
 		if (!ingameMode->GetIsSuper())
 		{
-			//int64 ObjID = input.ReadInt64();
 			int32 ActionID = input.ReadInt32();
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
@@ -300,6 +308,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 				AttackOverlapList.Reset();
 				AICon->StopMovement();
 				SetActorLocation(Location);
+				
 				SetActorRotation(Rotator);
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (npcAnim)
@@ -310,6 +319,17 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			else if (ActionID >= 1000)
 			{
 				AICon->MoveToLocation(Location, 2, false, false);
+			}
+			else if (ActionID == 2000)
+			{
+				if (FMath::IsNearlyZero(Location.X))
+				{
+					bInBattle = false;
+				}
+				else
+				{
+					bInBattle = true;
+				}
 			}
 		}
 	}

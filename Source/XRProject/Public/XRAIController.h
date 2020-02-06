@@ -24,9 +24,16 @@ public:
 	static const FName PatrolPosKey;
 	static const FName TargetKey;
 
-
+	UFUNCTION(BlueprintCallable)
 	void RunAI();
+	UFUNCTION(BlueprintCallable)
 	void StopAI();
+
+
+	UFUNCTION(BlueprintCallable)
+		void LoadAI(int32 BTID, int32 BBID);
+
+
 
 protected:
 private:
@@ -41,6 +48,9 @@ private:
 
 	UPROPERTY()
 		class UBlackboardData* BBAsset;
+
+
+
 
 
 

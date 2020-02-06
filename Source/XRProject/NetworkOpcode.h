@@ -3,6 +3,7 @@
 
 enum class ENetworkCSOpcode : uint16_t
 {
+
 	// LoginServer
 	kCreateAccountRequest = 0,
 	kLoginRequest,
@@ -41,6 +42,7 @@ enum class ENetworkCSOpcode : uint16_t
 
 enum class ENetworkSCOpcode : uint16_t
 {
+
 	// LoginServer
 	kCreateAccountResult = 0,
 	kLoginResult,
@@ -51,6 +53,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kCharacterDeleteNotify,
 	kCharacterListNotify,
 	kMigrateZoneNotify,
+
 
 	// ZoneServer
 	kUserEnterTheMap = 1000,
@@ -78,4 +81,5 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyCharacterSprint = 1021,
 
 	kNotifySpawnPotal = 1022,
+
 };
