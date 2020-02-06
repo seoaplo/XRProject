@@ -86,6 +86,12 @@ public:
 
 	virtual bool GetStatDataFromServer(InputStream& input);
 
+	UFUNCTION(BlueprintCallable)
+		/*HP µ¡¼À*/
+		void AddHP(float Value);
+	UFUNCTION(BlueprintCallable)
+		void SubtractHP(float Value);
+
 	UPROPERTY(BlueprintAssignable)
 		FOnCharacterStatChange	OnStatChange;
 	UPROPERTY(BlueprintAssignable)

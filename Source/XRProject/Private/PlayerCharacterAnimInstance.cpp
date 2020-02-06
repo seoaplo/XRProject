@@ -27,15 +27,19 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	if (ATTACK_MONTAGE_ONLYPLAY.Succeeded())
 	{
 		AttackMontageOnlyPlay = ATTACK_MONTAGE_ONLYPLAY.Object;
+	}	
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		MOVE_MONTAGE_ONLYPLAY(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/MoveMontageOnlyPlay.MoveMontageOnlyPlay'"));
+	if (MOVE_MONTAGE_ONLYPLAY.Succeeded())
+	{
+		MoveMontageOnlyPlay = MOVE_MONTAGE_ONLYPLAY.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		HIT_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/HitMontage.HitMontage'"));
 	if (HIT_MONTAGE.Succeeded())
 		HitMontage = HIT_MONTAGE.Object;
-
-
-
 
 }
 
@@ -61,16 +65,12 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsSprint = MyCharacter->bIsSprint;
 		bIsCharacterDead = MyCharacter->bIsCharacterDead;
 		bIsHit = MyCharacter->bIsHit;
-
-
-		//int amove = -1;
-		//int cmove = -1;
-		//amove = bIsMove == false ? 0 : 1;
-		//cmove = MyCharacter->bIsMove == false ? 0 : 1;
-		//UE_LOG(LogTemp, Warning, TEXT("AnimbIsMove : %d /// CharbIsMove : %d"),
-		//	amove, cmove);
 	}
 
+	//if (bIsHit)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("HIT ON"));
+	//}
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
@@ -88,6 +88,12 @@ void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 	}
 }
 
+void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
+{
+	MyCharacter->bIsHit = false;
+	bIsHit = false;
+}
+
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
 {
 	float ret = Montage_Play(AttackMontage, 1.f);
@@ -99,6 +105,11 @@ void UPlayerCharacterAnimInstance::PlayAttackOnlyPlayMontage()
 	float ret = Montage_Play(AttackMontageOnlyPlay, 1.f);
 }
 
+void UPlayerCharacterAnimInstance::PlayMoveOnlyPlayMontage()
+{
+	float ret = Montage_Play(MoveMontageOnlyPlay, 1.f);
+}
+
 void UPlayerCharacterAnimInstance::PlayHitMontage()
 {
 	float ret = Montage_Play(HitMontage, 1.f);
@@ -107,7 +118,7 @@ void UPlayerCharacterAnimInstance::PlayHitMontage()
 
 void UPlayerCharacterAnimInstance::StopAttackMontage()
 {
-
+	Montage_Stop(0.0f, AttackMontage);
 }
 
 void UPlayerCharacterAnimInstance::JumpToComboMontageSection(int32 Section)
@@ -116,8 +127,8 @@ void UPlayerCharacterAnimInstance::JumpToComboMontageSection(int32 Section)
 	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%d"), Section)));
 }
 
-void UPlayerCharacterAnimInstance::JumpToReloadMontageSection(int32 Section)
+void UPlayerCharacterAnimInstance::JumpToMoveMontageSection(FString Section)
 {
-	check((Section <= 4));
-	Montage_JumpToSection(FName(*FString::Printf(TEXT("combo%dR"), Section)));
+	Montage_JumpToSection(FName(*Section));
 }
+

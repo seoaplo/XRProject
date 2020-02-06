@@ -167,7 +167,7 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{
-		Equipment& CurrentEquip = CurrentData.EquipArray[EquipmentSize];
+		Equipment& CurrentEquip = CurrentData.EquipArray[i];
 		CurrentEquip.Type = Input.ReadInt32();
 		if (CurrentEquip.Type)
 		{
@@ -231,7 +231,7 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
 	{
-		Equipment& CurrentEquip = CurrentData.EquipArray[EquipmentSize];
+		Equipment& CurrentEquip = CurrentData.EquipArray[i];
 		CurrentEquip.Type = Input.ReadInt32();
 		if (CurrentEquip.Type)
 		{
@@ -272,40 +272,13 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
+
+		if(CurrentData.ObjectID != PlayerID)
+			Player->InitializeCharacter(false, CurrentData);
+		else
+			Player->InitializeCharacter(true, CurrentData);
+
 		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
-
-		for (int ii = 0; ii < CurrentData.kEquipmentArraySize; ii++)
-		{
-			/*¸Ç¸öÀÏ ¶§ */
-			if (CurrentData.EquipArray[ii].ID == -1)
-			{
-				//FEquipmentTableResource* EqTable;
-
-				const int32 kMalePrimaryBody = 130;
-				const int32 kMalePrimaryHand = 140;
-				const int32 kMalePrimaryLeg = 150;
-				const int32 kMalePrimaryWeapon = 3300001;
-
-				switch (ii)
-				{
-					case 0:
-						Player->ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
-						break;
-					case 1:
-						Player->ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
-						break;
-					case 2:
-						Player->ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
-						break;
-					case 3:
-						GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
-							Player->GetWorld(), Player);
-						break;
-				}
-			}
-			else
-				GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, CurrentData.EquipArray[ii].ID, World, Player);
-		}
 
 		if (Player)
 		{

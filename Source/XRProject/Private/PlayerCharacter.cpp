@@ -2,26 +2,44 @@
 
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
+#include "WidgetTree.h"
 #include "XRGameInstance.h"
 #include "Animation/AnimBlueprint.h"
 #include "AccountManager.h"
 #include "Components/InputComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "NonePlayerCharacter.h"
+#include "NickNameWidget.h"
+
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	PlayerStatComp = CreateDefaultSubobject<UPlayerCharacterStatComponent>(TEXT("CharacterStat"));
-	PlayerStatComp->OnHPZero.AddDynamic(this, &ABaseCharacter::OnDead);
+	PlayerStatComp->OnHPZero.AddDynamic(this, &APlayerCharacter::OnDead);
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
+	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
+	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
+	
+	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
+	NameTag->SetupAttachment(GetRootComponent());
+	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
+
 	if (AnimBP.Succeeded())
 	{
 		AnimInstance = AnimBP.Class;
+	}
+	else
+		check(false);
+
+	if (RemoteAnimBP.Succeeded())
+	{
+		RemoteAnimInstance = AnimBP.Class;
 	}
 	else
 		check(false);
@@ -33,7 +51,7 @@ APlayerCharacter::APlayerCharacter()
 	GetCapsuleComponent()->bHiddenInGame = false;
 
 
-	SpringArmLength = 300.0f;
+	SpringArmLength = 350.0f;
 	RotateSpeed = 1000.0f;
 	MovementSpeed = kNormalMovementSpeed;
 
@@ -87,6 +105,9 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.HandsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.WeaponComponent->SetCollisionProfileName("PlayerWeapon");
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	Equipments.BodyComponent->SetupAttachment(GetMesh());
 	Equipments.LegsComponent->SetupAttachment(GetMesh());
@@ -95,6 +116,7 @@ APlayerCharacter::APlayerCharacter()
 	FaceComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, FaceSocket);
 	HairComponent->AttachToComponent(FaceComponent, FAttachmentTransformRules::KeepRelativeTransform, HairSocket);
 	Equipments.WeaponComponent->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform, WeaponSocket);
+	Equipments.WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlapBegin);
 
 	Equipments.BodyComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 	//Equipments.BodyComponent->SetAnimInstanceClass(AnimBP.Class);
@@ -102,15 +124,32 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 
+	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
+	CapsuleSize = FVector2D(90.0f, 34.0f);
+	MeshLocationVector = FVector(0.0f, 0.0f, -90.0f);
+	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
+
+	this->GetMesh()->SetRelativeScale3D(ScaleVector);
+	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
+	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
+	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
+	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
+	NameTagLocation = FVector(0.0f, 0.0f, 90.0f);
 
 
 	ComboCount = 1;
+	CurrentAttackID = -1;
 	bIsMove = false;
 	bIsRolling = false;
 	bIsAttack = false;
 	bIsSprint = false;
 	bIsCharacterDead = false;
 	bIsHit = false;
+	bIsPlayer = false;
+	bInitialized = false;
+	bIsTestMode = false;
+
+	
 
 #pragma region TESTCODE
 
@@ -151,16 +190,37 @@ void APlayerCharacter::Tick(float deltatime)
 				GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
 				out.CompletePacketBuild();
 				GetNetMgr().SendPacket(out);
+
+				bIsMove = true;
+			}
+			else
+			{
+				if (bIsMove == true)
+				{
+					OutputStream out;
+					out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterWait);
+					out << this->ObjectID;
+					out << this->GetActorLocation();
+					out.CompletePacketBuild();
+					GetNetMgr().SendPacket(out);
+				}
+
+				bIsMove = false;
 			}
 		}
 		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Velocity : %s"), *GetCharacterMovement()->Velocity.ToString()));
 	}
+	else
+	{
+		if (GetCharacterMovement()->Velocity.Size() > KINDA_SMALL_NUMBER)
+			bIsMove = true;
+		else	
+			bIsMove = false;
+	}
 
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
-	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
-	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
-
+	NameTag->SetRelativeLocation(NameTagLocation);
 
 
 }
@@ -184,11 +244,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
-	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
-	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
-	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
-	MyAnimInstance->SetOwnerCharacter(this);
+
 
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
@@ -215,18 +271,7 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
-
-
-	ScaleVector = FVector(2.5f, 2.5f, 2.5f);
-	CapsuleSize = FVector2D(22.0f, 8.0f);
-	MeshLocationVector = FVector(0.0f, 0.0f, -22.0f);
-	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
-
-	this->SetActorRelativeScale3D(ScaleVector);
-	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
-	this->GetCapsuleComponent()->SetCapsuleRadius(CapsuleSize.Y);
-	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
-	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
+	
 
 	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
 	
@@ -234,6 +279,7 @@ void APlayerCharacter::BeginPlay()
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
 	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
+
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
 
@@ -242,23 +288,20 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead)
+	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead )
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
+		if (bInitialized == false)
+			check(false);
+
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
-		bIsMove = true;
 	}
-	else
-	{
-		bIsMove = false;
-	}
-
 }
 
 void APlayerCharacter::MoveRight(float Value)
@@ -273,48 +316,46 @@ void APlayerCharacter::MoveRight(float Value)
 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		AddMovementInput(Direction, Value);
-		bIsMove = true;
 	}
-
 }
 
 
 void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 {
-	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
-	FPartsResource* PartResourceTable = GameInstance->ItemManager->PartsDataTable->
+	FPartsResource* PartResourceTable = MyGameInstance->ItemManager->PartsDataTable->
 		FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));
 
 	if (Type == EPartsType::HAIR)
 	{
 		//헤어파츠
 		FSoftObjectPath HairAssetPath = nullptr;
-		HairAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		HairAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate HairAssetLoadDelegate;
 		HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			HairAssetPath, EPartsType::HAIR);
-		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
+		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
 	}
 	else if (Type == EPartsType::FACE)
 	{
 		//페이스 파츠
 		FSoftObjectPath FaceAssetPath = nullptr;
-		FaceAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		FaceAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate FaceAssetLoadDelegate;
 		FaceAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			FaceAssetPath, EPartsType::FACE);
-		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
+		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
 	}
 	else
 	{
 		FSoftObjectPath ETCAssetPath = nullptr;
-		ETCAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		ETCAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate ETCAssetLoadDelegate;
 		ETCAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			ETCAssetPath, Type);
 
-		GameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
+		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
 	}
 
@@ -407,26 +448,38 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 	if (NPC == nullptr)
 		check(false);
 
-	if (PlayerStatComp->GetCurrentHP() < 0.0f)
+	PlayerStatComp->SetCurrentHP(Damage);
+	
+	if(bIsTestMode == false)
+		UHealthBarWidget::GetInatance()->ApplyHp(PlayerStatComp->GetCurrentHP());
+
+
+	//MyAnimInstance->StopAttackMontage();
+
+	bIsHit = true;
+
+	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false)
 	{
-		SetCharacterLifeState(ECharacterLifeState::DEAD);
-		bIsCharacterDead = true;
-		//Dead 재생
+		MyAnimInstance->PlayHitMontage();
+		ComboCount = 1;
+		bSavedCombo = false;
 	}
 	else
-	{
-		PlayerStatComp->SetCurrentHP(PlayerStatComp->GetCurrentHP() - Damage);
-		bIsHit = true;
-		MyAnimInstance->PlayHitMontage();
+		bIsHit = false;
 
-		UE_LOG(LogTemp, Warning, TEXT("Damaged By %s, Damage : %f"), *(NPC->GetName()), Damage);
-		//Hit 재생
-	}
+	
+	/*동작 취소 처리*/
+	bIsSprint = false;
+	bIsMove = false;
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	UE_LOG(LogTemp, Warning, TEXT("Damaged By %s, Damage : %f"), *(NPC->GetName()), Damage);
+
 	return 0.0f;
 }
 
 void APlayerCharacter::Attack()
-{
+{	
 	if (bIsRolling == true || bIsHit)
 		return;
 
@@ -437,17 +490,21 @@ void APlayerCharacter::Attack()
 	{
 		bIsAttack = true;
 		MyAnimInstance->PlayAttackMontage();
+		
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out << ComboCount;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+		CurrentAttackID = ComboCount;
+
 	}
 	else
 		bSavedCombo = true;
 
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
-	out << ComboCount;
-	out << GetActorLocation();
-	out << GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 }
 
@@ -460,14 +517,164 @@ void APlayerCharacter::Sprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	bIsSprint = true;
-	UE_LOG(LogTemp, Warning, TEXT("Sprint"));
+
+	if (Cast<APlayerController>(GetController()))
+	{
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterSprint);
+		out << this->ObjectID;
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+	}
 }
 
 void APlayerCharacter::SprintEnd()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 	bIsSprint = false;
-	UE_LOG(LogTemp, Warning, TEXT("Sprint END"));
+}
+
+void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterData & Data)
+{
+	bInitialized = true;
+
+	bIsPlayer = bIsPlayerCharacter;
+
+	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
+	
+		ObjectID = Data.ObjectID;
+		PlayerStatComp->SetMaxHP(Data.Max_HP);
+		PlayerStatComp->SetCurrentHP(Data.Current_HP);
+		PlayerStatComp->SetAttack_Min(Data.Attack_Min);
+		PlayerStatComp->SetAttack_Max(Data.Attack_Max);
+		PlayerStatComp->SetAttack_Range(Data.Attack_Range);
+		PlayerStatComp->SetAttack_Speed(Data.Attack_Speed);
+		PlayerStatComp->SetSpeed(Data.Speed);
+		PlayerStatComp->SetDefence(Data.Defence);
+		PlayerStatComp->SetLevel(Data.Level);
+		PlayerStatComp->SetGender(Data.Gender);
+		PlayerStatComp->SetSTR(Data.STR);
+		PlayerStatComp->SetDEX(Data.DEX);
+		PlayerStatComp->SetINT(Data.INT);
+		PlayerStatComp->SetCurrentStamina(Data.CurrentStamina);
+		PlayerStatComp->SetMaxStamina(Data.MaxStamina);
+		PlayerStatComp->SetCharacterName(Data.Name.c_str());
+
+		
+		if (bIsPlayerCharacter)
+		{
+			Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+			MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+			MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
+			UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
+		}
+		else
+		{
+			Equipments.BodyComponent->SetAnimInstanceClass(RemoteAnimInstance);
+			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+		}
+		
+		MyAnimInstance->SetOwnerCharacter(this);
+
+
+		for (int ii = 0; ii < Data.kEquipmentArraySize; ii++)
+		{
+			/*맨몸일 때 */
+			if (Data.EquipArray[ii].ID == -1)
+			{
+				//FEquipmentTableResource* EqTable;
+
+				const int32 kMalePrimaryBody = 130;
+				const int32 kMalePrimaryHand = 140;
+				const int32 kMalePrimaryLeg = 150;
+				const int32 kMalePrimaryWeapon = 3300001;
+
+				switch (ii)
+				{
+				case 0:
+					ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+					break;
+				case 1:
+					ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+					break;
+				case 2:
+					ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+					break;
+				case 3:
+					MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+						MyGameInstance->GetWorld(), this);
+					break;
+				}
+			}
+			else
+				MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Data.EquipArray[ii].ID, GetWorld(), this);
+		}
+
+
+		UNickNameWidget* NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
+		if (NickNameWidget)
+		{
+			NickNameWidget->SettingName(this->PlayerStatComp->GetCharacterName());
+			NickNameWidget->SettingLevel(this->PlayerStatComp->GetLevel());
+			NickNameWidget->SettingTitle(TEXT("Title Sample"));
+			NameTag->SetWidget(NickNameWidget);
+		}
+		NameTag->SetRelativeLocation(NameTagLocation);
+}
+
+void APlayerCharacter::TestInitialize()
+{
+	bInitialized = true;
+	bIsPlayer = true;
+	bIsTestMode = true;
+
+	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
+
+	ObjectID = 1000;
+	PlayerStatComp->SetMaxHP(100);
+	PlayerStatComp->SetCurrentHP(100);
+	PlayerStatComp->SetAttack_Min(50);
+	PlayerStatComp->SetAttack_Max(100);
+	PlayerStatComp->SetAttack_Range(10);
+	PlayerStatComp->SetAttack_Speed(10);
+	PlayerStatComp->SetSpeed(10);
+	PlayerStatComp->SetDefence(10);
+	PlayerStatComp->SetLevel(1);
+	PlayerStatComp->SetGender(0);
+	PlayerStatComp->SetSTR(10);
+	PlayerStatComp->SetDEX(11);
+	PlayerStatComp->SetINT(12);
+	PlayerStatComp->SetCurrentStamina(100);
+	PlayerStatComp->SetMaxStamina(100);
+
+
+	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
+	//UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
+
+	MyAnimInstance->SetOwnerCharacter(this);
+
+	const int32 kMalePrimaryBody = 130;
+	const int32 kMalePrimaryHand = 140;
+	const int32 kMalePrimaryLeg = 150;
+	const int32 kMalePrimaryWeapon = 3300001;
+	
+	ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+
+	ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+	
+	ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+	
+	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+					MyGameInstance->GetWorld(), this);
+
+	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(GetWorld()->GetPlayerControllerIterator()->Get());
+	if (MyPlayerController == nullptr) return;
+	MyPlayerController->Possess(this);
+
 }
 
 void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -478,6 +685,7 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		bIsAttack = false;
 		bSavedCombo = false;
 		ComboCount = 1;
+		Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
@@ -499,7 +707,16 @@ void APlayerCharacter::ContinueCombo()
 		ComboCount++;
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
-		XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
+		//XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
+
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out << ComboCount;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
 	}
 }
 
@@ -512,33 +729,81 @@ void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType T
 
 }
 
+void APlayerCharacter::OnDead()
+{
+	SetCharacterLifeState(ECharacterLifeState::DEAD);
+	bIsCharacterDead = true;
+	UE_LOG(LogTemp, Warning, TEXT("Character Is Dead!"));
+}
+
 void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AActor * OtherActor,
 	UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
 
-	ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
-	if (NPC)
+	if (Cast<APlayerController>(GetController()))
 	{
-
-		for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
+		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
+		if (NPC)
 		{
-			if (FlagNpc == NPC)
-				return;
+
+			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
+			{
+				if (FlagNpc == NPC)
+					return;
+			}
+
+			int64 EnemyID = NPC->ObjectID;
+			int64 MyID = this->ObjectID;
+
+			OutputStream out;
+			out.WriteOpcode(ENetworkCSOpcode::kCharcterHitSuccess);
+			out << MyID;
+			out << EnemyID;
+			out << CurrentAttackID;
+			out << this->GetActorLocation();
+			out << this->GetActorRotation();
+			out.CompletePacketBuild();
+			GetNetMgr().SendPacket(out);
+
+			AttackOverlapList.push_back(NPC);
+
 		}
-
-		int64 EnemyID = NPC->ObjectID;
-		int64 MyID = this->ObjectID;
-	
-		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterCreateRequest);
-		out << MyID;
-		out << EnemyID;
-		out << this->GetActorLocation();
-		out << this->GetActorRotation();
-		out.CompletePacketBuild();
-		GetNetMgr().SendPacket(out);
-
-		AttackOverlapList.push_back(NPC);
-
 	}
+}
+
+void APlayerCharacter::SetIsPlayer(bool is)
+{
+	bIsPlayer = is;
+}
+
+bool APlayerCharacter::GetIsPlayer()
+{
+	return bIsPlayer;
+}
+
+bool APlayerCharacter::GetIsTestMode()
+{
+	return bIsTestMode;
+}
+
+UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
+{
+	switch (Type)
+	{
+		case EEquipmentsType::BODY:
+			return Equipments.BodyItem;
+			break;
+		case EEquipmentsType::HANDS:
+			return Equipments.HandsItem;
+			break;
+		case EEquipmentsType::LEGS:
+			return Equipments.LegsItem;
+			break;
+		case EEquipmentsType::WEAPON:
+			return Equipments.WeaponItem;
+			break;
+	}
+
+	check(false);
+	return nullptr;
 }

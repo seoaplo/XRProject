@@ -112,6 +112,24 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
 	return true;
  }
 
+ void UCharacterStatComponent::AddHP(float Value)
+ {
+	 Current_HP += Value;
+	 Current_HP = FMath::Max(Value, Max_HP);
+	 OnStatChange.Broadcast();
+ }
+
+ void UCharacterStatComponent::SubtractHP(float Value)
+ {
+	 Current_HP -= Value;
+	 Current_HP = FMath::Max(Current_HP, 0.0f);
+	 if (Current_HP <= 0.0f)
+	 {
+		 OnHPZero.Broadcast();
+	 }
+	 OnStatChange.Broadcast();
+ }
+
 
 // Called every frame
 void UCharacterStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

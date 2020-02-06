@@ -9,7 +9,7 @@ public class XRProject : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject",
-            "Engine", "InputCore", "UMG", "AIModule", "NavigationSystem" });
+            "Engine", "InputCore", "UMG", "AIModule", "NavigationSystem", "Slate", "SlateCore" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
