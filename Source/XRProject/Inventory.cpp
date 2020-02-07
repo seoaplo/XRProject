@@ -92,6 +92,13 @@ void Inventory::SetItem(UItem* Item, int Index)
 	Slot[Index] = Item;
 }
 
+void Inventory::UpdateSlot(int index, UItem* Item)
+{
+	if (index < 0 || index >= kMaxInventorySlotSize) return;
+	Slot[index] = Item;
+	return;
+}
+
 bool Inventory::UseSlot(int SlotID)
 {
 	if (SlotID < 0 || SlotID >= kMaxInventorySlotSize) return false;

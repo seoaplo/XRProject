@@ -62,6 +62,7 @@ private:
 	void SetMonsterController(class InputStream& input);
 	void UpdateMonsterAction(class InputStream& input);
 	void UpdateCharacterMotion(class InputStream& input);
+	void UpdateInventory(class InputStream& input);
 	void ActorDamaged(class InputStream& input);
 	void CharacterWait(class InputStream& input);
 	void CharacterSprint(class InputStream& input);

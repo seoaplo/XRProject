@@ -8,6 +8,7 @@
 #include "ChatingWidget.h"
 #include "HealthBarWidget.h"
 #include "DungeonMatchingWidget.h"
+#include "MiniMapWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "MiniMapWidget.h"
 #include "InGameMainWidget.generated.h"
