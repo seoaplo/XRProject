@@ -13,6 +13,7 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	bIsSprint = false;
 	bIsCharacterDead = false;
 	bIsHit = false;
+	bIsOverallRollAnimPlaying = false;
 
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
@@ -41,6 +42,11 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	if (HIT_MONTAGE.Succeeded())
 		HitMontage = HIT_MONTAGE.Object;
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		ROLL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/RollMontage.RollMontage'"));
+	if (ROLL_MONTAGE.Succeeded())
+		RollMontage = ROLL_MONTAGE.Object;
+
 }
 
 UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
@@ -65,12 +71,9 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsSprint = MyCharacter->bIsSprint;
 		bIsCharacterDead = MyCharacter->bIsCharacterDead;
 		bIsHit = MyCharacter->bIsHit;
+		bIsOverallRollAnimPlaying = MyCharacter->bIsOverallRollAnimPlaying;
 	}
 
-	//if (bIsHit)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("HIT ON"));
-	//}
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
@@ -82,16 +85,23 @@ void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 
 void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 {
+	//구르는 동작의 끝(애니메이션의 끝이 아님)
 	if (IsValid(MyCharacter))
 	{
 		MyCharacter->bIsRolling = false;
+		bIsRolling = false;
+		MyCharacter->SetNormalCapsuleMode();
 	}
 }
-
 void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
 {
 	MyCharacter->bIsHit = false;
 	bIsHit = false;
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingEnd()
+{
+	MyCharacter->bIsRolling = false; 
 }
 
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
@@ -113,6 +123,12 @@ void UPlayerCharacterAnimInstance::PlayMoveOnlyPlayMontage()
 void UPlayerCharacterAnimInstance::PlayHitMontage()
 {
 	float ret = Montage_Play(HitMontage, 1.f);
+	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
+}
+
+void UPlayerCharacterAnimInstance::PlayRollMontage()
+{
+	float ret = Montage_Play(RollMontage, 1.f);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
 }
 

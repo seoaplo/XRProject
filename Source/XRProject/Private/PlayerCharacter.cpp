@@ -31,24 +31,37 @@ APlayerCharacter::APlayerCharacter()
 	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
 
 	if (AnimBP.Succeeded())
-	{
 		AnimInstance = AnimBP.Class;
-	}
 	else
 		check(false);
 
-	if (RemoteAnimBP.Succeeded())
-	{
+	if (RemoteAnimBP.Succeeded()) 
 		RemoteAnimInstance = AnimBP.Class;
-	}
-	else
+	else 
 		check(false);
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+
+	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
+	CapsuleSize = FVector2D(90.0f, 34.0f);
+	RollingHitCapsuleSize = FVector2D(45.0f, 34.0f);
+	MeshLocationVector = FVector(0.0f, 0.0f, -90.0f);
+	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
+	RollingCapsuleOffset = 45.0f;
+
+	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
+	HitCapsule->SetVisibility(true);
+	HitCapsule->bHiddenInGame = false;
+	HitCapsule->SetCapsuleHalfHeight(CapsuleSize.X);
+	HitCapsule->SetCapsuleRadius(CapsuleSize.Y);
+	HitCapsule->SetGenerateOverlapEvents(true);
+	HitCapsule->SetCollisionProfileName("Player");
+
 	GetCapsuleComponent()->SetVisibility(true);
 	GetCapsuleComponent()->bHiddenInGame = false;
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 
 
 	SpringArmLength = 350.0f;
@@ -99,15 +112,24 @@ APlayerCharacter::APlayerCharacter()
 
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Equipments.BodyComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.BodyComponent->SetCollisionProfileName("Trigger");
+	Equipments.BodyComponent->SetGenerateOverlapEvents(false);
+
 	Equipments.LegsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
 	Equipments.LegsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.LegsComponent->SetGenerateOverlapEvents(false);
+
 	Equipments.HandsComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
+	Equipments.HandsComponent->SetCollisionProfileName("Trigger");
+	Equipments.HandsComponent->SetGenerateOverlapEvents(false);
 	Equipments.HandsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.WeaponComponent->SetCollisionProfileName("PlayerWeapon");
-	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetMesh()->SetGenerateOverlapEvents(false);
 
 	Equipments.BodyComponent->SetupAttachment(GetMesh());
 	Equipments.LegsComponent->SetupAttachment(GetMesh());
@@ -123,11 +145,7 @@ APlayerCharacter::APlayerCharacter()
 
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
-
-	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
-	CapsuleSize = FVector2D(90.0f, 34.0f);
-	MeshLocationVector = FVector(0.0f, 0.0f, -90.0f);
-	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
+	HitCapsule->SetupAttachment(RootComponent);
 
 	this->GetMesh()->SetRelativeScale3D(ScaleVector);
 	this->GetCapsuleComponent()->SetCapsuleHalfHeight(CapsuleSize.X);
@@ -136,27 +154,22 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTagLocation = FVector(0.0f, 0.0f, 90.0f);
 
-
 	ComboCount = 1;
 	CurrentAttackID = -1;
-	bIsMove = false;
-	bIsRolling = false;
-	bIsAttack = false;
-	bIsSprint = false;
-	bIsCharacterDead = false;
-	bIsHit = false;
-	bIsPlayer = false;
-	bInitialized = false;
-	bIsTestMode = false;
-
+	bIsMove						= false;
+	bIsRolling					= false;
+	bIsOverallRollAnimPlaying	 = false;
+	bIsAttack					= false;
+	bIsSprint					 = false;
+	bIsCharacterDead			= false;
+	bIsHit						= false;
+	bIsPlayer					= false;
+	bInitialized				= false;
+	bIsTestMode					= false;
+	ForwardValue = 0.0f;
+	RightValue = 0.0f;
+	RollingSpeed = 800.0f;
 	
-
-#pragma region TESTCODE
-
-	/* 주의 : 남자임을 가정하고 테스트 중 */
-	bIsMale = true;
-
-#pragma endregion
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -222,6 +235,10 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 
+	if (bIsRolling)
+	{
+		SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
+	}
 
 }
 
@@ -288,7 +305,10 @@ void APlayerCharacter::BeginPlay()
 
 void APlayerCharacter::MoveForward(float Value)
 {
-	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead )
+	ForwardValue = Value;
+
+
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead )
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -306,7 +326,9 @@ void APlayerCharacter::MoveForward(float Value)
 
 void APlayerCharacter::MoveRight(float Value)
 {
-	if (bIsAttack || bIsRolling || bIsHit || bIsCharacterDead)
+	RightValue = Value;
+
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -451,7 +473,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 	PlayerStatComp->SetCurrentHP(Damage);
 	
 	if(bIsTestMode == false)
-		UHealthBarWidget::GetInatance()->ApplyHp(PlayerStatComp->GetCurrentHP());
+		UHealthBarWidget::GetInatance()->ApplyHp(this->PlayerStatComp->GetCurrentHP());
 
 
 	//MyAnimInstance->StopAttackMontage();
@@ -478,9 +500,19 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 	return 0.0f;
 }
 
+FVector2D APlayerCharacter::GetNormalCapsuleSize()
+{
+	return CapsuleSize;
+}
+
+FVector2D APlayerCharacter::GetRollingCapsuleSize()
+{
+	return RollingHitCapsuleSize;
+}
+
 void APlayerCharacter::Attack()
 {	
-	if (bIsRolling == true || bIsHit)
+	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit)
 		return;
 
 	AttackOverlapList.clear(); //Overlap list 초기화
@@ -510,7 +542,69 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
+	//후딜레이 동작에서 구르는지 체크
+	if (bIsAttack)
+	{
+		FName CurrentSectionName = MyAnimInstance->Montage_GetCurrentSection(MyAnimInstance->AttackMontage);
+		FString SecStr = CurrentSectionName.ToString();
+	
+		for (int ii = 1; ii <= kMaxComboCount; ii++)
+		{
+			FString CompStr = "Combo" + FString::FromInt(ii);
+			if (SecStr == CompStr)
+				return;
+		}
+	}
+
+	if (bIsOverallRollAnimPlaying)
+		return;
+
+
+	bool bArrowKeyNotPressed = false;
+
+	//무식한건 아는데 당장 생각이 안남
+	float Yaw = 0.0f;
+	if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && FMath::IsNearlyEqual(RightValue, 0.0f))
+	{
+		Yaw = GetActorRotation().Yaw;
+		bArrowKeyNotPressed = true;
+	}
+	else if (ForwardValue > 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 0.0f;
+	else if (ForwardValue > 0.0f && RightValue > 0.0f)
+		Yaw = 45.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue > 0.0f)
+		Yaw = 90.0f;
+	else if (ForwardValue < 0.0f && RightValue > 0.0f)
+		Yaw = 135.0f;
+	else if (ForwardValue < 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 180.0f;  //-180?
+	else if (ForwardValue < 0.0f && RightValue < 0.0f)
+		Yaw = -135.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue < 0.0f)
+		Yaw = -90.0f;
+	else if (ForwardValue > 0.0f && RightValue < 0.0f)
+		Yaw = -45.0f;
+
+	const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
+	
+	if(bArrowKeyNotPressed)
+		this->SetActorRotation(FRotator(0.0f, Yaw, 0.0f));
+	else
+		this->SetActorRotation(CameraForward +  FRotator(0.0f, Yaw, 0.0f));
+
 	bIsRolling = true;
+	bIsOverallRollAnimPlaying = true;
+	MyAnimInstance->PlayRollMontage();
+	SetRollingCapsuleMode();
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterRolling);
+	out << this->ObjectID;
+	out << this->GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
 }
 
 void APlayerCharacter::Sprint()
@@ -560,6 +654,10 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		PlayerStatComp->SetMaxStamina(Data.MaxStamina);
 		PlayerStatComp->SetCharacterName(Data.Name.c_str());
 
+		if (PlayerStatComp->Gender == 0)
+			bIsMale = true;
+		else
+			bIsMale = false;
 		
 		if (bIsPlayerCharacter)
 		{
@@ -583,7 +681,6 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 			/*맨몸일 때 */
 			if (Data.EquipArray[ii].ID == -1)
 			{
-				//FEquipmentTableResource* EqTable;
 
 				const int32 kMalePrimaryBody = 130;
 				const int32 kMalePrimaryHand = 140;
@@ -691,6 +788,19 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		bIsHit = false;
 	}
+	else if (MyAnimInstance->RollMontage)
+	{
+		bIsOverallRollAnimPlaying = false;
+		
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+		out << 999;
+		out << GetActorLocation();
+		out << GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+
+	}
 }
 
 
@@ -707,7 +817,6 @@ void APlayerCharacter::ContinueCombo()
 		ComboCount++;
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
-		//XRLOG(Warning, TEXT("CurrentCombo : %d"), ComboCount);
 
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
@@ -785,6 +894,22 @@ bool APlayerCharacter::GetIsPlayer()
 bool APlayerCharacter::GetIsTestMode()
 {
 	return bIsTestMode;
+}
+
+void APlayerCharacter::SetRollingCapsuleMode()
+{
+	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
+	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
+	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, -RollingCapsuleOffset));
+	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation() + FVector(0.0f, 0.0f, -RollingCapsuleOffset));
+}
+
+void APlayerCharacter::SetNormalCapsuleMode()
+{
+	HitCapsule->SetCapsuleHalfHeight(GetNormalCapsuleSize().X);
+	HitCapsule->SetCapsuleRadius(GetNormalCapsuleSize().Y);
+	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, RollingCapsuleOffset));
+	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
 }
 
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)

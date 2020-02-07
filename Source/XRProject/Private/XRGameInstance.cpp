@@ -6,6 +6,8 @@
 #include "XRAIController.h"
 #include "XRPlayerController.h"
 #include "IngameGameMode.h"
+#include "InventoryWidget.h"
+#include "CharacterInfoWidget.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -33,6 +35,8 @@ void UXRGameInstance::Init()
 		this, &UXRGameInstance::CharacterWait);
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterSprint)->BindUObject(
 		this, &UXRGameInstance::CharacterSprint);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterRolling)->BindUObject(
+		this, &UXRGameInstance::CharacterRolling);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyChat)->BindUObject(
 		this, &UXRGameInstance::NotifyChat);
@@ -42,6 +46,9 @@ void UXRGameInstance::Init()
 		
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
+
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kInventoryUpdate)->BindUObject(
+		this, &UXRGameInstance::UpdateInventory);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
@@ -99,7 +106,6 @@ void UXRGameInstance::ReadInventoryInfo(InputStream & input)
 {
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if (GameInstance == nullptr) return;
-	UItemManager;
 	int Glod = input.ReadInt32();
 	Inventory::GetInstance().SetGold(Glod);
 	for (int i = 0; i < Inventory::GetInstance().GetInventorySize(); i++)
@@ -108,6 +114,37 @@ void UXRGameInstance::ReadInventoryInfo(InputStream & input)
 		if (newItem)
 		{
 			Inventory::GetInstance().AddItem(newItem, i);
+		}
+	}
+}
+
+void UXRGameInstance::UpdateInventory(InputStream & input)
+{
+	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (GameInstance == nullptr) return;
+
+	for (int i = 0; i < 2; i++)
+	{
+		bool IsEquipment = input.ReadBool();
+		int SlotNum = input.ReadInt32();
+		if (IsEquipment)
+		{
+			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+			UItemEquipment* EquipmentItem = Cast<UItemEquipment>(newItem);
+			if (EquipmentItem)
+			{
+				MapManager->GetPlayer()->SetEquippedItem((EEquipmentsType)SlotNum, EquipmentItem);
+				UCharacterInfoWidget::GetInstance()->Slot[SlotNum]->SetSlotObject();
+			}
+		}
+		else
+		{
+			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+			if (newItem)
+			{
+				Inventory::GetInstance().SetItem(newItem, SlotNum);
+				UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
+			}
 		}
 	}
 }
@@ -160,24 +197,6 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		aicon->MoveToLocation(Location, 2, false, false);
 	}
-
-	//TargetPlayer->bIsMove = true;
-
-	//FName CurrentSectionName = TargetPlayer->MyAnimInstance->
-	//	Montage_GetCurrentSection(TargetPlayer->MyAnimInstance->MoveMontageOnlyPlay);
-	//
-	//UE_LOG(LogTemp, Warning, TEXT("CurrentSEction : %s"), *(CurrentSectionName.ToString()));
-
-	//if (CurrentSectionName != FName("RunSection")
-	//	&& CurrentSectionName != FName("SprintSection"))
-	//{
-	//	TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	//	TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RunSection"));
-	//	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
-	//	UE_LOG(LogTemp, Warning, TEXT("RunSection Playing"));
-	//}
-
-
 }
 
 
@@ -289,16 +308,11 @@ void UXRGameInstance::CharacterWait(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	
-	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
-	//TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 ==  어색해.
-	
-	//TargetPlayer->bIsMove = false;
-	
-	TargetPlayer->bIsSprint = false;
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
-
-	UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsSprint = false;
+		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	}
 }
 
 void UXRGameInstance::CharacterSprint(InputStream& input)
@@ -307,14 +321,39 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 
-	TargetPlayer->bIsSprint = true;
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsSprint = true;
+		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+	}
 }
 
 void UXRGameInstance::CharacterDead(InputStream& input)
 {
 	int64 TargetID = input.ReadInt64();
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
-	TargetPlayer->bIsCharacterDead;
+	
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsCharacterDead = true;
+		TargetPlayer->SetCharacterLifeState(ECharacterLifeState::DEAD);
+	}
+}
+
+void UXRGameInstance::CharacterRolling(InputStream& input)
+{
+	int64 RollerID = input.ReadInt64();
+	FRotator RollerRot = input.ReadFRotator();
+
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(RollerID);
+
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->SetActorRotation(RollerRot);
+		TargetPlayer->bIsRolling = true;
+		TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+		TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RollSection"));
+	}
+
 }

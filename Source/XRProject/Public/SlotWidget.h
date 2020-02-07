@@ -18,6 +18,7 @@ public:
 	USlotWidget(const FObjectInitializer& ObjectInitializer);
 public:
 		USlotObject* SlotObject;
+		bool IsEquipment;
 		int Index;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")

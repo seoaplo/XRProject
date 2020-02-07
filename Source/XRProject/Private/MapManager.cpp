@@ -102,7 +102,8 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 		CurrentData.Speed = Input.ReadFloat32();
 		CurrentData.Defence = Input.ReadFloat32();
 
-		CurrentData.Name = Input.ReadCString();
+		std::string c_name = Input.ReadCString();
+		CurrentData.Name = mbs_to_wcs(c_name, std::locale("kor"));
 		CurrentData.Level = Input.ReadInt32();
 		CurrentData.Gender = Input.ReadInt32();
 		CurrentData.FaceID = Input.ReadInt32();
@@ -154,7 +155,8 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	CurrentData.Speed = Input.ReadFloat32();
 	CurrentData.Defence = Input.ReadFloat32();
 
-	CurrentData.Name = Input.ReadCString();
+	std::string c_name = Input.ReadCString();
+	CurrentData.Name = mbs_to_wcs(c_name, std::locale("kor"));
 	CurrentData.Level = Input.ReadInt32();
 	CurrentData.Gender = Input.ReadInt32();
 	CurrentData.FaceID = Input.ReadInt32();
@@ -218,7 +220,8 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 	CurrentData.Speed = Input.ReadFloat32();
 	CurrentData.Defence = Input.ReadFloat32();
 
-	CurrentData.Name = Input.ReadCString();
+	std::string c_name = Input.ReadCString();
+	CurrentData.Name = mbs_to_wcs(c_name, std::locale("kor"));
 	CurrentData.Level = Input.ReadInt32();
 	CurrentData.Gender = Input.ReadInt32();
 	CurrentData.FaceID = Input.ReadInt32();
@@ -294,8 +297,6 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 				continue;
 			}
 			if (Player->PlayerStatComp == nullptr) continue;
-	
-			//Player->PlayerStatComp->GetStatDataFromServer(Input);
 			CharacterList.Add(CurrentData.ObjectID, Player);
 		}
 	}

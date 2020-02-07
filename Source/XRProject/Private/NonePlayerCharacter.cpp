@@ -65,8 +65,7 @@ void ANonePlayerCharacter::BeginPlay()
 void ANonePlayerCharacter::Tick(float DeltaTime)
 {
 	ABaseCharacter::Tick(DeltaTime);
-
-	if (CurrentLoadState == ECharacterLoadState::READY)
+	if (CurrentLoadState == ECharacterLoadState::READY && CurrentLifeState == ECharacterLifeState::ALIVE)
 	{
 		auto ingameMode = Cast<UXRGameInstance>(GetGameInstance());
 		if (ingameMode)
@@ -74,6 +73,13 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 			if (ingameMode->GetIsSuper())
 			{
 				AICon->RunAI();
+
+				SumSec += DeltaTime;
+				if (SumSec >= 0.2f) 
+				{
+					SumSec = 0.0f;
+					SendAction(1000, GetActorLocation(), GetActorRotation());
+				}
 			}
 		}
 	}
@@ -94,6 +100,7 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;// 캐릭터 움직임 보간
+
 
 	XRLOG(Warning, TEXT("%s PossessedBy %s"), *GetName(), *Cntr->GetName())
 }
@@ -197,6 +204,7 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 	case ECharacterLifeState::DEAD:
 	{
 		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Dead")));
+		SetActorEnableCollision(false);
 		auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		AICon->StopAI();
 		if (npcAnim)
@@ -262,24 +270,25 @@ void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent,
 	auto castPlayerCharacter = Cast<APlayerCharacter>(OtherActor);
 	if (castPlayerCharacter)
 	{
-		auto FindListCharacter = AttackOverlapList.Find(castPlayerCharacter);
-		if (!AttackOverlapList.IsValidIndex(FindListCharacter))
+		auto PlayerCon = Cast<APlayerController>(castPlayerCharacter->GetController());
+		if (PlayerCon)
 		{
-			AttackOverlapList.AddUnique(castPlayerCharacter);
-			XRLOG(Warning, TEXT("OverlapPlayer"));
-			OutputStream out;
-			out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
-			out << ObjectID;
-			out << castPlayerCharacter->ObjectID;
-			out << 1;
-			out << GetActorLocation();
-			out << GetActorRotation();
-			out.CompletePacketBuild();
-			GetNetMgr().SendPacket(out);
-		
-
+			auto FindListCharacter = AttackOverlapList.Find(castPlayerCharacter);
+			if (!AttackOverlapList.IsValidIndex(FindListCharacter))
+			{
+				AttackOverlapList.AddUnique(castPlayerCharacter);
+				XRLOG(Warning, TEXT("OverlapPlayer"));
+				OutputStream out;
+				out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
+				out << ObjectID;
+				out << castPlayerCharacter->ObjectID;
+				out << 1;
+				out << GetActorLocation();
+				out << GetActorRotation();
+				out.CompletePacketBuild();
+				GetNetMgr().SendPacket(out);
+			}
 		}
-
 	}
 }
 
@@ -294,7 +303,7 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
 
-	XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+	//XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 }
 
 void ANonePlayerCharacter::SetInBattle(bool battle)
@@ -318,8 +327,8 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			if (ActionID < 1000)
 			{
 				AttackOverlapList.Reset();
-				AICon->StopMovement();
-				SetActorLocation(Location);
+				//AICon->StopMovement();
+				//SetActorLocation(Location);
 				
 				SetActorRotation(Rotator);
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
@@ -331,6 +340,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			else if (ActionID == 1000)
 			{
 				AICon->MoveToLocation(Location, 2, false, false);
+				AICon->SetControlRotation(Rotator);
 			}
 			else if (ActionID == 2000)
 			{
