@@ -33,6 +33,8 @@ void UXRGameInstance::Init()
 		this, &UXRGameInstance::CharacterWait);
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterSprint)->BindUObject(
 		this, &UXRGameInstance::CharacterSprint);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterRolling)->BindUObject(
+		this, &UXRGameInstance::CharacterRolling);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyChat)->BindUObject(
 		this, &UXRGameInstance::NotifyChat);
@@ -289,16 +291,14 @@ void UXRGameInstance::CharacterWait(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	
-	//TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
-	//TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("WaitSection"));
-	//TargetPlayer->SetActorLocation(TargetPos);  //어색한지 확인 ==  어색해.
-	
-	//TargetPlayer->bIsMove = false;
-	
-	TargetPlayer->bIsSprint = false;
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
 
-	UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
+		TargetPlayer->bIsSprint = false;
+		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+
+		UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
+	}
 }
 
 void UXRGameInstance::CharacterSprint(InputStream& input)
@@ -307,15 +307,39 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 
-	TargetPlayer->bIsSprint = true;
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsSprint = true;
+		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+	}
 }
 
 void UXRGameInstance::CharacterDead(InputStream& input)
 {
 	int64 TargetID = input.ReadInt64();
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
-	TargetPlayer->bIsCharacterDead;
-	TargetPlayer->SetCharacterLifeState(ECharacterLifeState::DEAD);
+	
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsCharacterDead = true;
+		TargetPlayer->SetCharacterLifeState(ECharacterLifeState::DEAD);
+	}
+}
+
+void UXRGameInstance::CharacterRolling(InputStream& input)
+{
+	int64 RollerID = input.ReadInt64();
+	FRotator RollerRot = input.ReadFRotator();
+
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(RollerID);
+
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->SetActorRotation(RollerRot);
+		TargetPlayer->bIsRolling = true;
+		TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+		TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RollSection"));
+	}
+
 }
