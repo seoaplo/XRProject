@@ -9,6 +9,7 @@
 #include "HealthBarWidget.h"
 #include "DungeonMatchingWidget.h"
 #include "Blueprint/UserWidget.h"
+#include "MiniMapWidget.h"
 #include "InGameMainWidget.generated.h"
 
 /**
@@ -33,4 +34,6 @@ public:
 		UHealthBarWidget* HealthBar;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UDungeonMatchingWidget* MatchingWindow;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+		UMiniMapWidget* MiniMap;
 };

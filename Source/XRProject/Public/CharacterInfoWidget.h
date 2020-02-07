@@ -17,13 +17,16 @@ class XRPROJECT_API UCharacterInfoWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	UCharacterInfoWidget(const FObjectInitializer& ObjectInitializer);
+	static UCharacterInfoWidget* GetInstance() { return CharacterInfoInstance; }
 private:
+	static UCharacterInfoWidget* CharacterInfoInstance;
 	USlotWidget* BodySlot;
 	USlotWidget* HandSlot;
 	USlotWidget* FootSlot;
 	USlotWidget* WeaponSlot;
 	bool bIsVisible;
 public:
+	USlotWidget* Slot[4];
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void SetVisible(bool IsVisible);
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")

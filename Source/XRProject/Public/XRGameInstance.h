@@ -33,7 +33,7 @@ public:
     }
 	FORCEINLINE UXRAssetMgr* GetXRAssetMgr() { return XRAssetManager; }
 
-	UMapManager& GetMapMgr() { return *MapManager; }
+	UMapManager& GetMapManager() { return *MapManager; }
 
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UXRAssetMgr* XRAssetManager;
@@ -67,7 +67,7 @@ private:
 	void CharacterSprint(class InputStream& input);
 	void CharacterDead(class InputStream& input);
 	void CharacterRolling(class InputStream& input);
-
+	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);
 };
@@ -87,4 +87,4 @@ public:
 
 #define GetNetMgr UNetworkManager::GetInstance
 #define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr
-#define GetMapMgr Cast<UXRGameInstance>(GetGameInstance())->GetMapMgr
+#define GetMapMgr Cast<UXRGameInstance>(GetGameInstance())->GetMapManager

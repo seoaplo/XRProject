@@ -25,12 +25,12 @@ void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	PrimaryActorTick.bCanEverTick = true;
 	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
 	if (CurrentWidget != nullptr)
 	{
 		CurrentWidget->AddToViewport();
 	}
-	PrimaryActorTick.bCanEverTick = true;
 
 	GetMapMgr().PlayerListSpawn(GetWorld());
 	GetMapMgr().MonsterListSpawn(GetWorld());
@@ -43,6 +43,21 @@ void AIngameGameMode::BeginPlay()
 		this, &AIngameGameMode::NotifyMatchResult);
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchCanceled)->BindUObject(
 		this, &AIngameGameMode::NotifyMatchCanceled);
+
+	if (CurrentWidget->MiniMap != nullptr)
+	{
+		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+		CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
+		CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
+		for (auto& Character : GetMapMgr().GetCharacterList())
+		{
+			CurrentMiniMap.AddActorList(Character.Value, static_cast<int>(EMiniMapObjectType::EParty));
+		}
+		for (auto& Monster : GetMapMgr().GetMonsterList())
+		{
+			CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
+		}
+	}
 }
 
 
@@ -50,11 +65,16 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
 	GetNetMgr().Update();
+	if (CurrentWidget->MiniMap != nullptr)
+	{
+		CurrentWidget->MiniMap->Update();
+	}
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	CurrentWidget->MiniMap->ListClear();
 }
 
 void AIngameGameMode::SpawnRemotePlayer()

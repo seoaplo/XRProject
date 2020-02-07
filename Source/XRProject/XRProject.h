@@ -48,7 +48,7 @@ struct CharacterData
 	int Speed = -1;
 	int Defence = -1;
 
-	std::string Name;
+	std::wstring Name;
 
 	int Level = -1;
 	int Gender = -1;

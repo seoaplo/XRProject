@@ -55,7 +55,6 @@ int Inventory::GetItemCount(int64 ID)
 				Count += Slot[i]->GetCount();
 			}
 		}
-
 	}
 	return Count;
 }
@@ -70,42 +69,27 @@ UItem * Inventory::GetItem(int index)
 bool Inventory::AddItem(UItem* item, int index)
 {
 	if (item == nullptr) return false;
-	if (index == -1)
-	{
-		for (int i = 0; i < kMaxInventorySlotSize; i++)
-		{
-			if (Slot[i] == nullptr)
-			{
-				Slot[i] = item;
-				return true;
-			}
-		}
-		return false;
-	}
-	else
-	{
-		if (index < 0 || index >= kMaxInventorySlotSize) return false;
-		if (Slot[index] == nullptr)
-		{
-			Slot[index] = item;
-			return true;
-		}
-	}
-	return false;
+	if (index < 0 || index >= kMaxInventorySlotSize) return false;
+	Slot[index] = item;
+	return true;
 }
 
-bool Inventory::ExchangeItem(int index1, int index2)
+void Inventory::ExchangeItem(int index1, int index2)
 {
-	if (index1 < 0 || index1 >= kMaxInventorySlotSize) return false;
-	if (index2 < 0 || index2 >= kMaxInventorySlotSize) return false;
-
+	if (index1 < 0 || index1 >= kMaxInventorySlotSize) return;
+	if (index2 < 0 || index2 >= kMaxInventorySlotSize) return;
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
 	out << (int32_t)index1;
 	out << (int32_t)index2;
 	out.CompletePacketBuild();
 	UNetworkManager::GetInstance().SendPacket(out);
-	return true;
+}
+
+void Inventory::SetItem(UItem* Item, int Index)
+{
+	if (Index < 0 || Index >= kMaxInventorySlotSize) return;
+	Slot[Index] = Item;
 }
 
 bool Inventory::UseSlot(int SlotID)
