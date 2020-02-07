@@ -83,9 +83,7 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 {
 	Super::PossessedBy(Cntr);
 	AICon = Cast<AXRAIController>(GetController());
-<<<<<<< Updated upstream
-	XRLOG(Warning,TEXT("%s PossessedBy %s"),*GetName(),*Cntr->GetName())
-=======
+
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
@@ -98,7 +96,6 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;// 캐릭터 움직임 보간
 
 	XRLOG(Warning, TEXT("%s PossessedBy %s"), *GetName(), *Cntr->GetName())
->>>>>>> Stashed changes
 }
 
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
