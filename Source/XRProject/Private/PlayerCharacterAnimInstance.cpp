@@ -101,7 +101,7 @@ void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
 
 void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingEnd()
 {
-	MyCharacter->bIsRolling = false;
+	MyCharacter->bIsRolling = false; 
 }
 
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
