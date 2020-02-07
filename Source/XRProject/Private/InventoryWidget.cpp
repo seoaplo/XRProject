@@ -1,6 +1,12 @@
 #include "InventoryWidget.h"
 #include <string>
 
+UInventoryWidget* UInventoryWidget::InventoryInstance = nullptr;
+
+UInventoryWidget* UInventoryWidget::GetInstance()
+{
+	return InventoryInstance;
+}
 UInventoryWidget::UInventoryWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
 	bIsVisible = false;
@@ -41,10 +47,13 @@ int UInventoryWidget::GetHeightSize()
 
 void UInventoryWidget::SetUp()
 {
+	InventoryInstance = this;
 	int Size = Inventory::GetInstance().GetInventorySize();
 	for (int i = 0; i < Size; i++)
 	{
-		list[i]->SlotObject = Inventory::GetInstance().GetItem(i);
+		list[i]->SetSlotObject();
+		list[i]->Index = i;
+		list[i]->IsEquipment = false;
 	}
 }
 

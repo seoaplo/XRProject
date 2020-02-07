@@ -66,7 +66,7 @@ private:
 	void CharacterWait(class InputStream& input);
 	void CharacterSprint(class InputStream& input);
 	void CharacterDead(class InputStream& input);
-
+	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);
 };

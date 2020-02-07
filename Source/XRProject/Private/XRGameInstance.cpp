@@ -6,6 +6,8 @@
 #include "XRAIController.h"
 #include "XRPlayerController.h"
 #include "IngameGameMode.h"
+#include "InventoryWidget.h"
+#include "CharacterInfoWidget.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -42,6 +44,9 @@ void UXRGameInstance::Init()
 		
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
+
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kInventoryUpdate)->BindUObject(
+		this, &UXRGameInstance::UpdateInventory);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kActorDamaged)->BindUObject(
 		this, &UXRGameInstance::ActorDamaged);
@@ -99,7 +104,6 @@ void UXRGameInstance::ReadInventoryInfo(InputStream & input)
 {
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if (GameInstance == nullptr) return;
-	UItemManager;
 	int Glod = input.ReadInt32();
 	Inventory::GetInstance().SetGold(Glod);
 	for (int i = 0; i < Inventory::GetInstance().GetInventorySize(); i++)
@@ -108,6 +112,37 @@ void UXRGameInstance::ReadInventoryInfo(InputStream & input)
 		if (newItem)
 		{
 			Inventory::GetInstance().AddItem(newItem, i);
+		}
+	}
+}
+
+void UXRGameInstance::UpdateInventory(InputStream & input)
+{
+	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (GameInstance == nullptr) return;
+
+	for (int i = 0; i < 2; i++)
+	{
+		bool IsEquipment = input.ReadBool();
+		int SlotNum = input.ReadInt32();
+		if (IsEquipment)
+		{
+			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+			UItemEquipment* EquipmentItem = Cast<UItemEquipment>(newItem);
+			if (EquipmentItem)
+			{
+				MapManager->GetPlayer()->SetEquippedItem((EEquipmentsType)SlotNum, EquipmentItem);
+				UCharacterInfoWidget::GetInstance()->Slot[SlotNum]->SetSlotObject();
+			}
+		}
+		else
+		{
+			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+			if (newItem)
+			{
+				Inventory::GetInstance().SetItem(newItem, SlotNum);
+				UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
+			}
 		}
 	}
 }
