@@ -3,7 +3,6 @@
 #pragma once
 
 #include "InputStream.h"
-#include <list>
 #include "EngineMinimal.h"
 #include "CustomSingleton.h"
 #include "ItemEquipment.h"
@@ -27,6 +26,7 @@ class XRPROJECT_API UItemManager : public UObject
 public:
 	UItemManager();
 	~UItemManager();
+
 public:
 	class UDataTable* EquipmentItemDataTable;
 	class UDataTable* PartsDataTable;
@@ -48,7 +48,7 @@ public:
 	범용적으로 사용할 수 없음
 	*/
 	void GetIcon(UTexture2D* OutTexture, int ID);
-	UItem* CreateItem(class InputStream& input);
+	TOptional<UItem*> CreateItem(class InputStream& input);
 	TOptional<UItem*> GetItemFromId(EItemType Type, int32 ID);
 	void BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCharacter* TargetCharacter);
 	void BuildItem(UItem* Item, UWorld* World, APlayerCharacter* TargetCharacter);
