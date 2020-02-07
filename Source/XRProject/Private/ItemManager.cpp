@@ -4,6 +4,7 @@
 #include "ItemManager.h"
 #include "InventoryWidget.h"
 #include "XRGameInstance.h"
+#include "XRProject.h"
 
 UItemManager::UItemManager()
 {
@@ -126,16 +127,16 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 	return nullptr;
 }
 
-void UItemManager::GetIcon(UTexture2D* OutTexture, int ID)
+void UItemManager::GetIcon(USlotWidget* Target, int ID)
 {
 	FSoftObjectPath AssetPath;
-	auto GI = Cast<UXRGameInstance>(UInventoryWidget::GetInstance()->GetWorld()->GetGameInstance());
-	GI->GetXRAssetMgr()->FindResourceFromDataTable(ID);
+	auto GI = Cast<UXRGameInstance>(Target->GetGameInstance());
+	AssetPath = GI->GetXRAssetMgr()->FindResourceFromDataTable(ID);
 	FStreamableDelegate ResultCallback;
-	ResultCallback.BindLambda([AssetPath, &OutTexture, this]()
+	ResultCallback = FStreamableDelegate::CreateLambda([AssetPath, Target, this]()
 	{
 		TSoftObjectPtr<UTexture2D> Loaded(AssetPath);
-		OutTexture = Loaded.Get();
+		Target->Icon->SetBrushFromTexture(Loaded.Get());
 		XRLOG(Warning, TEXT("IconLoadComplete"));
 	});
 	GI->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, ResultCallback);

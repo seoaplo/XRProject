@@ -74,18 +74,6 @@ bool Inventory::AddItem(UItem* item, int index)
 	return true;
 }
 
-void Inventory::ExchangeItem(int index1, int index2)
-{
-	if (index1 < 0 || index1 >= kMaxInventorySlotSize) return;
-	if (index2 < 0 || index2 >= kMaxInventorySlotSize) return;
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
-	out << (int32_t)index1;
-	out << (int32_t)index2;
-	out.CompletePacketBuild();
-	UNetworkManager::GetInstance().SendPacket(out);
-}
-
 void Inventory::SetItem(UItem* Item, int Index)
 {
 	if (Index < 0 || Index >= kMaxInventorySlotSize) return;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "SlotObject.h"
+#include "Image.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "SlotWidget.generated.h"
@@ -21,10 +22,11 @@ public:
 		bool IsEquipment;
 		int Index;
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
+		UImage* Icon;
+public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		void SetSlotObject();
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		virtual UTexture2D* GetIcon();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual int GetCount();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")

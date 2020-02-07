@@ -70,7 +70,7 @@ public:
 public:
 	virtual bool Use() override { return false; };
 	virtual int GetID() override;
-	virtual UTexture2D* GetIcon() override;
+	virtual int GetIconID() override;
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		int32 GetAddATK() { return AddInfo.AddATK; };
