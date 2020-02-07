@@ -29,7 +29,10 @@ public:
 	UMapManager();
 public:
 	int64_t GetPlayerID() { return PlayerID; }
+	int32_t GetMapID() { return LevelID; }
 	APlayerCharacter* GetPlayer() { return PlayerCharacter; }
+	const TMap<int64_t, APlayerCharacter*>& GetCharacterList() { return CharacterList; }
+	const TMap<int64_t, ANonePlayerCharacter*>& GetMonsterList() { return MonsterList; }
 public:
 	bool Init();
 	bool Clear();
@@ -69,6 +72,7 @@ private:
 
 	int32_t LevelID;
 	int64_t PlayerID;
+
 	std::vector<CharacterData> CharacterDataList;
 	std::vector<MonsterData> MonsterDataList;
 

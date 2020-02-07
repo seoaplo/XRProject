@@ -33,7 +33,7 @@ public:
     }
 	FORCEINLINE UXRAssetMgr* GetXRAssetMgr() { return XRAssetManager; }
 
-	UMapManager& GetMapMgr() { return *MapManager; }
+	UMapManager& GetMapManager() { return *MapManager; }
 
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UXRAssetMgr* XRAssetManager;
@@ -86,4 +86,4 @@ public:
 
 #define GetNetMgr UNetworkManager::GetInstance
 #define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr
-#define GetMapMgr Cast<UXRGameInstance>(GetGameInstance())->GetMapMgr
+#define GetMapMgr Cast<UXRGameInstance>(GetGameInstance())->GetMapManager
