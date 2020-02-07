@@ -10,11 +10,9 @@
 #include "DungeonMatchingWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "MiniMapWidget.h"
+#include "CharacterInfoWidget.h"
 #include "InGameMainWidget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class XRPROJECT_API UInGameMainWidget : public UUserWidget
 {
@@ -34,6 +32,8 @@ public:
 		UHealthBarWidget* HealthBar;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UDungeonMatchingWidget* MatchingWindow;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+		UCharacterInfoWidget* CharacterInfo;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UMiniMapWidget* MiniMap;
 };

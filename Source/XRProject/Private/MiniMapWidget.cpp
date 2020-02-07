@@ -13,7 +13,7 @@ void UMiniMapWidget::SetMapID(int ID)
 	case 100:
 		ImageSize.X = 2200;
 		ImageSize.Y = 2200;
-		ImageRate = 5.29054;
+		ImageRate = 9.554878;
 		break;
 	case 111:
 		ImageSize.X = 2200;
