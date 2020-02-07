@@ -43,6 +43,7 @@ AXRAIController::AXRAIController()
 	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 	SetGenericTeamId(FGenericTeamId(5));
 
+	bSetControlRotationFromPawnOrientation = false;
 
 }
 

@@ -28,8 +28,7 @@ ANonePlayerCharacter::ANonePlayerCharacter()
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
 
-	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
 	
 	AIControllerClass = AXRAIController::StaticClass(); 
@@ -59,8 +58,6 @@ void ANonePlayerCharacter::PostInitializeComponents()
 void ANonePlayerCharacter::BeginPlay()
 {
 	ACharacter::BeginPlay();
-	
-
 
 }
 
@@ -86,7 +83,22 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 {
 	Super::PossessedBy(Cntr);
 	AICon = Cast<AXRAIController>(GetController());
+<<<<<<< Updated upstream
 	XRLOG(Warning,TEXT("%s PossessedBy %s"),*GetName(),*Cntr->GetName())
+=======
+
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
+	//GetCharacterMovement()->bOrientRotationToMovement = true;
+	//GetCharacterMovement()->bUseControllerDesiredRotation = false;// 캐릭터 움직임 보간
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;// 캐릭터 움직임 보간
+
+	XRLOG(Warning, TEXT("%s PossessedBy %s"), *GetName(), *Cntr->GetName())
+>>>>>>> Stashed changes
 }
 
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -305,7 +317,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
 
-			XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+			//XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 			if (ActionID < 1000)
 			{
 				AttackOverlapList.Reset();
