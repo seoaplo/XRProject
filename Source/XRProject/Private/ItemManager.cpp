@@ -2,6 +2,7 @@
 
 
 #include "ItemManager.h"
+#include "InventoryWidget.h"
 #include "XRGameInstance.h"
 
 UItemManager::UItemManager()
@@ -49,7 +50,14 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		if (Table == nullptr)
 			check(false);
 		UItemETC* Item = NewObject<UItemETC>();
-		Item->SetCount(input.ReadInt32());
+		Item->DefaultInfo.ID = ID;
+		Item->DefaultInfo.Name = Table->Name;
+		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.Type = Table->Type;
+		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->SetCount(Count);
+		Item->ItemType = EItemType::ETC;
+		Item->AddToRoot();
 		return Item;
 		break;
 	}
@@ -61,7 +69,16 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		if (Table == nullptr)
 			check(false);
 		UItemConsumption* Item = NewObject<UItemConsumption>();
-		Item->SetCount(input.ReadInt32());
+		Item->DefaultInfo.ID = ID;
+		Item->DefaultInfo.Name = Table->Name;
+		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.Type = Table->Type;
+		Item->DefaultInfo.RecoveryHP = Table->RecoveryHP;
+		Item->DefaultInfo.RecoveryStamina = Table->RecoveryStamina;
+		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->SetCount(Count);
+		Item->ItemType = EItemType::CONSUMPTION;
+		Item->AddToRoot();
 		return Item;
 		break;
 	}
@@ -98,6 +115,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		Item->DefaultInfo.ReqINT = Table->RequiredINT;
 		Item->DefaultInfo.ToolTip = Table->ToolTip;
 		Item->ItemType = EItemType::EQUIPMENT;
+		Item->AddToRoot();
 		int Count = input.ReadInt32();
 		return Item;
 		break;
@@ -111,7 +129,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 void UItemManager::GetIcon(UTexture2D* OutTexture, int ID)
 {
 	FSoftObjectPath AssetPath;
-	auto GI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+	auto GI = Cast<UXRGameInstance>(UInventoryWidget::GetInstance()->GetWorld()->GetGameInstance());
 	GI->GetXRAssetMgr()->FindResourceFromDataTable(ID);
 	FStreamableDelegate ResultCallback;
 	ResultCallback.BindLambda([AssetPath, &OutTexture, this]()
@@ -157,7 +175,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 		Item->DefaultInfo.ReqINT = Table->RequiredINT;
 		Item->DefaultInfo.ToolTip = Table->ToolTip;
 		Item->ItemType = EItemType::EQUIPMENT;
-
+		Item->AddToRoot();
 		return Item;
 	}
 	break;

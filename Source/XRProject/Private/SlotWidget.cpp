@@ -1,5 +1,6 @@
 #include "SlotWidget.h"
 #include "..\Public\SlotWidget.h"
+#include "XRGameInstance.h"
 #include "Inventory.h"
 
 USlotWidget::USlotWidget(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
@@ -32,33 +33,14 @@ bool USlotWidget::IsEmpty()
 
 void USlotWidget::SetSlotObject()
 {
-	if (Index >= 0 || Inventory::GetInstance().GetInventorySize() > Index)
+	if (Index < 0 || Inventory::GetInstance().GetInventorySize() <= Index) return;
+	if (IsEquipment)
 	{
-		SlotObject = Inventory::GetInstance().GetItem(Index);
+		GetMapMgr().GetPlayer()->GetEquippedItem((EEquipmentsType)Index);
 	}
 	else
 	{
-		switch (Index)
-		{
-		case 100:
-		{
-			break;
-		}
-		case 101:
-		{
-			break;
-		}
-		case 102:
-		{
-			break;
-		}
-		case 103:
-		{
-			break;
-		}
-		default:
-			break;
-		}
+		SlotObject = Inventory::GetInstance().GetItem(Index);
 	}
 	Update();
 }
@@ -68,10 +50,6 @@ void USlotWidget::DropIn(UUserWidget * SlotWidget)
 	USlotWidget* Target = Cast<USlotWidget>(SlotWidget);
 	if (Target)
 	{
-		if (Inventory::GetInstance().ExchangeItem(Index, Target->Index))
-		{
-			SetSlotObject();
-			Target->SetSlotObject();
-		}
+		Inventory::GetInstance().ExchangeItem(Index, Target->Index);
 	}
 }
