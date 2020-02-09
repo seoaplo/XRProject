@@ -12,6 +12,9 @@
 
 const float kSprintMovementSpeed = 750.0f;
 const float kNormalMovementSpeed = 450.0f;
+const float kMaxMovementAcceleration = 8192.0f;
+const float kNormalMovementAcceleration = 2048.0f;
+const float kRollingMovementSpeed = 800.0f;
 
 class UIngameGameMode;
 /**
@@ -40,6 +43,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UItemManager* ItemManager;
+
+public:
+
 
 private:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
@@ -70,6 +76,7 @@ private:
 	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);
+
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-
@@ -84,6 +91,16 @@ public:
 	int32 ResourceID;
 };
 
+USTRUCT(BlueprintType)
+struct FXRDamageEvent : public FDamageEvent
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
+		int32 ID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
+		bool Intensity; //강격이면 true, 약격이면 false
+};
 
 #define GetNetMgr UNetworkManager::GetInstance
 #define GetAssetMgr Cast<UXRGameInstance>(GetGameInstance())->GetXRAssetMgr

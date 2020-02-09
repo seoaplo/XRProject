@@ -72,6 +72,8 @@ public:
 		void AnimNotify_HitMotionEnd();
 	UFUNCTION()
 		void AnimNotify_RemoteRollingEnd();
+	UFUNCTION()
+		void AnimNotify_RemoteRollingAllEnd();
 
 	void PlayAttackMontage();
 	void PlayAttackOnlyPlayMontage();

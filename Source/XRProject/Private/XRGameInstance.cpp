@@ -63,7 +63,7 @@ void UXRGameInstance::Shutdown()
 	GetNetMgr().Close();
     NetworkManager->StopThread();
     UNetworkManager::Instance = nullptr;
-}
+}  
 
 void UXRGameInstance::LobbytoGame()
 {
@@ -195,7 +195,10 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	}
 	else
 	{
-		aicon->MoveToLocation(Location, 2, false, false);
+		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
+		{
+			aicon->MoveToLocation(Location, 2, false, false);
+		}
 	}
 }
 
@@ -262,20 +265,30 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int64 AttackedID = input.ReadInt64();
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
+	//bool AttackIntensity = input.ReadBool();
 
 	if (AttackerType == 1)
 	{
-
 		ANonePlayerCharacter* AttackerMonster = MapManager->FindMonster(AttackerID);
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
+		
+		//데미지 강격/약격 나누기 위한 잔재
+		//XRDamageEvent MonsterDamageEvent;
+		//MonsterDamageEvent.ID = AttackActionID;
+		//MonsterDamageEvent.Intensity = AttackIntensity;
 
 		if (AttackerMonster)
 		{
 			if (AttackedCharacter == MapManager->GetPlayer())
 				AttackedCharacter->TakeDamage(AttackSetHp, FDamageEvent(), AttackerMonster->GetController(), AttackerMonster);
 			else
+			{
+				//if(MonsterDamageEvent)
 				AttackedCharacter->MyAnimInstance->PlayHitMontage();
+			}
 		}
+
+
 
 	}
 	else if (AttackerType == 0)
@@ -350,8 +363,15 @@ void UXRGameInstance::CharacterRolling(InputStream& input)
 
 	if (TargetPlayer != MapManager->GetPlayer())
 	{
-		TargetPlayer->SetActorRotation(RollerRot);
+
 		TargetPlayer->bIsRolling = true;
+		TargetPlayer->bIsOverallRollAnimPlaying = true;
+		AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
+		if (!aicon)
+			check(false);
+		
+		aicon->StopMovement();
+		TargetPlayer->SetActorRotation(RollerRot);
 		TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
 		TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RollSection"));
 	}

@@ -111,7 +111,7 @@ APlayerCharacter::APlayerCharacter()
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
-	Equipments.BodyComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.BodyComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Equipments.BodyComponent->SetCollisionProfileName("Trigger");
 	Equipments.BodyComponent->SetGenerateOverlapEvents(false);
 
@@ -166,9 +166,9 @@ APlayerCharacter::APlayerCharacter()
 	bIsPlayer					= false;
 	bInitialized				= false;
 	bIsTestMode					= false;
+	bIsMouseShow				= false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
-	RollingSpeed = 800.0f;
 	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -237,7 +237,8 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (bIsRolling)
 	{
-		SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
+		//SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
+		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	}
 
 }
@@ -255,6 +256,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	PlayerInputComponent->BindAction("Roll", IE_Pressed, this, &APlayerCharacter::Roll);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::SprintEnd);
+	PlayerInputComponent->BindAction("ShowCursor", IE_Pressed , this, &APlayerCharacter::ToggleMouseCursor);
 
 }
 
@@ -475,14 +477,12 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 	if(bIsTestMode == false)
 		UHealthBarWidget::GetInatance()->ApplyHp(this->PlayerStatComp->GetCurrentHP());
 
-
-	//MyAnimInstance->StopAttackMontage();
-
 	bIsHit = true;
 
 	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false)
 	{
 		MyAnimInstance->PlayHitMontage();
+		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
 	}
@@ -609,6 +609,9 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
+	if (bIsOverallRollAnimPlaying)
+		return;
+
 	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	bIsSprint = true;
 
@@ -900,8 +903,12 @@ void APlayerCharacter::SetRollingCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
-	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, -RollingCapsuleOffset));
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation() + FVector(0.0f, 0.0f, -RollingCapsuleOffset));
+	
+	/* 속도 설정 */
+	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+	GetCharacterMovement()->MaxWalkSpeed = kRollingMovementSpeed;
+
 }
 
 void APlayerCharacter::SetNormalCapsuleMode()
@@ -910,8 +917,21 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	HitCapsule->SetCapsuleRadius(GetNormalCapsuleSize().Y);
 	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, RollingCapsuleOffset));
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
+
+	/*속도 설정*/
+	GetCharacterMovement()->MaxAcceleration = kNormalMovementAcceleration;
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
+bool APlayerCharacter::GetbIsRolling()
+{
+	return bIsRolling;
+}
+
+bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
+{
+	return bIsOverallRollAnimPlaying;
+}
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
 {
 	switch (Type)
@@ -938,4 +958,29 @@ void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Ite
 {
 	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
 	GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
+}
+
+void APlayerCharacter::ToggleMouseCursor()
+{
+	int32 SizeX = 0;
+	int32 SizeY = 0;
+	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
+
+	if (bIsMouseShow)
+	{
+		bIsMouseShow = false;
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+		//GetWorld()->GetFirstPlayerController()->SetIgnoreLookInput(false);
+
+	}
+	else
+	{
+		bIsMouseShow = true;
+		GetWorld()->GetFirstPlayerController()->SetMouseLocation(SizeX/2, SizeY/2);
+		//GetWorld()->GetFirstPlayerController()->SetIgnoreLookInput(true);
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+	}
+
 }
