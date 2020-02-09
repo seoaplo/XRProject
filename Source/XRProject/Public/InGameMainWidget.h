@@ -34,6 +34,6 @@ public:
 		UHealthBarWidget* HealthBar;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UDungeonMatchingWidget* MatchingWindow;
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
-		UMiniMapWidget* MiniMap;
+	//UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+	//	UMiniMapWidget* MiniMap;
 };
