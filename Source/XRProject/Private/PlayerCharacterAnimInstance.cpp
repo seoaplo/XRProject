@@ -15,7 +15,7 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	bIsCharacterDead = false;
 	bIsHit = false;
 	bIsOverallRollAnimPlaying = false;
-
+	FemaleMontageList.Reserve(5);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ATTACK_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/AttackMontage.AttackMontage'"));
@@ -66,7 +66,6 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	if (MyCharacter)
 	{
-		//CharacterSpeed = MyCharacter->GetCharacterMovement()->Velocity.Size(); //ÁÖÀÇ : velocity crash
 		bIsMove = MyCharacter->bIsMove;
 		bIsRolling = MyCharacter->bIsRolling;
 		bIsSprint = MyCharacter->bIsSprint;

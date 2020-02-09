@@ -107,7 +107,11 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		TSubclassOf<UAnimInstance> FemaleAnimInstance;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> RemoteAnimInstance;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -234,3 +238,4 @@ private:
 	void ToggleMouseCursor();
 
 };
+

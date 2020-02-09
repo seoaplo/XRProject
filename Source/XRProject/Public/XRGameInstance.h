@@ -91,6 +91,8 @@ public:
 	int32 ResourceID;
 };
 
+
+
 USTRUCT(BlueprintType)
 struct FXRDamageEvent : public FDamageEvent
 {

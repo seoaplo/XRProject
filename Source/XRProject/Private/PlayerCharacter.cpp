@@ -22,6 +22,9 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
+	
+	//static ConstructorHelpers::FClassFinder<UAnimInstance> FemaleAnimBP
+	//(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
@@ -171,8 +174,8 @@ APlayerCharacter::APlayerCharacter()
 	RightValue = 0.0f;
 	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-
+	//FCharacterSizeInfo aa;
+	//aa = FindCharacterSizeFromDataTable(1);
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
 }
 
@@ -664,7 +667,11 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		
 		if (bIsPlayerCharacter)
 		{
-			Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+			if (bIsMale)
+				Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+			else
+				Equipments.BodyComponent->SetAnimInstanceClass(FemaleAnimInstance);
+
 			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 			MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
 			MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
@@ -672,12 +679,15 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		}
 		else
 		{
-			Equipments.BodyComponent->SetAnimInstanceClass(RemoteAnimInstance);
+			if (bIsMale)
+				Equipments.BodyComponent->SetAnimInstanceClass(RemoteAnimInstance);
+			else
+				Equipments.BodyComponent->SetAnimInstanceClass(FemaleRemoteAnimInstance);
+
 			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 		}
 		
 		MyAnimInstance->SetOwnerCharacter(this);
-
 
 		for (int ii = 0; ii < Data.kEquipmentArraySize; ii++)
 		{
