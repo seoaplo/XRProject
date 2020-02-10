@@ -3,6 +3,7 @@
 
 #include "PlayerCharacterAnimInstance.h"
 #include "AccountManager.h"
+#include "XRGameInstance.h"
 #include "PlayerCharacter.h"
 
 UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
@@ -14,7 +15,7 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	bIsCharacterDead = false;
 	bIsHit = false;
 	bIsOverallRollAnimPlaying = false;
-
+	FemaleMontageList.Reserve(5);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ATTACK_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/AttackMontage.AttackMontage'"));
@@ -65,7 +66,6 @@ void UPlayerCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	
 	if (MyCharacter)
 	{
-		//CharacterSpeed = MyCharacter->GetCharacterMovement()->Velocity.Size(); //ÁÖÀÇ : velocity crash
 		bIsMove = MyCharacter->bIsMove;
 		bIsRolling = MyCharacter->bIsRolling;
 		bIsSprint = MyCharacter->bIsSprint;
@@ -102,8 +102,14 @@ void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
 void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingEnd()
 {
 	MyCharacter->bIsRolling = false; 
+	bIsRolling = false;
 }
 
+void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingAllEnd()
+{
+	bIsOverallRollAnimPlaying = false;
+	MyCharacter->bIsOverallRollAnimPlaying = false;
+}
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
 {
 	float ret = Montage_Play(AttackMontage, 1.f);

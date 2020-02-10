@@ -13,6 +13,7 @@
 #include "UserWidget.h"
 #include "HealthBarWidget.h"
 #include "XRPlayerController.h"
+#include "PlayerCameraShake.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
@@ -107,7 +108,11 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		TSubclassOf<UAnimInstance> FemaleAnimInstance;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> RemoteAnimInstance;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -123,8 +128,6 @@ public:
 		FVector2D CapsuleSize;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLLISION")
 		FVector2D RollingHitCapsuleSize;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		float RollingSpeed;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_VALUE")
 		float RollingCapsuleOffset;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
@@ -133,7 +136,8 @@ public:
 		FVector WeaponScaleVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
 		FVector NameTagLocation;
-
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UCameraShake> MyShake;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
 
@@ -171,9 +175,12 @@ private:
 	bool bIsPlayer;
 	bool bInitialized;
 	bool bIsTestMode;
+	bool bIsMouseShow;
 	int32 CurrentAttackID;
 	float ForwardValue; //앞 방향키를 누르고 있는가(-1~1)
 	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
+	float SumSec = 0;
+
 
 public:
 	virtual void Tick(float Deltatime) override;
@@ -182,17 +189,9 @@ public:
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* controller) override;
 
-public:
-	void MoveForward(float Value);
-	void MoveRight(float Value);
-	void TurnAtRate(float Rate);
-	void LookUpAtRate(float Rate);
-	void Attack();
-	void Roll();
-	void Sprint();
-	void SprintEnd();
-	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
 
+public:
+	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
@@ -200,8 +199,13 @@ public:
 	void SetIsPlayer(bool is);
 	bool GetIsPlayer();
 	bool GetIsTestMode();
-	void SetRollingCapsuleMode();
-	void SetNormalCapsuleMode();
+	void SetRollingCapsuleMode(); //구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
+	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
+
+	bool GetbIsRolling();
+	bool GetbIsOverallRollAnimPlaying();
+
+	void TestPlay();
 
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);
@@ -226,6 +230,16 @@ public:
 
 		virtual	void OnDead() override;
 
+private:
+	void MoveForward(float Value);
+	void MoveRight(float Value);
+	void TurnAtRate(float Rate);
+	void LookUpAtRate(float Rate);
+	void Attack();
+	void Roll();
+	void Sprint();
+	void SprintEnd();
+	void ToggleMouseCursor();
 
-	float SumSec = 0;
 };
+
