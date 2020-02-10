@@ -30,7 +30,7 @@ AXRAIController::AXRAIController()
 	SightConfig->SetMaxAge(10.f);
 
 
-	//EnermyPerceptionComponent->ConfigureSense(*SightConfig);
+	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 
 	DamageConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
 	DamageConfig->SetMaxAge(10.f);

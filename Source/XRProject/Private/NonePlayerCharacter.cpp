@@ -362,15 +362,18 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			//XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 			if (ActionID < 1000)
 			{
+
+				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID) );
 				AttackOverlapList.Reset();
 				//AICon->StopMovement();
-				//SetActorLocation(Location);
+				SetActorLocation(Location);
 				
 				SetActorRotation(Rotator);
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (npcAnim)
 				{
-					PlayAnimMontage(npcAnim->NpcAttackMontage[ActionID]);
+					npcAnim->Montage_Play(npcAnim->NpcAttackMontage[ActionID]);
+			
 				}
 			}
 			else if (ActionID == 1000)
