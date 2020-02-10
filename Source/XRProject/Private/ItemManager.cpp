@@ -217,6 +217,9 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 		else
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
+
+	TargetCharacter->PseudoChangeEquipmentWithoutMesh(RetItem);
+
 	FStreamableDelegate AssetLoadDelegate;
 	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
 		AssetPath, RetItem, TargetCharacter);
@@ -240,6 +243,8 @@ void UItemManager::BuildItem(UItem* Item, UWorld* World, APlayerCharacter* Targe
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 	
+	TargetCharacter->PseudoChangeEquipmentWithoutMesh(RetItem);
+
 	FStreamableDelegate AssetLoadDelegate;
 	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
 		AssetPath, RetItem, TargetCharacter);
