@@ -5,7 +5,9 @@
 #include "XRProject.h"
 #include "GameFramework/Character.h"
 #include "CharacterStatComponent.h"
+#include "Engine/DataTable.h"
 #include "BaseCharacter.generated.h"
+
 
 
 /*
@@ -28,12 +30,13 @@ enum class ECharacterLifeState : uint8
 };
 
 
-
-
-
-
-
-                               
+struct FCharacterSizeInfo
+{
+public:
+	FTransform LocalTransform;
+	float CapsuleHeight;
+	float CapsuleRad;
+};
 
 UCLASS()
 class XRPROJECT_API ABaseCharacter : public ACharacter
@@ -55,7 +58,8 @@ public:
 		const ECharacterLoadState GetCharacterLoadState() { return CurrentLoadState; }
 	UFUNCTION(BlueprintCallable)
 		const ECharacterLifeState GetCharacterLifeState() { return CurrentLifeState; }
-
+	
+	class UDataTable* CharacterDataTable;
 
 	UFUNCTION(BlueprintCallable)
 	virtual	void SetCharacterLoadState(ECharacterLoadState NewLoadState);
@@ -81,7 +85,7 @@ public:
 	UPROPERTY()
 		int64 ObjectID;
 
-
+	FCharacterSizeInfo FindCharacterSizeFromDataTable(int32 ID);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
@@ -100,3 +104,17 @@ private:
 
 
 
+USTRUCT(BlueprintType)
+struct FCharacterResource : public FTableRowBase
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_CharacterResource")
+		FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_CharacterResource")
+		FString LocalTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_CharacterResource")
+		float CapsuleHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_CharacterResource")
+		float CapsuleRad;
+};

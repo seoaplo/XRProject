@@ -13,7 +13,7 @@ public:
 		USlotObject() {};
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		virtual UTexture2D* GetIcon();
+		virtual int GetIconID();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual int GetCount();
 };

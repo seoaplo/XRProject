@@ -13,6 +13,10 @@ ABaseCharacter::ABaseCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	//StatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("CharacterStat"));
+	FString CharacterDataPath = TEXT("DataTable'/Game/Resources/DataTable/CharacterData.CharacterData'");
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> DT_CHAR(*CharacterDataPath);
+	if (DT_CHAR.Succeeded()) CharacterDataTable = DT_CHAR.Object;
 }
 
 // Called when the game starts or when spawned 
@@ -148,5 +152,25 @@ void ABaseCharacter::SetRemoteLocation(FVector remoteLocation)
 void ABaseCharacter::SetRemoteRotation(FRotator remoteRotator)
 {
 	RemoteRotator = remoteRotator;
+}
+
+FCharacterSizeInfo ABaseCharacter::FindCharacterSizeFromDataTable(int32 ID)
+{
+	FCharacterSizeInfo Out;
+	if (CharacterDataTable)
+	{
+		FCharacterResource* TableRow = CharacterDataTable->FindRow<FCharacterResource>
+			(FName(*(FString::FromInt(ID))), FString(""));
+		if (TableRow)
+		{
+			Out.LocalTransform.InitFromString(TableRow->LocalTransform);
+			Out.CapsuleHeight = TableRow->CapsuleHeight;
+			Out.CapsuleRad = TableRow->CapsuleRad;
+
+			return Out;
+		}
+	}
+	check(false);
+	return Out;
 }
 

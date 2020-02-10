@@ -25,6 +25,9 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
+	
+	//static ConstructorHelpers::FClassFinder<UAnimInstance> FemaleAnimBP
+	//(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
@@ -114,7 +117,7 @@ APlayerCharacter::APlayerCharacter()
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
 	Equipments.BodyComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
-	Equipments.BodyComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.BodyComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Equipments.BodyComponent->SetCollisionProfileName("Trigger");
 	Equipments.BodyComponent->SetGenerateOverlapEvents(false);
 
@@ -169,11 +172,19 @@ APlayerCharacter::APlayerCharacter()
 	bIsPlayer					= false;
 	bInitialized				= false;
 	bIsTestMode					= false;
+	bIsMouseShow				= false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
-	RollingSpeed = 800.0f;
 
+	MyShake = UPlayerCameraShake::StaticClass();
+
+	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
+	//FCharacterSizeInfo aa;
+	//aa = FindCharacterSizeFromDataTable(1);
+
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
 	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
 	PlayerAIPerceptionStimul->bAutoRegister = true;
@@ -240,9 +251,10 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 	if (bIsRolling)
-	{
-		SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
-	}
+		AddMovementInput(GetActorForwardVector(), 1.0f, false);
+
+	
+	
 
 }
 
@@ -259,6 +271,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	PlayerInputComponent->BindAction("Roll", IE_Pressed, this, &APlayerCharacter::Roll);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::SprintEnd);
+	PlayerInputComponent->BindAction("ShowCursor", IE_Pressed , this, &APlayerCharacter::ToggleMouseCursor);
+	PlayerInputComponent->BindAction("TEST", IE_Pressed , this, &APlayerCharacter::TestPlay);
 
 }
 
@@ -300,6 +314,8 @@ void APlayerCharacter::BeginPlay()
 
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
+
+	
 
 
 
@@ -420,6 +436,41 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 	}
 }
 
+void APlayerCharacter::PseudoChangeEquipmentWithoutMesh(UItem * Item)
+{
+	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
+
+	if (EquipItem == nullptr)
+		check(false);
+
+	EEquipmentsType Types;
+
+	switch (EquipItem->DefaultInfo.Type)
+	{
+		case 0: { Types = EEquipmentsType::BODY; break; }
+		case 1: { Types = EEquipmentsType::HANDS; break; }
+		case 2: { Types = EEquipmentsType::LEGS; break; }
+		case 3: { Types = EEquipmentsType::WEAPON; break; }
+	}
+
+	switch (Types)
+	{
+	case EEquipmentsType::BODY:
+		Equipments.BodyItem = EquipItem;
+		break;
+	case EEquipmentsType::HANDS:
+		Equipments.HandsItem = EquipItem;
+		break;
+	case EEquipmentsType::LEGS:
+		Equipments.LegsItem = EquipItem;
+		break;
+	case EEquipmentsType::WEAPON:
+		Equipments.WeaponItem = EquipItem;
+		break;
+	}
+}
+
+
 void APlayerCharacter::ChangeEquipment(UItem * Item, UStaticMesh* SmMesh)
 {
 	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
@@ -478,16 +529,21 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 	if(bIsTestMode == false)
 		UHealthBarWidget::GetInatance()->ApplyHp(this->PlayerStatComp->GetCurrentHP());
 
-
-	//MyAnimInstance->StopAttackMontage();
-
 	bIsHit = true;
 
 	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false)
 	{
 		MyAnimInstance->PlayHitMontage();
+		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
+		if (MyShake)
+		{
+			auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+			Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
+			//UPlayerCameraShake* sss = 
+			//sss->SetCustomShakeMode(ShakeInfo);
+		}
 	}
 	else
 		bIsHit = false;
@@ -612,6 +668,9 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
+	if (bIsOverallRollAnimPlaying)
+		return;
+
 	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	bIsSprint = true;
 
@@ -664,7 +723,11 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		
 		if (bIsPlayerCharacter)
 		{
-			Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+			if (bIsMale)
+				Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
+			else
+				Equipments.BodyComponent->SetAnimInstanceClass(FemaleAnimInstance);
+
 			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 			MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
 			MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
@@ -672,12 +735,15 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		}
 		else
 		{
-			Equipments.BodyComponent->SetAnimInstanceClass(RemoteAnimInstance);
+			if (bIsMale)
+				Equipments.BodyComponent->SetAnimInstanceClass(RemoteAnimInstance);
+			else
+				Equipments.BodyComponent->SetAnimInstanceClass(FemaleRemoteAnimInstance);
+
 			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 		}
 		
 		MyAnimInstance->SetOwnerCharacter(this);
-
 
 		for (int ii = 0; ii < Data.kEquipmentArraySize; ii++)
 		{
@@ -905,8 +971,12 @@ void APlayerCharacter::SetRollingCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
-	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, -RollingCapsuleOffset));
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation() + FVector(0.0f, 0.0f, -RollingCapsuleOffset));
+	
+	/* 속도 설정 */
+	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+	GetCharacterMovement()->MaxWalkSpeed = kRollingMovementSpeed;
+
 }
 
 void APlayerCharacter::SetNormalCapsuleMode()
@@ -915,6 +985,34 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	HitCapsule->SetCapsuleRadius(GetNormalCapsuleSize().Y);
 	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, RollingCapsuleOffset));
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
+
+	/*속도 설정*/
+	GetCharacterMovement()->MaxAcceleration = kNormalMovementAcceleration;
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
+
+bool APlayerCharacter::GetbIsRolling()
+{
+	return bIsRolling;
+}
+
+bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
+{
+	return bIsOverallRollAnimPlaying;
+}
+
+void APlayerCharacter::TestPlay()
+{
+
+	if (MyShake)
+	{
+		//GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+		auto aaa=  GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+		UPlayerCameraShake* sss = Cast<UPlayerCameraShake>(aaa);
+		sss->SetCustomShakeMode(ShakeInfo);
+
+		XRLOG(Warning, TEXT("Text Playing..."));
+	}
 }
 
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
@@ -943,4 +1041,26 @@ void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Ite
 {
 	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
 	GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
+}
+
+void APlayerCharacter::ToggleMouseCursor()
+{
+	int32 SizeX = 0;
+	int32 SizeY = 0;
+	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
+
+	if (bIsMouseShow)
+	{
+		bIsMouseShow = false;
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+	}
+	else
+	{
+		bIsMouseShow = true;
+		GetWorld()->GetFirstPlayerController()->SetMouseLocation(SizeX/2, SizeY/2);
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+	}
+
 }

@@ -54,3 +54,11 @@ void UCharacterInfoWidget::SetSlot(USlotWidget * Body, USlotWidget * Hand, USlot
 	Slot[2] = FootSlot;
 	Slot[3] = WeaponSlot;
 }
+
+void UCharacterInfoWidget::SetSlotInfo()
+{
+	BodySlot->SetSlotObject();
+	HandSlot->SetSlotObject();
+	FootSlot->SetSlotObject();
+	WeaponSlot->SetSlotObject();
+}

@@ -4,6 +4,7 @@
 #include "ItemETC.h"
 #include "XRGameInstance.h"
 #include "InventoryWidget.h"
+#include "InventoryWidget.h"
 
 int UItemETC::GetCount()
 {
@@ -20,10 +21,7 @@ void UItemETC::SetCount(int Count)
 	AddInfo.Count = Count;
 }
 
-UTexture2D* UItemETC::GetIcon()
+int UItemETC::GetIconID()
 {
-	UTexture2D* result = nullptr;
-	auto GI = Cast<UXRGameInstance>(UInventoryWidget::GetInstance()->GetWorld()->GetGameInstance());
-	GI->ItemManager->GetIcon(result, DefaultInfo.IconResourceID);
-	return result;
+	return DefaultInfo.IconResourceID;
 }

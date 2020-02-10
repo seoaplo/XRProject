@@ -27,6 +27,8 @@ private:
 	bool bIsVisible;
 public:
 	USlotWidget* Slot[4];
+public:
+	void SetSlotInfo();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void SetVisible(bool IsVisible);
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")

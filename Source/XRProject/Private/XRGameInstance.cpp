@@ -63,7 +63,7 @@ void UXRGameInstance::Shutdown()
 	GetNetMgr().Close();
     NetworkManager->StopThread();
     UNetworkManager::Instance = nullptr;
-}
+}  
 
 void UXRGameInstance::LobbytoGame()
 {
@@ -122,30 +122,40 @@ void UXRGameInstance::UpdateInventory(InputStream & input)
 {
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if (GameInstance == nullptr) return;
-
-	for (int i = 0; i < 2; i++)
+	int8 Type = input.ReadInt8();
+	switch (Type)
 	{
-		bool IsEquipment = input.ReadBool();
-		int SlotNum = input.ReadInt32();
-		if (IsEquipment)
+	case 0 : // 생성
+	{
+		break;
+	}
+	case 1 : // 삭제
+	{
+		break;
+	}
+	case 2 : // 업데이트
+	{
+		for (int i = 0; i < 2; i++)
 		{
-			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
-			UItemEquipment* EquipmentItem = Cast<UItemEquipment>(newItem);
-			if (EquipmentItem)
+			bool IsEquipment = input.ReadBool();
+			int SlotNum = input.ReadInt32();
+			if (IsEquipment)
 			{
+				UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+				UItemEquipment* EquipmentItem = Cast<UItemEquipment>(newItem);
 				MapManager->GetPlayer()->SetEquippedItem((EEquipmentsType)SlotNum, EquipmentItem);
 				UCharacterInfoWidget::GetInstance()->Slot[SlotNum]->SetSlotObject();
+
 			}
-		}
-		else
-		{
-			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
-			if (newItem)
+			else
 			{
+				UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
 				Inventory::GetInstance().SetItem(newItem, SlotNum);
 				UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
 			}
 		}
+		break;
+	}
 	}
 }
 
@@ -195,7 +205,10 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	}
 	else
 	{
-		aicon->MoveToLocation(Location, 2, false, false);
+		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
+		{
+			aicon->MoveToLocation(Location, 2, false, false);
+		}
 	}
 }
 
@@ -262,20 +275,30 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int64 AttackedID = input.ReadInt64();
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
+	//bool AttackIntensity = input.ReadBool();
 
 	if (AttackerType == 1)
 	{
-
 		ANonePlayerCharacter* AttackerMonster = MapManager->FindMonster(AttackerID);
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
+		
+		//데미지 강격/약격 나누기 위한 잔재
+		//XRDamageEvent MonsterDamageEvent;
+		//MonsterDamageEvent.ID = AttackActionID;
+		//MonsterDamageEvent.Intensity = AttackIntensity;
 
 		if (AttackerMonster)
 		{
 			if (AttackedCharacter == MapManager->GetPlayer())
 				AttackedCharacter->TakeDamage(AttackSetHp, FDamageEvent(), AttackerMonster->GetController(), AttackerMonster);
 			else
+			{
+				//if(MonsterDamageEvent)
 				AttackedCharacter->MyAnimInstance->PlayHitMontage();
+			}
 		}
+
+
 
 	}
 	else if (AttackerType == 0)
@@ -350,8 +373,15 @@ void UXRGameInstance::CharacterRolling(InputStream& input)
 
 	if (TargetPlayer != MapManager->GetPlayer())
 	{
-		TargetPlayer->SetActorRotation(RollerRot);
+
 		TargetPlayer->bIsRolling = true;
+		TargetPlayer->bIsOverallRollAnimPlaying = true;
+		AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
+		if (!aicon)
+			check(false);
+		
+		aicon->StopMovement();
+		TargetPlayer->SetActorRotation(RollerRot);
 		TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
 		TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RollSection"));
 	}

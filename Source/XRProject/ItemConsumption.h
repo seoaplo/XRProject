@@ -47,5 +47,5 @@ public:
 	virtual int GetCount() override;
 	virtual int GetID() override;
 	virtual void SetCount(int Count);
-	UTexture2D* GetIcon() override;
+	virtual int GetIconID() override;
 };

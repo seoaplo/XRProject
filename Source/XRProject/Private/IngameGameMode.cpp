@@ -36,6 +36,8 @@ void AIngameGameMode::BeginPlay()
 	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
 
+	CurrentWidget->CharacterInfo->SetSlotInfo();
+
 	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
 	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
 
@@ -47,6 +49,7 @@ void AIngameGameMode::BeginPlay()
 	if (CurrentWidget->MiniMap != nullptr)
 	{
 		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+		CurrentMiniMap.ListClear();
 		CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
 		CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
 		for (auto& Character : GetMapMgr().GetCharacterList())
@@ -65,16 +68,11 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
 	GetNetMgr().Update();
-	if (CurrentWidget->MiniMap != nullptr)
-	{
-		CurrentWidget->MiniMap->Update();
-	}
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	CurrentWidget->MiniMap->ListClear();
 }
 
 void AIngameGameMode::SpawnRemotePlayer()
