@@ -3,3 +3,7 @@
 
 #include "DungeonResultWidget.h"
 
+void UDungeonResultWidget::GetReward(InputStream& input)
+{
+
+}

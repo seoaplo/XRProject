@@ -30,12 +30,18 @@ void USlotWidget::SetSlotObject()
 	if (IsEquipment)
 	{
 		if (GetMapMgr().GetPlayer())	SlotObject = GetMapMgr().GetPlayer()->GetEquippedItem((EEquipmentsType)Index);
-		if (!IsEmpty()) XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+		if (!IsEmpty())
+		{
+			XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+		}
 	}
 	else
 	{
 		SlotObject = Inventory::GetInstance().GetItem(Index);
-		if (!IsEmpty()) XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+		if (!IsEmpty())
+		{
+			XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+		}
 	}
 	Update();
 }
@@ -57,9 +63,10 @@ void USlotWidget::DropIn(UUserWidget * SlotWidget)
 		}
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);
-		out << (bool)IsEquipment;
+		out << (int8)2;
+		out << (int8)IsEquipment;
 		out << (int32_t)Index;
-		out << (bool)Target->IsEquipment;
+		out << (int8)Target->IsEquipment;
 		out << (int32_t)Target->Index;
 		out.CompletePacketBuild();
 		UNetworkManager::GetInstance().SendPacket(out);

@@ -122,30 +122,40 @@ void UXRGameInstance::UpdateInventory(InputStream & input)
 {
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 	if (GameInstance == nullptr) return;
-
-	for (int i = 0; i < 2; i++)
+	int8 Type = input.ReadInt8();
+	switch (Type)
 	{
-		bool IsEquipment = input.ReadBool();
-		int SlotNum = input.ReadInt32();
-		if (IsEquipment)
+	case 0 : // 积己
+	{
+		break;
+	}
+	case 1 : // 昏力
+	{
+		break;
+	}
+	case 2 : // 诀单捞飘
+	{
+		for (int i = 0; i < 2; i++)
 		{
-			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
-			UItemEquipment* EquipmentItem = Cast<UItemEquipment>(newItem);
-			if (EquipmentItem)
+			bool IsEquipment = input.ReadBool();
+			int SlotNum = input.ReadInt32();
+			if (IsEquipment)
 			{
+				UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+				UItemEquipment* EquipmentItem = Cast<UItemEquipment>(newItem);
 				MapManager->GetPlayer()->SetEquippedItem((EEquipmentsType)SlotNum, EquipmentItem);
 				UCharacterInfoWidget::GetInstance()->Slot[SlotNum]->SetSlotObject();
+
 			}
-		}
-		else
-		{
-			UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
-			if (newItem)
+			else
 			{
+				UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
 				Inventory::GetInstance().SetItem(newItem, SlotNum);
 				UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
 			}
 		}
+		break;
+	}
 	}
 }
 

@@ -46,20 +46,21 @@ void AIngameGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchCanceled)->BindUObject(
 		this, &AIngameGameMode::NotifyMatchCanceled);
 
-	//if (CurrentWidget->MiniMap != nullptr)
-	//{
-	//	UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
-	//	CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
-	//	CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
-	//	for (auto& Character : GetMapMgr().GetCharacterList())
-	//	{
-	//		CurrentMiniMap.AddActorList(Character.Value, static_cast<int>(EMiniMapObjectType::EParty));
-	//	}
-	//	for (auto& Monster : GetMapMgr().GetMonsterList())
-	//	{
-	//		CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
-	//	}
-	//}
+	if (CurrentWidget->MiniMap != nullptr)
+	{
+		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+		CurrentMiniMap.ListClear();
+		CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
+		CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
+		for (auto& Character : GetMapMgr().GetCharacterList())
+		{
+			CurrentMiniMap.AddActorList(Character.Value, static_cast<int>(EMiniMapObjectType::EParty));
+		}
+		for (auto& Monster : GetMapMgr().GetMonsterList())
+		{
+			CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
+		}
+	}
 }
 
 
@@ -67,16 +68,12 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
 	GetNetMgr().Update();
-	//if (CurrentWidget->MiniMap != nullptr)
-	//{
-	//	CurrentWidget->MiniMap->Update();
-	//}
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-//	CurrentWidget->MiniMap->ListClear();
+	CurrentWidget->MiniMap->ListClear();
 }
 
 void AIngameGameMode::SpawnRemotePlayer()
