@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "NetworkManager.h"
 #include "DungeonResultWidget.generated.h"
 
 /**
@@ -14,6 +13,5 @@ UCLASS()
 class XRPROJECT_API UDungeonResultWidget : public UUserWidget
 {
 	GENERATED_BODY()
-public:
-	void GetReward(class InputStream& input);
+	
 };

@@ -69,10 +69,7 @@ public:
 		void Update();
 	UFUNCTION(BlueprintImplementableEvent)
 		void SetMapImage(int ID);
-	//UFUNCTION(BlueprintCallable, Category = "C_Widget")
-	//	void ZoomIn();
-	//UFUNCTION(BlueprintCallable, Category = "C_Widget")
-	//	void ZoomOut();
+
 };
 
 

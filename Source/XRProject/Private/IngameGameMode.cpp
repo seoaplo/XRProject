@@ -48,8 +48,8 @@ void AIngameGameMode::BeginPlay()
 
 	if (CurrentWidget->MiniMap != nullptr)
 	{
-		CurrentWidget->MiniMap->ListClear();
 		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+		CurrentMiniMap.ListClear();
 		CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
 		CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
 		for (auto& Character : GetMapMgr().GetCharacterList())
@@ -68,13 +68,11 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
 	GetNetMgr().Update();
-
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-
 }
 
 void AIngameGameMode::SpawnRemotePlayer()
