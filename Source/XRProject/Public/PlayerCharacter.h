@@ -78,6 +78,7 @@ public:
 	const int32 kMaxComboCount = 4;
 	const float kSprintMovementSpeed = 750.0f;
 	const float kNormalMovementSpeed = 450.0f;
+
 public:
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
@@ -88,8 +89,11 @@ public:
 	UPROPERTY()
 		bool bIsMale; //���� üũ�� ���� bool��.
 
+
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
+	UPROPERTY(EditInstanceOnly, Category = "C_Collision")
+		class UCapsuleComponent* HitCapsule;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class UWidgetComponent* NameTag;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
@@ -115,8 +119,14 @@ public:
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
 		FVector ScaleVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLISION")
 		FVector2D CapsuleSize;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLLISION")
+		FVector2D RollingHitCapsuleSize;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
+		float RollingSpeed;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_VALUE")
+		float RollingCapsuleOffset;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
 		FVector MeshLocationVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
@@ -132,7 +142,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		/*순수하게 구르는 동작만 수행하는가? : 구르기 시 액터 이동을 체크하기 위해 사용*/
 		bool bIsRolling;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		/*구르기 전체 동작을 수행중인가? true : false*/
+		bool bIsOverallRollAnimPlaying;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsSprint;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
@@ -186,11 +200,17 @@ public:
 	void SetIsPlayer(bool is);
 	bool GetIsPlayer();
 	bool GetIsTestMode();
+	void SetRollingCapsuleMode();
+	void SetNormalCapsuleMode();
+
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);
 
 	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
 		class AActor* DamageCauser) override;
+
+	FVector2D GetNormalCapsuleSize();
+	FVector2D GetRollingCapsuleSize();
 	
 	UFUNCTION()
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,

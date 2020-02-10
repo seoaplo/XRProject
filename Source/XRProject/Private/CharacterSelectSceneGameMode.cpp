@@ -216,6 +216,8 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 		InitData.EquipArray[3].ID = Info.weapon_itemid;
 		InitData.Max_HP = 10.0f;
 		InitData.Current_HP = 10.0f;
+		InitData.Gender = Info.gender;
+		InitData.Level = Info.Level;
 
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, -200.0f, 0.0f));

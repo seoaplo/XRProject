@@ -35,6 +35,8 @@ void UXRGameInstance::Init()
 		this, &UXRGameInstance::CharacterWait);
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterSprint)->BindUObject(
 		this, &UXRGameInstance::CharacterSprint);
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterRolling)->BindUObject(
+		this, &UXRGameInstance::CharacterRolling);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyChat)->BindUObject(
 		this, &UXRGameInstance::NotifyChat);
@@ -306,10 +308,11 @@ void UXRGameInstance::CharacterWait(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	
-	TargetPlayer->bIsSprint = false;
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
-
-	UE_LOG(LogTemp, Warning, TEXT("CharacterWait Received"));
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsSprint = false;
+		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	}
 }
 
 void UXRGameInstance::CharacterSprint(InputStream& input)
@@ -318,14 +321,39 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 
-	TargetPlayer->bIsSprint = true;
-	TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
-	UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsSprint = true;
+		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+		UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
+	}
 }
 
 void UXRGameInstance::CharacterDead(InputStream& input)
 {
 	int64 TargetID = input.ReadInt64();
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
-	TargetPlayer->bIsCharacterDead;
+	
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->bIsCharacterDead = true;
+		TargetPlayer->SetCharacterLifeState(ECharacterLifeState::DEAD);
+	}
+}
+
+void UXRGameInstance::CharacterRolling(InputStream& input)
+{
+	int64 RollerID = input.ReadInt64();
+	FRotator RollerRot = input.ReadFRotator();
+
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(RollerID);
+
+	if (TargetPlayer != MapManager->GetPlayer())
+	{
+		TargetPlayer->SetActorRotation(RollerRot);
+		TargetPlayer->bIsRolling = true;
+		TargetPlayer->MyAnimInstance->PlayMoveOnlyPlayMontage();
+		TargetPlayer->MyAnimInstance->JumpToMoveMontageSection(FString("RollSection"));
+	}
+
 }

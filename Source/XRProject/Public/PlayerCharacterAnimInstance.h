@@ -37,6 +37,8 @@ private:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsRolling;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
+		bool bIsOverallRollAnimPlaying;
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsSprint;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_PlayerAnim", Meta = (AllowPrivateAccess = true))
 		bool bIsCharacterDead;
@@ -53,6 +55,8 @@ public:
 		UAnimMontage* MoveMontageOnlyPlay;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* HitMontage;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* RollMontage;
 	
 	void SetOwnerCharacter(APlayerCharacter* MyCharacter);
 
@@ -66,13 +70,16 @@ public:
 		void AnimNotify_RollingEnd();
 	UFUNCTION()
 		void AnimNotify_HitMotionEnd();
+	UFUNCTION()
+		void AnimNotify_RemoteRollingEnd();
 
 	void PlayAttackMontage();
 	void PlayAttackOnlyPlayMontage();
 	void PlayMoveOnlyPlayMontage();
 	void StopAttackMontage();
 	void PlayHitMontage();
-	
+	void PlayRollMontage();
+
 
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToMoveMontageSection(FString Section);
