@@ -51,9 +51,9 @@ void UInventoryWidget::SetUp()
 	int Size = Inventory::GetInstance().GetInventorySize();
 	for (int i = 0; i < Size; i++)
 	{
-		list[i]->SetSlotObject();
 		list[i]->Index = i;
 		list[i]->IsEquipment = false;
+		list[i]->SetSlotObject();
 	}
 }
 

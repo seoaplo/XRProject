@@ -1,4 +1,5 @@
 #include "ItemConsumption.h"
+#include "InventoryWidget.h"
 #include "XRGameInstance.h"
 
 bool UItemConsumption::Use()
@@ -21,10 +22,7 @@ void UItemConsumption::SetCount(int Count)
 	AddInfo.Count = Count;
 }
 
-UTexture2D* UItemConsumption::GetIcon()
+int UItemConsumption::GetIconID()
 {
-	UTexture2D* result = nullptr;
-	auto GI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
-	GI->ItemManager->GetIcon(result, DefaultInfo.IconResourceID);
-	return result;
+	return DefaultInfo.IconResourceID;
 }

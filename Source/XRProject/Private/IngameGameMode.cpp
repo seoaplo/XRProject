@@ -36,7 +36,7 @@ void AIngameGameMode::BeginPlay()
 	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
 
-	//CurrentWidget->CharacterInfo->SetSlotInfo();
+	CurrentWidget->CharacterInfo->SetSlotInfo();
 
 	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
 	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);

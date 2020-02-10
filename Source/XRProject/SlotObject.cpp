@@ -1,8 +1,8 @@
 #include "SlotObject.h"
 
-UTexture2D * USlotObject::GetIcon()
+int USlotObject::GetIconID()
 {
-	return nullptr;
+	return 0;
 }
 
 int USlotObject::GetCount()

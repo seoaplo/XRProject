@@ -22,7 +22,6 @@ enum class ENetworkCSOpcode : uint16_t
 
 	kInventoryUpdateRequest = 1003,
 	kQuickSlotUseRequest = 1004,
-	kEquipmentMountRequest = 1005,
 
 	kMatchingRequest = 1006,
 	kMatchingConfirmRequest = 1007, // true / false
