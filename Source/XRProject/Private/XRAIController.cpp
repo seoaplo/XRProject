@@ -9,6 +9,8 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NonePlayerCharacter.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Damage.h"
+
 
 
 const FName AXRAIController::HomePosKey(TEXT("HomePos"));
@@ -17,18 +19,9 @@ const FName AXRAIController::TargetKey(TEXT("Target"));
 
 AXRAIController::AXRAIController()
 {
-	//static ConstructorHelpers::FObjectFinder<UBlackboardData> BBObject(TEXT("BlackboardData'/Game/Resources/AI/EnermyAI/BB_Enermy.BB_Enermy'"));
-	//if (BBObject.Succeeded())
-	//{
-	//	BBAsset = BBObject.Object;
-	//}
-
-	//static ConstructorHelpers::FObjectFinder<UBehaviorTree> BAObject(TEXT("BehaviorTree'/Game/Resources/AI/EnermyAI/BT_Enermy.BT_Enermy'"));
-	//if (BAObject.Succeeded())
-	//{
-	//	BTAsset = BAObject.Object;
-	//}
-
+	SetGenericTeamId(FGenericTeamId(5));
+	
+	
 	EnermyPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("EnermySensing"));
 	SightConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
 	SightConfig->SightRadius = 1000.f;
@@ -36,14 +29,16 @@ AXRAIController::AXRAIController()
 	SightConfig->PeripheralVisionAngleDegrees = 85.f;
 	SightConfig->SetMaxAge(10.f);
 
-	SightConfig->DetectionByAffiliation.bDetectEnemies = true;
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = false;
-	SightConfig->DetectionByAffiliation.bDetectFriendlies = false;
 
-	EnermyPerceptionComponent->ConfigureSense(*SightConfig);
-	SetGenericTeamId(FGenericTeamId(5));
+	//EnermyPerceptionComponent->ConfigureSense(*SightConfig);
 
+	DamageConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
+	DamageConfig->SetMaxAge(10.f);
+
+	EnermyPerceptionComponent->ConfigureSense(*DamageConfig);
 	bSetControlRotationFromPawnOrientation = false;
+
+	EnermyPerceptionComponent->OnPerceptionUpdated.AddDynamic(this, &AXRAIController::TestPrint);
 
 }
 
@@ -122,6 +117,15 @@ void AXRAIController::LoadAI(int32 BTID, int32 BBID)
 
 void AXRAIController::OnRepeatTimer()
 {
+}
+
+void AXRAIController::TestPrint(const TArray<AActor*>& recvActor)
+{
+
+	for (auto list : recvActor)
+	{
+		XRLOG(Warning, TEXT("AI Perception TestPrint : %s"), *list->GetName());
+	}
 }
 
 ETeamAttitude::Type AXRAIController::GetTeamAttitudeTowards(const AActor& Other) const

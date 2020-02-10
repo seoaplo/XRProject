@@ -9,6 +9,9 @@
 #include "Components/InputComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Damage.h"
+
+
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
@@ -169,11 +172,13 @@ APlayerCharacter::APlayerCharacter()
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
 	RollingSpeed = 800.0f;
-	
+
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
-
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
+	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
+	PlayerAIPerceptionStimul->bAutoRegister = true;
+	PlayerAIPerceptionStimul->RegisterForSense(AISenseDamage->GetSenseImplementation());
+
 }
 
 APlayerCharacter::~APlayerCharacter()
@@ -234,7 +239,6 @@ void APlayerCharacter::Tick(float deltatime)
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
-
 	if (bIsRolling)
 	{
 		SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
@@ -263,8 +267,6 @@ void APlayerCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 
-	PlayerAIPerceptionStimul->bAutoRegister = true;
-	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
 
 
 }
@@ -288,7 +290,6 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
-	
 
 	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
 	
@@ -299,6 +300,8 @@ void APlayerCharacter::BeginPlay()
 
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
+
+
 
 
 }
@@ -799,7 +802,6 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		out << GetActorRotation();
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
-
 	}
 }
 
@@ -855,6 +857,10 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
 		if (NPC)
 		{
+			///수정자 조재진///
+			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
+			UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
+			/// 오프라인 공격 테스트용도 지워도 무상관///////
 
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
@@ -876,7 +882,6 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 			GetNetMgr().SendPacket(out);
 
 			AttackOverlapList.push_back(NPC);
-
 		}
 	}
 }

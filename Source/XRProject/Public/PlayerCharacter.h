@@ -80,6 +80,14 @@ public:
 	const float kNormalMovementSpeed = 450.0f;
 
 public:
+
+	UPROPERTY()
+		class  UAISenseConfig_Damage* AISenseDamage;
+
+
+
+
+
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
 	UPROPERTY(EditInstanceOnly, Category = "Variable")

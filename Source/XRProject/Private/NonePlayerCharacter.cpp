@@ -12,6 +12,7 @@
 #include "XRProjectGameModeBase.h"
 #include "XRGameInstance.h"
 #include "IngameGameMode.h"
+#include "Perception/AISense_Damage.h"
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
@@ -78,7 +79,14 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 				if (SumSec >= 0.2f) 
 				{
 					SumSec = 0.0f;
-					SendAction(1000, GetActorLocation(), GetActorRotation());
+
+					auto Aicon = Cast<AXRAIController>(GetController());
+					EPathFollowingStatus::Type followstatus = Aicon->GetMoveStatus();
+					if (followstatus == EPathFollowingStatus::Type::Moving)
+					{
+						SendAction(1000, GetActorLocation(), GetActorRotation());
+						XRLOG(Warning, TEXT("%s Is Moving, %s "), *GetName(), *GetActorLocation().ToString());
+					}
 				}
 			}
 		}
@@ -107,14 +115,38 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 
 float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	EnermyStatComponent->SetCurrentHP(EnermyStatComponent->GetCurrentHP() - DamageAmount);
+	float damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	UAISense_Damage::ReportDamageEvent(GetWorld(), this, EventInstigator->GetPawn(), damage, GetActorLocation(), GetActorLocation());
+	EnermyStatComponent->SetCurrentHP(EnermyStatComponent->GetCurrentHP() - damage);
+	XRLOG(Warning, TEXT("Monster TakeDamage : %f"), damage);
+	
+
+
+	ABaseCharacter* DamageCauserPlayer = Cast<ABaseCharacter>(EventInstigator->GetPawn());
+	if (DamageCauserPlayer)
+	{
+	
+		if (AggroList.Contains(DamageCauserPlayer))
+		{
+			AggroList[DamageCauserPlayer] += damage;
+		}
+		else
+		{
+			AggroList.Add(DamageCauserPlayer);
+			AggroList[DamageCauserPlayer] = damage;
+		}
+	}
 	auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	if (npcAnim)
 	{
 		if (!npcAnim->IsAnyMontagePlaying())
 		{
+			auto aicon = Cast<AAIController>(GetController());
+			if (aicon)
+			{
+				aicon->StopMovement();
+			}
 			npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
 		}
 	}
@@ -157,23 +189,20 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 		}
 		else
 		{
-			XRLOG(Warning, TEXT("LOST AICONTROLLER"));
+			XRLOG(Warning, TEXT("LOST AI CONTROLLER"));
 		}
 		GetCharacterMovement()->MaxWalkSpeed = EnermyStatComponent->GetSpeed();
-		GetCapsuleComponent()->SetCapsuleHalfHeight(75.f);
-		GetCapsuleComponent()->SetCapsuleRadius(16.5f);
-
-		GetMesh()->SetRelativeLocation(FVector(0, 0, -70));
-		GetMesh()->SetRelativeScale3D(FVector(3.f, 3.f, 3.f));
 		
 		NpcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		
 		SetSkelResource(SkelID, AnimBPID);
+		OnNpcReady.Broadcast();
 		break;
 	}
 	case ECharacterLoadState::READY:
 	{
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : READY")));
+		NpcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		SetCharacterLifeState(ECharacterLifeState::ALIVE);
 
 		break;
@@ -247,15 +276,22 @@ void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 			BBID = ResourceTableRow->MonsterBB;
 
 			EnermyStatComponent->SetMaxHP(ResourceTableRow->MonsterMaxHP);
+			EnermyStatComponent->SetCurrentHP(EnermyStatComponent->GetMaxHP());
 			EnermyStatComponent->SetAttack_Min(ResourceTableRow->MonsterAttackMin);
 			EnermyStatComponent->SetAttack_Max(ResourceTableRow->MonsterAttackMax);
 			EnermyStatComponent->SetAttack_Range(ResourceTableRow->MonsterAttackRange);
 			EnermyStatComponent->SetAttack_Speed(ResourceTableRow->MonsterAttackSpeed);
 			EnermyStatComponent->SetSpeed(ResourceTableRow->MonsterSpeed);
 			EnermyStatComponent->SetCharacterName(ResourceTableRow->MonsterName);
+
+			XRLOG(Warning, TEXT("NpcID %d Not Exist "), NpcID);
+			FResourceLocalSize LocalTransForm = GetAssetMgr()->FindResourceSizeFromTable(SkelID);
+			GetMesh()->SetRelativeTransform(LocalTransForm.LocalTransform);
+			GetCapsuleComponent()->SetCapsuleHalfHeight(LocalTransForm.CapsuleHeight);
+			GetCapsuleComponent()->SetCapsuleRadius(LocalTransForm.CapsuleRad);
 		}
 	}
-	XRLOG(Warning, TEXT("NpcID %d Not Exist "), NpcID);
+
 
 }
 

@@ -9,6 +9,34 @@
 #include "Optional.h"
 #include "XRAssetMgr.generated.h"
 #define __out__ 
+
+USTRUCT(BlueprintType)
+struct FResourceTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		FString ResourcePath;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		FString ResourceName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		FString ResourceLocalTransForm;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float	CapsuleHeight;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float	CapsuleRad;
+
+};
+
+
+
+struct FResourceLocalSize
+{
+	FTransform LocalTransform;
+	float CapsuleHeight;
+	float CapsuleRad;
+};
 /**
  * 
  */
@@ -29,6 +57,8 @@ public:
 
 	FSoftObjectPath FindResourceFromDataTable(int32 ResousrceID);
 
+	FResourceLocalSize FindResourceSizeFromTable(int32 ResousrceID);
+
 	void ASyncLoadAssetComplete(FString LoadAssetName);
 	class UDataTable* GetResourceDataTable() { return ResourceDataTable; }
 
@@ -41,15 +71,7 @@ private:
 	class UDataTable* ResourceDataTable;
 };
 
-USTRUCT(BlueprintType)
-struct FResourceTableRow : public FTableRowBase
-{
-	GENERATED_BODY()
-public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		FString ResourcePath;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		FString ResourceName;
-};
+
+
 

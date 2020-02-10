@@ -32,6 +32,6 @@ public:
 		void GetName(ANonePlayerCharacter* Target);
 	UFUNCTION(BlueprintCallable)
 		void SetMaxHp(int PlayerMaxHP);
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void ApplyHp(int PlayerCurrentHP);
 };

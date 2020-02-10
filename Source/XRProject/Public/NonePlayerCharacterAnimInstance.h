@@ -7,6 +7,8 @@
 
 #include "NonePlayerCharacterAnimInstance.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillFireDelegate);
 /*
 //작성자 조재진
 */
@@ -26,7 +28,7 @@ private:
 	//사용자 정의//
 
 public:
-
+	FOnSkillFireDelegate OnSkillFire;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		float CurrentSpeed;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
@@ -42,12 +44,18 @@ public:
 		UAnimMontage* NpcDeadMontage;
 	UFUNCTION(BlueprintCallable)
 		UAnimMontage* GetDeadMontage() { return NpcDeadMontage; }
+
+
 	
 	UFUNCTION()
 		void AnimNotify_AttackColliOn();
 
 	UFUNCTION()
 		void AnimNotify_AttackColliOff();
+
+
+	UFUNCTION()
+		void AnimNotify_FireSkill();
 
 
 protected:

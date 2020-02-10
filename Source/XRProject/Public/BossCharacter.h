@@ -7,18 +7,26 @@
 #include "BossCharacter.generated.h"
 
 USTRUCT(Atomic, BlueprintType)
-struct FBossAttack
+struct FBossSkill
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 		UAnimMontage* AttackAction;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float AttackRange;
-	UPROPERTY(EditAnywhere)
-		float AttackAngle;
-
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float CoolTime;
 };
+
+UENUM(BlueprintType)
+enum class EBossState : uint8
+{
+	Spawn,
+	Idle,
+	InBattle,
+};
+
 
 /**
  * 작성자 조재진
@@ -40,10 +48,33 @@ private:
 	//사용자 정의///
 public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TArray<FBossAttack> BossAttackList;
+		TArray<FBossSkill> BossAttackList;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<int> ReadySkillList;
+
+	UFUNCTION(BlueprintCallable)
+		void SetOnSkillQueue(int32 index);
+
+
+	UFUNCTION(BlueprintNativeEvent)
+		void FireSkill();
+	void FireSkill_Implementation();
+
+
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 BossPhase;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 CurrentBossPhase;
+
+	UFUNCTION(BlueprintCallable)
+		void SetCurrentBossPhase(int32 phase);
 
 protected:
 private:
 
+
+	void SetCharacterLoadState(ECharacterLoadState NewState) override;
 
 };

@@ -71,6 +71,9 @@ public:
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcHitReactDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcReadyState);
+
+
 
 /**
  *
@@ -155,8 +158,8 @@ public:
 
 
 
-
-
+	UPROPERTY(BlueprintAssignable)
+	FOnNpcReadyState OnNpcReady;
 
 	virtual void ExcuteRecvNpcAction(InputStream& input);
 
@@ -174,7 +177,7 @@ public:
 protected:
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		TArray<ABaseCharacter*>		AggroList;
+		TMap<ABaseCharacter*,int>		AggroList;
 
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
