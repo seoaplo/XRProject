@@ -140,7 +140,8 @@ public:
 		TSubclassOf<UCameraShake> MyShake;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
-
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_TEST")
+		FCameraShakeInfo ShakeInfo;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
@@ -195,6 +196,7 @@ public:
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
+	void PseudoChangeEquipmentWithoutMesh(UItem * Item);//아이템 메시를 포함하지 않고, 정보만 일단 업데이트하는 함수
 	void ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset);
 	void SetIsPlayer(bool is);
 	bool GetIsPlayer();

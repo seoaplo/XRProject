@@ -172,8 +172,12 @@ APlayerCharacter::APlayerCharacter()
 	bIsMouseShow				= false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
+	MyShake = UPlayerCameraShake::StaticClass();
+
 	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+
 	//FCharacterSizeInfo aa;
 	//aa = FindCharacterSizeFromDataTable(1);
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
@@ -239,10 +243,10 @@ void APlayerCharacter::Tick(float deltatime)
 	NameTag->SetRelativeLocation(NameTagLocation);
 
 	if (bIsRolling)
-	{
-		//SetActorLocation(GetActorLocation() + GetActorForwardVector() * deltatime * RollingSpeed);
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
-	}
+
+	
+	
 
 }
 
@@ -425,6 +429,38 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 	}
 }
 
+void APlayerCharacter::PseudoChangeEquipmentWithoutMesh(UItem * Item)
+{
+	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
+
+	if (EquipItem == nullptr)
+		check(false);
+
+	EEquipmentsType Types;
+
+	switch (EquipItem->DefaultInfo.Type)
+	{
+		case 0: { Types = EEquipmentsType::BODY; break; }
+		case 1: { Types = EEquipmentsType::HANDS; break; }
+		case 2: { Types = EEquipmentsType::LEGS; break; }
+	}
+
+	switch (Types)
+	{
+	case EEquipmentsType::BODY:
+		Equipments.BodyItem = EquipItem;
+	case EEquipmentsType::HANDS:
+		Equipments.HandsItem = EquipItem;
+		break;
+	case EEquipmentsType::LEGS:
+		Equipments.LegsItem = EquipItem;
+	case EEquipmentsType::WEAPON:
+		Equipments.WeaponItem = EquipItem;
+		break;
+	}
+}
+
+
 void APlayerCharacter::ChangeEquipment(UItem * Item, UStaticMesh* SmMesh)
 {
 	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
@@ -491,6 +527,13 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
+		if (MyShake)
+		{
+			auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+			Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
+			//UPlayerCameraShake* sss = 
+			//sss->SetCustomShakeMode(ShakeInfo);
+		}
 	}
 	else
 		bIsHit = false;
@@ -948,8 +991,16 @@ bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
 
 void APlayerCharacter::TestPlay()
 {
-	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
-	XRLOG(Warning, TEXT("Text Playing..."));
+
+	if (MyShake)
+	{
+		//GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+		auto aaa=  GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+		UPlayerCameraShake* sss = Cast<UPlayerCameraShake>(aaa);
+		sss->SetCustomShakeMode(ShakeInfo);
+
+		XRLOG(Warning, TEXT("Text Playing..."));
+	}
 }
 
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
@@ -991,14 +1042,11 @@ void APlayerCharacter::ToggleMouseCursor()
 		bIsMouseShow = false;
 		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-		//GetWorld()->GetFirstPlayerController()->SetIgnoreLookInput(false);
-
 	}
 	else
 	{
 		bIsMouseShow = true;
 		GetWorld()->GetFirstPlayerController()->SetMouseLocation(SizeX/2, SizeY/2);
-		//GetWorld()->GetFirstPlayerController()->SetIgnoreLookInput(true);
 		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 	}

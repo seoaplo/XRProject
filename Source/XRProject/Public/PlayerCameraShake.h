@@ -10,6 +10,38 @@
  * 
  */
 
+
+USTRUCT(Blueprinttype)
+struct FCameraShakeInfo
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditInstanceOnly)
+		float BlendInTime;
+	UPROPERTY(EditInstanceOnly)
+		float BlendOutTime;
+	UPROPERTY(EditInstanceOnly)
+		FVector AmplitudeMin;
+	UPROPERTY(EditInstanceOnly)
+		FVector AmplitudeMax;
+	UPROPERTY(EditInstanceOnly)
+		FVector FrequencyMin;
+	UPROPERTY(EditInstanceOnly)
+		FVector FrequencyMax;
+
+	FCameraShakeInfo()
+	{
+		BlendInTime = 0.5f;
+		BlendOutTime = 0.5f;
+		AmplitudeMin = FVector(0.0f, 0.0f, 0.0f);
+		AmplitudeMax = FVector(0.0f, 0.0f, 0.0f);
+		FrequencyMin = FVector(0.0f, 0.0f, 0.0f);
+		FrequencyMax = FVector(0.0f, 0.0f, 0.0f);
+	}
+
+};
+
+
 UCLASS()
 class XRPROJECT_API UPlayerCameraShake : public UCameraShake
 {
@@ -19,22 +51,10 @@ public:
 	UPlayerCameraShake();
 	~UPlayerCameraShake();
 
-public:
-	UPROPERTY(EditInstanceOnly)
-	FVector2D PitchAmplitude;
-	UPROPERTY(EditInstanceOnly)
-	FVector2D PitchFrequency;
-	UPROPERTY(EditInstanceOnly)
-	FVector2D YawAmplitude;
-	UPROPERTY(EditInstanceOnly)
-	FVector2D YawFrequency;
-	UPROPERTY(EditInstanceOnly)
-	float Duration;
 
 public:
 	void SetSmallShakeMode();
 	void SetBigShakeMode();
-	void SetCustomShakeMode();
-
-	
+		/*Duration 설정 불가능*/
+	void SetCustomShakeMode(FCameraShakeInfo Info);
 };

@@ -21,10 +21,10 @@ UItemManager::UItemManager()
 
 
 
-	if (DT_EQUIPITEM.Succeeded()) EquipmentItemDataTable = DT_EQUIPITEM.Object;
-	if (DT_CONSUMPTIONITEM.Succeeded()) ConsumptionItemDataTable = DT_CONSUMPTIONITEM.Object;
-	if (DT_ETCITEM.Succeeded()) ETCItemDataTable = DT_ETCITEM.Object;
-	if (DT_PARTS.Succeeded()) PartsDataTable = DT_PARTS.Object;
+	if (DT_EQUIPITEM.Succeeded())		EquipmentItemDataTable = DT_EQUIPITEM.Object;
+	if (DT_CONSUMPTIONITEM.Succeeded())	ConsumptionItemDataTable = DT_CONSUMPTIONITEM.Object;
+	if (DT_ETCITEM.Succeeded())			ETCItemDataTable = DT_ETCITEM.Object;
+	if (DT_PARTS.Succeeded())			PartsDataTable = DT_PARTS.Object;
 
 }
 
@@ -204,7 +204,6 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
-		CurrentItemId = ID;
 	}
 
 	FSoftObjectPath AssetPath = nullptr;
@@ -218,6 +217,9 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 		else
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
+
+	TargetCharacter->PseudoChangeEquipmentWithoutMesh(RetItem);
+
 	FStreamableDelegate AssetLoadDelegate;
 	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
 		AssetPath, RetItem, TargetCharacter);
@@ -241,6 +243,8 @@ void UItemManager::BuildItem(UItem* Item, UWorld* World, APlayerCharacter* Targe
 			AssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(EquipmentItem->DefaultInfo.FemaleMeshResourceID);
 	}
 	
+	TargetCharacter->PseudoChangeEquipmentWithoutMesh(RetItem);
+
 	FStreamableDelegate AssetLoadDelegate;
 	AssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &UItemManager::LoadItemMeshAssetComplete,
 		AssetPath, RetItem, TargetCharacter);

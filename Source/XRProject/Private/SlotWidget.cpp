@@ -52,14 +52,12 @@ void USlotWidget::DropIn(UUserWidget * SlotWidget)
 	if (Target)
 	{
 		if (Target->IsEquipment && IsEquipment) return;
-		if (Target->IsEquipment || IsEquipment)
+		if (IsEquipment || !Target->IsEquipment)
 		{
-			UItemEquipment* Equipment1 = Cast<UItemEquipment>(SlotObject);
-			if (!Equipment1) return;
-			UItemEquipment* Equipment2 = Cast<UItemEquipment>(Target->SlotObject);
-			if (!Equipment2) return;
-			if (Equipment1->DefaultInfo.Type != Equipment2->DefaultInfo.Type) return;
-
+			// Àåºñ ÀåÂø
+			UItemEquipment* Equipment = Cast<UItemEquipment>(Target->SlotObject);
+			if (!Equipment) return;
+			if (Index != Equipment->DefaultInfo.Type) return;
 		}
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kInventoryUpdateRequest);

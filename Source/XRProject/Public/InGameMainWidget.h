@@ -11,6 +11,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MiniMapWidget.h"
 #include "CharacterInfoWidget.h"
+#include "ExpBar.h"
 #include "InGameMainWidget.generated.h"
 
 UCLASS()
@@ -36,4 +37,6 @@ public:
 		UCharacterInfoWidget* CharacterInfo;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
 		UMiniMapWidget* MiniMap;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_GameMode")
+		UExpBar* ExpBar;
 };

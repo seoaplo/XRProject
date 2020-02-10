@@ -69,6 +69,7 @@ public:
 		void Update();
 	UFUNCTION(BlueprintImplementableEvent)
 		void SetMapImage(int ID);
+
 };
 
 

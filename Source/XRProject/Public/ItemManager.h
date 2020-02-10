@@ -33,15 +33,6 @@ public:
 	class UDataTable* PartsDataTable;
 	class UDataTable* ConsumptionItemDataTable;
 	class UDataTable* ETCItemDataTable;
-
-	FEquipmentDefaultInfo* EquipmentItemData;
-
-	//소비템
-
-	//기타템
-private:
-	UItem* RetItem;
-	int32 CurrentItemId;
 public:
 	/*주의 : Type는 원래 장비인지, 소비인지 등이어야 하나 Xrproject.h를 건드려야 하므로
 	합의하에 진행할 것

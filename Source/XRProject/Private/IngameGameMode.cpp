@@ -73,7 +73,6 @@ void AIngameGameMode::Tick(float deltatime)
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	CurrentWidget->MiniMap->ListClear();
 }
 
 void AIngameGameMode::SpawnRemotePlayer()
