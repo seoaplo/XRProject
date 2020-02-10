@@ -13,6 +13,7 @@
 #include "UserWidget.h"
 #include "HealthBarWidget.h"
 #include "XRPlayerController.h"
+#include "PlayerCameraShake.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
@@ -135,7 +136,8 @@ public:
 		FVector WeaponScaleVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
 		FVector NameTagLocation;
-
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<UCameraShake> MyShake;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
 
@@ -202,6 +204,8 @@ public:
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
+
+	void TestPlay();
 
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);

@@ -260,6 +260,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent * PlayerInputCo
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::SprintEnd);
 	PlayerInputComponent->BindAction("ShowCursor", IE_Pressed , this, &APlayerCharacter::ToggleMouseCursor);
+	PlayerInputComponent->BindAction("TEST", IE_Pressed , this, &APlayerCharacter::TestPlay);
 
 }
 
@@ -304,6 +305,8 @@ void APlayerCharacter::BeginPlay()
 
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
+
+	
 
 
 }
@@ -942,6 +945,13 @@ bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
 {
 	return bIsOverallRollAnimPlaying;
 }
+
+void APlayerCharacter::TestPlay()
+{
+	GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+	XRLOG(Warning, TEXT("Text Playing..."));
+}
+
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
 {
 	switch (Type)
