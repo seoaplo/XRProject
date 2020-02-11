@@ -10,6 +10,8 @@ class APlayerCharacter;
 
 
 DECLARE_DELEGATE(FCheckNextComboValid)
+DECLARE_DELEGATE(FCheckCharacterAttackMoveStart)
+DECLARE_DELEGATE(FCheckCharacterAttackMoveEnd)
 
 /**
  *
@@ -25,7 +27,8 @@ public:
 
 public:
 	FCheckNextComboValid Delegate_CheckNextCombo;
-
+	FCheckCharacterAttackMoveStart Delegate_CharacterAttackMoveStart;
+	FCheckCharacterAttackMoveEnd Delegate_CharacterAttackMoveEnd;
 public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
@@ -68,6 +71,10 @@ public:
 public:
 	UFUNCTION()
 		void AnimNotify_CheckNextComboValid();
+	UFUNCTION()
+		void AnimNotify_AttackStart();
+	UFUNCTION()
+		void AnimNotify_AttackEnd();
 	UFUNCTION()
 		void AnimNotify_RollingEnd();
 	UFUNCTION()

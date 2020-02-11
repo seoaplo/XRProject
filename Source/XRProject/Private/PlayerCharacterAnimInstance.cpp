@@ -80,9 +80,17 @@ void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 {
 	if (Delegate_CheckNextCombo.IsBound())
 		Delegate_CheckNextCombo.Execute();
-
 }
-
+void UPlayerCharacterAnimInstance::AnimNotify_AttackStart()
+{
+	if (Delegate_CharacterAttackMoveStart.IsBound())
+		Delegate_CharacterAttackMoveStart.Execute();
+}
+void UPlayerCharacterAnimInstance::AnimNotify_AttackEnd()
+{
+	if (Delegate_CharacterAttackMoveEnd.IsBound())
+		Delegate_CharacterAttackMoveEnd.Execute();
+}
 void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 {
 	//구르는 동작의 끝(애니메이션의 끝이 아님)

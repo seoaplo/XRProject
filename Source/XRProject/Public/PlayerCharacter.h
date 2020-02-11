@@ -180,9 +180,14 @@ private:
 	float ForwardValue; //앞 방향키를 누르고 있는가(-1~1)
 	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
 	float SumSec = 0;
+	bool bIsAttackMoving; //공격 시 일보 전진
+	
+	
 	/*Test Value*/
 	bool bIsTestMode;
-	int32 TestID;
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
+		int32 TestID; //실제 출시 땐 제거될 테스트ID
+
 
 public:
 	virtual void Tick(float Deltatime) override;
@@ -204,6 +209,7 @@ public:
 	bool GetIsTestMode();
 	void SetRollingCapsuleMode(); //구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
+	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
@@ -227,6 +233,10 @@ public:
 		void OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void ContinueCombo();
+	UFUNCTION()
+		void StartMoveAttack();
+	UFUNCTION()
+		void EndMoveAttack();
 	UFUNCTION()
 		void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
 	UFUNCTION(BlueprintCallable, Category ="C_TEST")

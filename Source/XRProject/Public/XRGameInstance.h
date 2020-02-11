@@ -15,6 +15,7 @@ const float kNormalMovementSpeed = 450.0f;
 const float kMaxMovementAcceleration = 8192.0f;
 const float kNormalMovementAcceleration = 2048.0f;
 const float kRollingMovementSpeed = 800.0f;
+const float kAttackMovementSpeed = 250.0f;
 
 class UIngameGameMode;
 /**

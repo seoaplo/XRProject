@@ -166,6 +166,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsSprint					 = false;
 	bIsCharacterDead			= false;
 	bIsHit						= false;
+	bIsAttackMoving = false;
 	bIsPlayer					= false;
 	bInitialized				= false;
 	bIsTestMode					= false;
@@ -173,8 +174,8 @@ APlayerCharacter::APlayerCharacter()
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
 	MyShake = UPlayerCameraShake::StaticClass();
-	TestID = 0;
-	
+	TestID = 2;
+
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -242,9 +243,11 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 
-	if (bIsRolling)
+
+	if (bIsRolling || bIsAttackMoving)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	
+
 
 }
 
@@ -270,11 +273,8 @@ void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
-
-
 }
 
 void APlayerCharacter::PossessedBy(AController* controller)
@@ -605,6 +605,8 @@ void APlayerCharacter::Roll()
 			if (SecStr == CompStr)
 				return;
 		}
+
+		bIsAttackMoving = false;
 	}
 
 	if (bIsOverallRollAnimPlaying)
@@ -614,28 +616,7 @@ void APlayerCharacter::Roll()
 	bool bArrowKeyNotPressed = false;
 
 	//무식한건 아는데 당장 생각이 안남
-	float Yaw = 0.0f;
-	if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && FMath::IsNearlyEqual(RightValue, 0.0f))
-	{
-		Yaw = GetActorRotation().Yaw;
-		bArrowKeyNotPressed = true;
-	}
-	else if (ForwardValue > 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
-		Yaw = 0.0f;
-	else if (ForwardValue > 0.0f && RightValue > 0.0f)
-		Yaw = 45.0f;
-	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue > 0.0f)
-		Yaw = 90.0f;
-	else if (ForwardValue < 0.0f && RightValue > 0.0f)
-		Yaw = 135.0f;
-	else if (ForwardValue < 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
-		Yaw = 180.0f;  //-180?
-	else if (ForwardValue < 0.0f && RightValue < 0.0f)
-		Yaw = -135.0f;
-	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue < 0.0f)
-		Yaw = -90.0f;
-	else if (ForwardValue > 0.0f && RightValue < 0.0f)
-		Yaw = -45.0f;
+	float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
 
 	const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
 	
@@ -722,6 +703,8 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 
 			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 			MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+			MyAnimInstance->Delegate_CharacterAttackMoveStart.BindUFunction(this, FName("StartMoveAttack"));
+			MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 			MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 			UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 		}
@@ -810,6 +793,8 @@ void APlayerCharacter::TestInitialize()
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+	MyAnimInstance->Delegate_CharacterAttackMoveStart.BindUFunction(this, FName("StartMoveAttack"));
+	MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 	//UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 
@@ -867,6 +852,9 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 
 void APlayerCharacter::ContinueCombo()
 {
+	bIsAttackMoving = false;
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+
 	if (bSavedCombo)
 	{
 		if (ComboCount >= kMaxComboCount)
@@ -878,6 +866,20 @@ void APlayerCharacter::ContinueCombo()
 		ComboCount++;
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
+		
+		if (TestID == 2)
+		{
+			bool bArrowKeyNotPressed = false;
+			float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
+			const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
+
+			if (bArrowKeyNotPressed)
+				this->SetActorRotation(FRotator(0.0f, Yaw, 0.0f));
+			else
+				this->SetActorRotation(CameraForward + FRotator(0.0f, Yaw, 0.0f));
+
+		}
+
 
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
@@ -890,6 +892,16 @@ void APlayerCharacter::ContinueCombo()
 	}
 }
 
+void APlayerCharacter::StartMoveAttack()
+{
+	bIsAttackMoving = true;
+	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
+}
+void APlayerCharacter::EndMoveAttack()
+{
+	bIsAttackMoving = false;
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
 {
@@ -954,7 +966,8 @@ bool APlayerCharacter::GetIsTestMode()
 	return bIsTestMode;
 }
 
-void APlayerCharacter::SetRollingCapsuleMode()
+//구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
+void APlayerCharacter::SetRollingCapsuleMode() 
 {
 	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
@@ -966,6 +979,7 @@ void APlayerCharacter::SetRollingCapsuleMode()
 
 }
 
+//구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 void APlayerCharacter::SetNormalCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(GetNormalCapsuleSize().X);
@@ -976,6 +990,34 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	/*속도 설정*/
 	GetCharacterMovement()->MaxAcceleration = kNormalMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
+
+float APlayerCharacter::GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed)
+{
+	float Yaw = 0.0f;
+	if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && FMath::IsNearlyEqual(RightValue, 0.0f))
+	{
+		Yaw = GetActorRotation().Yaw;
+		Out_ArrowKeyPressed = true;
+	}
+	else if (ForwardValue > 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 0.0f;
+	else if (ForwardValue > 0.0f && RightValue > 0.0f)
+		Yaw = 45.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue > 0.0f)
+		Yaw = 90.0f;
+	else if (ForwardValue < 0.0f && RightValue > 0.0f)
+		Yaw = 135.0f;
+	else if (ForwardValue < 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 180.0f;  //-180?
+	else if (ForwardValue < 0.0f && RightValue < 0.0f)
+		Yaw = -135.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue < 0.0f)
+		Yaw = -90.0f;
+	else if (ForwardValue > 0.0f && RightValue < 0.0f)
+		Yaw = -45.0f;
+
+	return Yaw;
 }
 
 bool APlayerCharacter::GetbIsRolling()
