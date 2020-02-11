@@ -173,7 +173,7 @@ APlayerCharacter::APlayerCharacter()
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
 	MyShake = UPlayerCameraShake::StaticClass();
-
+	TestID = 0;
 	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -244,8 +244,6 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (bIsRolling)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
-
-	
 	
 
 }
@@ -407,9 +405,9 @@ void APlayerCharacter::ChangeEquipment(UItem * Item, USkeletalMesh* SkMesh)
 
 	switch (EquipItem->DefaultInfo.Type)
 	{
-	case 0: { Types = EEquipmentsType::BODY; break; }
-	case 1: { Types = EEquipmentsType::HANDS; break; }
-	case 2: { Types = EEquipmentsType::LEGS; break; }
+		case 0: { Types = EEquipmentsType::BODY; break; }
+		case 1: { Types = EEquipmentsType::HANDS; break; }
+		case 2: { Types = EEquipmentsType::LEGS; break; }
 	}
 
 	switch (Types)
@@ -491,14 +489,17 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	}
 	else if (Type == EPartsType::NUDEBODY)
 	{
+		Equipments.BodyItem = nullptr;
 		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 	else if (Type == EPartsType::NUDEHAND)
 	{
+		Equipments.HandsItem = nullptr;
 		Equipments.HandsComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 	else if (Type == EPartsType::NUDELEG)
 	{
+		Equipments.LegsItem = nullptr;
 		Equipments.LegsComponent->SetSkeletalMesh(LoadedMesh.Get());
 	}
 }
@@ -534,8 +535,6 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const & DamageEven
 		{
 			auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
 			Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
-			//UPlayerCameraShake* sss = 
-			//sss->SetCustomShakeMode(ShakeInfo);
 		}
 	}
 	else
@@ -894,10 +893,7 @@ void APlayerCharacter::ContinueCombo()
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
 {
-	//TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
-	//AccountManager::GetInstance().GetCurrentPlayerCharacter()->ChangePartsComponentsMesh(Type, LoadedMesh.Get());
 	this->ChangePartsComponentsMesh(Type, AssetPath);
-
 }
 
 void APlayerCharacter::OnDead()
@@ -995,14 +991,13 @@ bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
 void APlayerCharacter::TestPlay()
 {
 
-	if (MyShake)
+	if (TestID == 1)
 	{
-		//GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
-		auto aaa=  GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
-		UPlayerCameraShake* sss = Cast<UPlayerCameraShake>(aaa);
-		sss->SetCustomShakeMode(ShakeInfo);
 
-		XRLOG(Warning, TEXT("Text Playing..."));
+	}
+	else if (TestID == 2)
+	{
+
 	}
 }
 
@@ -1030,8 +1025,30 @@ UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
 
 void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item)
 {
+	const int32 kMalePrimaryBody = 130;
+	const int32 kMalePrimaryHand = 140;
+	const int32 kMalePrimaryLeg = 150;
+	const int32 kMalePrimaryWeapon = 3300001;
 	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
-	GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
+	if (Item == nullptr)
+	{
+		if (Type == EEquipmentsType::BODY)
+			ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+		else if (Type == EEquipmentsType::HANDS)
+			ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+		else if (Type == EEquipmentsType::LEGS)
+			ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+		else if (Type == EEquipmentsType::WEAPON)
+		{
+			GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+				GetWorld(), this);
+		}
+	}
+	else
+		GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
+
+
+
 }
 
 void APlayerCharacter::ToggleMouseCursor()
