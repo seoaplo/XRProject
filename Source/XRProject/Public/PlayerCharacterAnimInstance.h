@@ -40,6 +40,8 @@ public:
 		UAnimMontage* HitMontage;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* RollMontage;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* SkillMontage;
 
 
 private:
@@ -85,6 +87,8 @@ public:
 		void AnimNotify_RemoteRollingAllEnd();
 
 	void PlayAttackMontage();
+	void PlaySkillMontage();
+
 	void PlayAttackOnlyPlayMontage();
 	void PlayMoveOnlyPlayMontage();
 	void StopAttackMontage();
@@ -94,6 +98,6 @@ public:
 
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToMoveMontageSection(FString Section);
-
+	void JumpToSkillMonatgeSection(FString Section);
 
 };

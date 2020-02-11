@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Skill.h"
+#include "PlayerSkill.h"
 #include "Item.h"
 #include "Inventory.h"
 #include "Blueprint/UserWidget.h"
@@ -29,7 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual void SetItem(UItem* NewItem);
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		virtual void SetSkill(USkill* NewSkill);
+		virtual void SetSkill(UPlayerSkill* NewSkill);
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		virtual void ClearSlot();
 	UFUNCTION(BlueprintImplementableEvent)

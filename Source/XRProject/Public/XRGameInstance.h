@@ -8,6 +8,7 @@
 #include "XRAssetMgr.h"
 #include "ItemManager.h"
 #include "MapManager.h"
+#include "PlayerSkillManager.h"
 #include "XRGameInstance.generated.h"
 
 const float kSprintMovementSpeed = 750.0f;
@@ -44,6 +45,8 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UItemManager* ItemManager;
+	UPlayerSkillManager* GetPlayerSkillManager() { return PlayerSkillManager; }
+	
 
 public:
 
@@ -53,6 +56,8 @@ private:
 		UNetworkManager* NetworkManager;
 	UPROPERTY()
 		UMapManager* MapManager;
+	UPROPERTY()
+		UPlayerSkillManager* PlayerSkillManager;
 private:
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Meta =(AllowPrivateAccess=true))
 	bool  IsSuper = false;

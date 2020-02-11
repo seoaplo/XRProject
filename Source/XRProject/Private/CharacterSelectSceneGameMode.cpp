@@ -279,6 +279,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	InitData.EquipArray[3].ID = Info.weapon_itemid;
 	InitData.Max_HP = 10.0f;
 	InitData.Current_HP = 10.0f;
+	InitData.Gender = 0;
 
 	Character->InitializeCharacter(false, InitData);
 	Character->SetActorEnableCollision(false);

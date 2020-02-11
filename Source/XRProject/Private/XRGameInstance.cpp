@@ -20,6 +20,8 @@ void UXRGameInstance::Init()
 	ItemManager = NewObject<UItemManager>();
 	MapManager = NewObject<UMapManager>();
 	MapManager->Init();
+	PlayerSkillManager = NewObject<UPlayerSkillManager>();
+
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
 		this, &UXRGameInstance::HandleEnterZone);
@@ -55,6 +57,10 @@ void UXRGameInstance::Init()
 	
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterDead)->BindUObject(
 		this, &UXRGameInstance::CharacterDead);
+
+
+
+
 
 }
 

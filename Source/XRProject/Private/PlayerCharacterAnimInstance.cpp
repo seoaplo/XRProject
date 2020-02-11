@@ -48,6 +48,12 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	if (ROLL_MONTAGE.Succeeded())
 		RollMontage = ROLL_MONTAGE.Object;
 
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		SKILL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/SkillMontage.SkillMontage'"));
+	if (SKILL_MONTAGE.Succeeded())
+		SkillMontage = SKILL_MONTAGE.Object;
+
 }
 
 UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
@@ -162,3 +168,12 @@ void UPlayerCharacterAnimInstance::JumpToMoveMontageSection(FString Section)
 	Montage_JumpToSection(FName(*Section));
 }
 
+void UPlayerCharacterAnimInstance::PlaySkillMontage()
+{
+	float ret = Montage_Play(SkillMontage, 1.f);
+}
+
+void UPlayerCharacterAnimInstance::JumpToSkillMonatgeSection(FString Section)
+{
+	Montage_JumpToSection(FName(*Section));
+}

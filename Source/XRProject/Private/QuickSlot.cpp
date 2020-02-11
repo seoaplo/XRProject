@@ -47,7 +47,7 @@ void UQuickSlot::SetItem(UItem* NewItem)
 	}
 }
 
-void UQuickSlot::SetSkill(USkill* NewSkill)
+void UQuickSlot::SetSkill(UPlayerSkill* NewSkill)
 {
 	if (false) // 스킬 구현하고 액티브인 경우에만 들어올수 있도록 한다.
 	{

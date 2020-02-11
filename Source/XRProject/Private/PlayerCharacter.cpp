@@ -29,6 +29,11 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
 	
+	
+
+
+
+
 	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	NameTag->SetupAttachment(GetRootComponent());
 	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
@@ -874,34 +879,20 @@ void APlayerCharacter::ContinueCombo()
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
 		
-		if (TestID == 2)
+
+		bool bArrowKeyNotPressed = false;
+		float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
+		const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
+		
+		if (bArrowKeyNotPressed)
 		{
-			bool bArrowKeyNotPressed = false;
-			float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
-			const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
-
-		/*	if (bArrowKeyNotPressed)
-				this->SetActorRotation(FRotator(0.0f, Yaw, 0.0f));
-			else
-				this->SetActorRotation(CameraForward + FRotator(0.0f, Yaw, 0.0f));*/
-
-			
-			if (bArrowKeyNotPressed)
-			{
-				const FRotator Rot = FRotator(0.0f, Yaw, 0.0f);
-				AttackNextRotation = Rot;
-				//const FVector Direction = FRotationMatrix(Rot).GetUnitAxis(EAxis::X);
-				//AddMovementInput(Direction, 1.0f);
-			}
-			else
-			{
-				const FRotator Rot = CameraForward + FRotator(0.0f, Yaw, 0.0f);
-				AttackNextRotation = Rot;
-				//const FVector Direction = FRotationMatrix(Rot).GetUnitAxis(EAxis::X);
-				//AddMovementInput(Direction, 1.0f);
-				//FMath::RInterpTo
-			}
-
+			const FRotator Rot = FRotator(0.0f, Yaw, 0.0f);
+			AttackNextRotation = Rot;
+		}
+		else
+		{
+			const FRotator Rot = CameraForward + FRotator(0.0f, Yaw, 0.0f);
+			AttackNextRotation = Rot;
 		}
 
 
@@ -1059,6 +1050,8 @@ void APlayerCharacter::TestPlay()
 
 	if (TestID == 1)
 	{
+		
+		//UGameplayStatics::PredictProjectilePath
 
 	}
 	else if (TestID == 2)

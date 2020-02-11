@@ -14,6 +14,7 @@
 #include "HealthBarWidget.h"
 #include "XRPlayerController.h"
 #include "PlayerCameraShake.h"
+#include "PlayerSkillManager.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
@@ -81,15 +82,10 @@ public:
 	const float kNormalMovementSpeed = 450.0f;
 
 public:
-	UPROPERTY(EditInstanceOnly, Category = "Variable")
-		float RotateSpeed;
-	UPROPERTY(EditInstanceOnly, Category = "Variable")
-		float SpringArmLength;
-	UPROPERTY(EditInstanceOnly, Category = "Variable")
-		float MovementSpeed;
-	UPROPERTY()
-		bool bIsMale; //���� üũ�� ���� bool��.
 
+	bool bIsMale; //���� üũ�� ���� bool��.
+
+public:
 
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -115,13 +111,8 @@ public:
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
 		UPlayerCharacterAnimInstance* MyAnimInstance;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseTurnRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseLookUpRate;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
-
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
 		FVector ScaleVector;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLISION")
@@ -130,18 +121,15 @@ public:
 		FVector2D RollingHitCapsuleSize;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_VALUE")
 		float RollingCapsuleOffset;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		FVector MeshLocationVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		FVector WeaponScaleVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		FVector NameTagLocation;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UCameraShake> MyShake;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_TEST")
 		FCameraShakeInfo ShakeInfo;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Skill")
+		TArray<UPlayerSkill*> PlayerSkillList;
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
@@ -182,8 +170,15 @@ private:
 	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
 	float SumSec = 0;
 	bool bIsAttackMoving; //공격 시 일보 전진
-	
-	
+	float RotateSpeed;
+	float SpringArmLength;
+	float MovementSpeed;
+	float BaseTurnRate;
+	float BaseLookUpRate;
+	FVector MeshLocationVector;
+	FVector WeaponScaleVector;
+	FVector NameTagLocation;
+
 	/*Test Value*/
 	bool bIsTestMode;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
