@@ -107,6 +107,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
 		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
+		Item->DefaultInfo.ATK = Table->ATK;
 		Item->DefaultInfo.DEF = Table->DEF;
 		Item->DefaultInfo.STR = Table->STR;
 		Item->DefaultInfo.DEX = Table->DEX;
@@ -167,6 +168,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
 		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
+		Item->DefaultInfo.ATK = Table->ATK;
 		Item->DefaultInfo.DEF = Table->DEF;
 		Item->DefaultInfo.STR = Table->STR;
 		Item->DefaultInfo.DEX = Table->DEX;

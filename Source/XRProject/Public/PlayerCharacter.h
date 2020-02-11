@@ -175,13 +175,14 @@ private:
 	int32 CurrentComboCount;
 	bool bIsPlayer;
 	bool bInitialized;
-	bool bIsTestMode;
 	bool bIsMouseShow;
 	int32 CurrentAttackID;
 	float ForwardValue; //앞 방향키를 누르고 있는가(-1~1)
 	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
 	float SumSec = 0;
-
+	/*Test Value*/
+	bool bIsTestMode;
+	int32 TestID;
 
 public:
 	virtual void Tick(float Deltatime) override;
@@ -207,6 +208,7 @@ public:
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
 
+	/*Test Function*/
 	void TestPlay();
 
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);

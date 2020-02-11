@@ -48,6 +48,7 @@ void USlotWidget::SetSlotObject()
 
 void USlotWidget::DropIn(UUserWidget * SlotWidget)
 {
+	if (SlotWidget == this) return;
 	USlotWidget* Target = Cast<USlotWidget>(SlotWidget);
 	if (Target)
 	{
