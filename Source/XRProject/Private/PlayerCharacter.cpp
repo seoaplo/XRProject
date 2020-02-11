@@ -247,7 +247,11 @@ void APlayerCharacter::Tick(float deltatime)
 	if (bIsRolling || bIsAttackMoving)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	
-
+	if (bIsAttack)
+	{
+		FRotator NextRot = FMath::RInterpConstantTo(GetActorRotation(), AttackNextRotation, deltatime, 1200.0f);
+		SetActorRotation(NextRot);
+	}
 
 }
 
@@ -566,11 +570,14 @@ void APlayerCharacter::Attack()
 	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit)
 		return;
 
+
 	AttackOverlapList.clear(); //Overlap list 초기화
 
 	//first
 	if (bIsAttack == false)
 	{
+		AttackNextRotation = GetActorRotation(); //공격 시작시에, 액터로케이션과 Next로테이션을 동일하게 맞춤
+
 		bIsAttack = true;
 		MyAnimInstance->PlayAttackMontage();
 		
@@ -873,10 +880,27 @@ void APlayerCharacter::ContinueCombo()
 			float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
 			const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
 
-			if (bArrowKeyNotPressed)
+		/*	if (bArrowKeyNotPressed)
 				this->SetActorRotation(FRotator(0.0f, Yaw, 0.0f));
 			else
-				this->SetActorRotation(CameraForward + FRotator(0.0f, Yaw, 0.0f));
+				this->SetActorRotation(CameraForward + FRotator(0.0f, Yaw, 0.0f));*/
+
+			
+			if (bArrowKeyNotPressed)
+			{
+				const FRotator Rot = FRotator(0.0f, Yaw, 0.0f);
+				AttackNextRotation = Rot;
+				//const FVector Direction = FRotationMatrix(Rot).GetUnitAxis(EAxis::X);
+				//AddMovementInput(Direction, 1.0f);
+			}
+			else
+			{
+				const FRotator Rot = CameraForward + FRotator(0.0f, Yaw, 0.0f);
+				AttackNextRotation = Rot;
+				//const FVector Direction = FRotationMatrix(Rot).GetUnitAxis(EAxis::X);
+				//AddMovementInput(Direction, 1.0f);
+				//FMath::RInterpTo
+			}
 
 		}
 

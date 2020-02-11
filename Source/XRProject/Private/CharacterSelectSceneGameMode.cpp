@@ -31,6 +31,9 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
+	const int32 NudeBodyID = 130;
+	const int32 NudeHandID = 140;
+	const int32 NudeLegID =	 150;
 
 
 	//Çì¾îÆÄÃ÷
@@ -56,7 +59,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	if (Info.armor_itemid == -1)
 	{
 		FSoftObjectPath NudeAssetPath = nullptr;
-		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.armor_itemid)), TEXT("t"));
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(NudeBodyID)), TEXT("t"));
 		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
 		FStreamableDelegate NudeAssetLoadDelegate;
 		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
@@ -68,7 +71,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	if (Info.hand_itemid == -1)
 	{
 		FSoftObjectPath NudeAssetPath = nullptr;
-		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.hand_itemid)), TEXT("t"));
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(NudeHandID)), TEXT("t"));
 		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
 		FStreamableDelegate NudeAssetLoadDelegate;
 		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
@@ -80,7 +83,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	if (Info.shoes_itemid == -1)
 	{
 		FSoftObjectPath NudeAssetPath = nullptr;
-		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.shoes_itemid)), TEXT("t"));
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(NudeLegID)), TEXT("t"));
 		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
 		FStreamableDelegate NudeAssetLoadDelegate;
 		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,

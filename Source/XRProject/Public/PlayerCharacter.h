@@ -168,6 +168,7 @@ public:
 	/*TEST*/
 private:
 	FRotator DeltaRotation;
+	FRotator AttackNextRotation; //공격 시에 방향전환에 사용되는 로테이터.
 	FRotator AdditionalRotationValue;
 	FVector SpringArmLocation;
 	bool bForwardKeyIsNeutral;
