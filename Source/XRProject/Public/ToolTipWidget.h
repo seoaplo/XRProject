@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "DungeonResultWidget.generated.h"
+#include "ToolTipWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class XRPROJECT_API UDungeonResultWidget : public UUserWidget
+class XRPROJECT_API UToolTipWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	

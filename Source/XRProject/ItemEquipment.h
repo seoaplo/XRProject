@@ -57,7 +57,7 @@ struct EquipmentInfo // 서버에서 보내주는 데이터
 	int32_t AddINT;
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class XRPROJECT_API UItemEquipment : public UItem
 {
 	GENERATED_BODY()

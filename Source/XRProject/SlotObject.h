@@ -5,7 +5,7 @@
 #include "UObject/NoExportTypes.h"
 #include "SlotObject.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class XRPROJECT_API USlotObject : public UObject
 {
 	GENERATED_BODY()

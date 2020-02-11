@@ -443,17 +443,20 @@ void APlayerCharacter::PseudoChangeEquipmentWithoutMesh(UItem * Item)
 		case 0: { Types = EEquipmentsType::BODY; break; }
 		case 1: { Types = EEquipmentsType::HANDS; break; }
 		case 2: { Types = EEquipmentsType::LEGS; break; }
+		case 3: { Types = EEquipmentsType::WEAPON; break; }
 	}
 
 	switch (Types)
 	{
 	case EEquipmentsType::BODY:
 		Equipments.BodyItem = EquipItem;
+		break;
 	case EEquipmentsType::HANDS:
 		Equipments.HandsItem = EquipItem;
 		break;
 	case EEquipmentsType::LEGS:
 		Equipments.LegsItem = EquipItem;
+		break;
 	case EEquipmentsType::WEAPON:
 		Equipments.WeaponItem = EquipItem;
 		break;

@@ -52,7 +52,7 @@ void USlotWidget::DropIn(UUserWidget * SlotWidget)
 	if (Target)
 	{
 		if (Target->IsEquipment && IsEquipment) return;
-		if (IsEquipment || !Target->IsEquipment)
+		if (IsEquipment && !Target->IsEquipment)
 		{
 			// Àåºñ ÀåÂø
 			UItemEquipment* Equipment = Cast<UItemEquipment>(Target->SlotObject);
