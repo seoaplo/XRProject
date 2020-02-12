@@ -31,11 +31,21 @@ public:
 		int32 Gender; //0 : Male , 1 : Female
 
 
+
 public:
-	UFUNCTION(BlueprintCallable,Category = "C_StatFunction")
-		float GetMaxStamina();
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
-		float GetCurrentStamina();
+		/*Stamina µ¡¼À*/
+		void AddStamina(float Value);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SubtractStamina(float Value);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		const float GetCurrentStamina() const;
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SetCurrentStamina(float Stamina);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SetMaxStamina(float Stamina);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		float GetMaxStamina();
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		int32 GetLevel();
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
@@ -47,10 +57,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		int GetGender();
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
-		void SetMaxStamina(float MStamina);
-	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
-		void SetCurrentStamina(float CStamina);
-	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		void SetLevel(int32 Level_);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		void SetSTR(int32 STR_);
@@ -60,6 +66,7 @@ public:
 		void SetINT(int32 INT_);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		void SetGender(int32 Gender_);
+
 
 	virtual bool GetStatDataFromServer(InputStream& input) override;
 };

@@ -18,6 +18,7 @@
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
+class UXRGameInstance;
 
 UENUM()
 enum class EEquipmentsType : uint8
@@ -85,10 +86,7 @@ public:
 
 	bool bIsMale; //���� üũ�� ���� bool��.
 
-public:
-
-	UPROPERTY(EditAnywhere)
-		FEquipment Equipments;
+private:
 	UPROPERTY(EditInstanceOnly, Category = "C_Collision")
 		class UCapsuleComponent* HitCapsule;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
@@ -97,41 +95,42 @@ public:
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Parts")
+	UPROPERTY(EditInstanceOnly, Category = "C_Parts")
 		class USkeletalMeshComponent* FaceComponent;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Parts")
+	UPROPERTY(EditInstanceOnly, Category = "C_Parts")
 		class USkeletalMeshComponent* HairComponent;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleAnimInstance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> RemoteAnimInstance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
-		UPlayerCharacterAnimInstance* MyAnimInstance;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
-		UPlayerCharacterStatComponent* PlayerStatComp;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FVector ScaleVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLISION")
+	UPROPERTY(EditInstanceOnly, Category = "C_COLLISION")
 		FVector2D CapsuleSize;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLLISION")
+	UPROPERTY(EditInstanceOnly, Category = "C_COLLLISION")
 		FVector2D RollingHitCapsuleSize;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_VALUE")
+	UPROPERTY(EditInstanceOnly, Category = "C_VALUE")
 		float RollingCapsuleOffset;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UCameraShake> MyShake;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
+	UPROPERTY(VisibleAnywhere, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FCameraShakeInfo ShakeInfo;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Skill")
-		TArray<UPlayerSkill*> PlayerSkillList;
-
 
 public:
+	UPROPERTY(EditAnywhere)
+		FEquipment Equipments;
+	UPROPERTY(VisibleAnywhere, Category = "C_CharacterStatus")
+		UPlayerCharacterStatComponent* PlayerStatComp;
+	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
+		UPlayerCharacterAnimInstance* MyAnimInstance;
+	UPROPERTY(VisibleAnywhere, Category = "C_GameInstance")
+		UXRGameInstance* CurGameInstance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))

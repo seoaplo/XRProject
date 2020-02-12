@@ -3,11 +3,11 @@
 
 #include "PlayerSkill.h"
 #include "PlayerCharacter.h"
+#include "XRGameInstance.h"
 
 UPlayerSkill::UPlayerSkill()
 {
-
-
+	bIsActiveMove = false;
 }
 
 UPlayerSkill::~UPlayerSkill()
@@ -18,6 +18,12 @@ UPlayerSkill::~UPlayerSkill()
 void UPlayerSkill::Play(APlayerCharacter* Character)
 {
 }
+
+bool UPlayerSkill::End(APlayerCharacter* Character)
+{
+	return false;
+}
+
 
 bool UPlayerSkill::ConditionCheck(APlayerCharacter * Character)
 {
@@ -39,16 +45,36 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	UPlayerCharacterAnimInstance* MyAnimInst = Character->MyAnimInstance;
 	if (!MyAnimInst)
 		check(false);
-
+	
+	if (ConditionCheck(Character))
+		Character->PlayerStatComp->SubtractStamina(GetRequireStamina());
+	else
+		return;
+	
 	FString GaiaStr = "GaiaCrush";
+	int32 Idx = MyAnimInst->SkillMontage->GetSectionIndex(FName(*GaiaStr));
+	float length = MyAnimInst->SkillMontage->GetSectionLength(Idx);
+
+	Character->GetCharacterMovement()->MaxWalkSpeed = MoveDistance / length;
+	Character->GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+	bIsActiveMove = true;
 
 	MyAnimInst->PlaySkillMontage();
 	MyAnimInst->JumpToSkillMonatgeSection(GaiaStr);
 }
 
+bool USkill_GaiaCrush::End(APlayerCharacter* Character)
+{
+	bIsActiveMove = false;
+	return true;
+}
+
 bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
 {
-	//Stamina Check
+	if (Character->PlayerStatComp->GetCurrentStamina() >= GetRequireStamina())
+	{ 
+		return true;
+	}
 	return false;
 }
 

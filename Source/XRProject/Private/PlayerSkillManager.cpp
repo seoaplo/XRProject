@@ -24,7 +24,6 @@ UPlayerSkill * UPlayerSkillManager::CreateSkillFromID(int32 ID)
 	check(SkillInfo);
 
 	UPlayerSkill* NewSkill = NewObject<UPlayerSkill>();
-
 	
 	NewSkill->SetSkillName(SkillInfo->SkillName);
 	NewSkill->SetDamageMagnification(SkillInfo->DamageMagnification);
@@ -37,8 +36,8 @@ UPlayerSkill * UPlayerSkillManager::CreateSkillFromID(int32 ID)
 	if (SkillInfo->SkillName == "GaiaCrush")
 	{
 		USkill_GaiaCrush* Gaia = Cast<USkill_GaiaCrush>(NewSkill);
-		Gaia->SetMoveDistance(FCString::Atof(*(SkillInfo->ETC1)));
-		Gaia->SetAffectRadius(FCString::Atof(*(SkillInfo->ETC2)));
+		Gaia->SetMoveDistance(FCString::Atof(*(SkillInfo->MoveDistance)));
+		Gaia->SetAffectRadius(FCString::Atof(*(SkillInfo->AffectRadius)));
 		return Gaia;
 	}
 	else
@@ -58,7 +57,7 @@ UPlayerSkill * UPlayerSkillManager::FindSkillFromList(TArray<UPlayerSkill*> Skil
 	return nullptr;
 }
 
-void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication = false)
+void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication)
 {
 	if (bNeedCheckDuplication)
 	{
@@ -68,5 +67,6 @@ void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill
 				return;
 		}
 	}
+
 	SkillList.Add(Skill);
 }

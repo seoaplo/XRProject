@@ -6,6 +6,7 @@
 #include "PlayerSkill.h"
 #include "Engine/DataTable.h"
 #include "UObject/NoExportTypes.h"
+#include <initializer_list>
 #include "PlayerSkillManager.generated.h"
 
 /**
@@ -23,9 +24,10 @@ public:
 
 private:
 	class UDataTable* SkillDataTable;
-
 public:
+
+	TArray<UPlayerSkill*> SkillListForPlalyer;
 	UPlayerSkill* CreateSkillFromID(int32 ID);
 	UPlayerSkill* FindSkillFromList(TArray<UPlayerSkill*> SkillList, int32 ID);
-	void AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication = false);
+	void AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication);
 };

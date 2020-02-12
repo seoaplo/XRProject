@@ -102,6 +102,7 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 		CurrentData.Speed = Input.ReadFloat32();
 		CurrentData.Defence = Input.ReadFloat32();
 
+
 		std::string c_name = Input.ReadCString();
 		CurrentData.Name = mbs_to_wcs(c_name, std::locale("kor"));
 		CurrentData.Level = Input.ReadInt32();
@@ -114,7 +115,7 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 		CurrentData.CurrentStamina = Input.ReadFloat32();
 		CurrentData.MaxStamina = Input.ReadFloat32();
 
-		int EquipmentSize = 4;
+		const int EquipmentSize = 4;
 		for (int iCount = 0; iCount < EquipmentSize; iCount++)
 		{
 			Equipment& CurrentEquip = CurrentData.EquipArray[iCount];
@@ -133,6 +134,8 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 				CurrentEquip.Count = Input.ReadInt32();
 			}
 		}
+
+
 	}
 }
 
@@ -187,6 +190,16 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 		}
 	}
 	PlayerID = CurrentData.ObjectID;
+	UXRGameInstance* Instance = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+
+	int32 NumberOfSkills = 0;
+	NumberOfSkills = Input.ReadInt32();
+	for (int ii = 0; ii < NumberOfSkills; ii++)
+	{
+		UPlayerSkillManager* SkillManager = Instance->GetPlayerSkillManager();
+		int32 ID = Input.ReadInt32();
+		SkillManager->AddSkill(SkillManager->SkillListForPlalyer, SkillManager->CreateSkillFromID(ID), true);
+	}
 }
 bool UMapManager::ReadPlayerDeleteFromServer(InputStream& Input)
 {
@@ -281,8 +294,10 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
  		
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 
-		if(CurrentData.ObjectID != PlayerID)
+		if (CurrentData.ObjectID != PlayerID)
+		{
 			Player->InitializeCharacter(false, CurrentData);
+		}
 		else
 			Player->InitializeCharacter(true, CurrentData);
 

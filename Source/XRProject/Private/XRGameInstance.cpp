@@ -58,10 +58,6 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterDead)->BindUObject(
 		this, &UXRGameInstance::CharacterDead);
 
-
-
-
-
 }
 
 void UXRGameInstance::Shutdown()

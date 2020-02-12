@@ -252,7 +252,7 @@ void APlayerCharacter::Tick(float deltatime)
 	if (bIsRolling || bIsAttackMoving)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	
-	if (bIsAttack)
+	if (bIsAttackMoving)
 	{
 		FRotator NextRot = FMath::RInterpConstantTo(GetActorRotation(), AttackNextRotation, deltatime, 1200.0f);
 		SetActorRotation(NextRot);
@@ -307,18 +307,15 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 	
 
-	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
-	
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
+	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
+
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
 
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
-
-	
-
 
 }
 
@@ -363,40 +360,39 @@ void APlayerCharacter::MoveRight(float Value)
 
 void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 {
-	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
-
-	FPartsResource* PartResourceTable = MyGameInstance->ItemManager->PartsDataTable->
+	
+	FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
 		FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));
 
 	if (Type == EPartsType::HAIR)
 	{
 		//Çì¾îÆÄÃ÷
 		FSoftObjectPath HairAssetPath = nullptr;
-		HairAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		HairAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate HairAssetLoadDelegate;
 		HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			HairAssetPath, EPartsType::HAIR);
-		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
+		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
 	}
 	else if (Type == EPartsType::FACE)
 	{
 		//ÆäÀÌ½º ÆÄÃ÷
 		FSoftObjectPath FaceAssetPath = nullptr;
-		FaceAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		FaceAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate FaceAssetLoadDelegate;
 		FaceAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			FaceAssetPath, EPartsType::FACE);
-		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
+		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
 	}
 	else
 	{
 		FSoftObjectPath ETCAssetPath = nullptr;
-		ETCAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		ETCAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate ETCAssetLoadDelegate;
 		ETCAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			ETCAssetPath, Type);
 
-		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
+		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
 	}
 
@@ -916,6 +912,14 @@ void APlayerCharacter::EndMoveAttack()
 {
 	bIsAttackMoving = false;
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+	out << 999;
+	out << GetActorLocation();
+	out << GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
 }
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
@@ -1047,17 +1051,8 @@ bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
 
 void APlayerCharacter::TestPlay()
 {
-
-	if (TestID == 1)
-	{
-		
-		//UGameplayStatics::PredictProjectilePath
-
-	}
-	else if (TestID == 2)
-	{
-
-	}
+	
+	
 }
 
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)

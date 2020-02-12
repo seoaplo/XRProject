@@ -18,7 +18,6 @@ class XRPROJECT_API UPlayerSkill : public UObject
 {
 	GENERATED_BODY()
 
-
 public:
 	UPlayerSkill();
 	~UPlayerSkill();
@@ -32,9 +31,11 @@ protected:
 	float			RequireStamina;
 	float			CoolTime;
 	int32			IconID;
+	bool			bIsActiveMove;
 
 public:
 	virtual void Play(APlayerCharacter* Character);
+	virtual bool End(APlayerCharacter* Character);
 	virtual bool ConditionCheck(APlayerCharacter* Character);
 
 public:
@@ -53,6 +54,7 @@ public:
 	float GetCoolTime() { return CoolTime; }
 	int32 GetIconID() { return IconID; }
 	float GetRequireStamina() { return RequireStamina; }
+	inline bool GetIsActiveMove() { return bIsActiveMove; }
 
 };
 
@@ -73,6 +75,7 @@ private:
 
 public:
 	virtual void Play(APlayerCharacter* Character) override;
+	virtual bool End(APlayerCharacter* Character) override;
 	virtual bool ConditionCheck(APlayerCharacter* Character) override;
 	//void Set();
 
@@ -106,13 +109,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
 		FString ToolTip;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
-		FString ETC1;
+		FString MoveDistance;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
-		FString ETC2;
+		FString AffectRadius;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
-		FString ETC3;
+		FString DMG_Increase;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
-		FString ETC4;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
-		FString ETC5;
+		FString DEF_Increase;
 };

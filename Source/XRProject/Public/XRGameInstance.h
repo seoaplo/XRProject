@@ -45,6 +45,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UItemManager* ItemManager;
+
 	UPlayerSkillManager* GetPlayerSkillManager() { return PlayerSkillManager; }
 	
 
