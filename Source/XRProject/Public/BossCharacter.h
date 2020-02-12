@@ -11,12 +11,17 @@ struct FBossSkill
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UAnimMontage* AttackAction;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float AttackRange;
+		int32 SkilID;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float CoolTime;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float AttackRange;
+
+
+
 };
 
 UENUM(BlueprintType)

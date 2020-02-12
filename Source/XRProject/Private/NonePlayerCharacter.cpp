@@ -156,10 +156,7 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 void ANonePlayerCharacter::DetectTarget(const TArray<AActor*>& DetectingPawn)
 {
 
-	for (auto detec : DetectingPawn)
-	{
-		XRLOG(Warning, TEXT("%s"), *detec->GetName());
-	}
+
 
 }
 
