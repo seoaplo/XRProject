@@ -6,6 +6,7 @@
 #include "XRAIController.h"
 #include "PlayerCharacter.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Perception/AISenseConfig_Damage.h"
 
 UBTService_SelectTarget::UBTService_SelectTarget()
 {
@@ -15,12 +16,24 @@ void UBTService_SelectTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
+
 	APawn* ControllingPawn = OwnerComp.GetAIOwner()->GetPawn();
 	AXRAIController* OwnerCon = Cast<AXRAIController>(OwnerComp.GetAIOwner());
 	ANonePlayerCharacter* OwnerNpc = Cast<ANonePlayerCharacter>(ControllingPawn);
 	if (OwnerNpc && OwnerCon)
 	{
 		TArray < AActor*> OutActors;
+		OwnerCon->GetPerceptionComp()->GetKnownPerceivedActors(TSubclassOf<UAISense_Damage>(), OutActors);
+		for (int i = 0; i < OutActors.Num(); i++)
+		{
+			APlayerCharacter* DetectedPlayer = Cast<APlayerCharacter>(OutActors[i]);
+			if (DetectedPlayer)
+			{
+				XRLOG(Warning, TEXT("%s TakeDamage Perception Activate : %s"), *ControllingPawn->GetName(), *OutActors[i]->GetName());
+			}
+		}
+
+
 		OwnerCon->GetPerceptionComp()->GetKnownPerceivedActors(nullptr, OutActors);
 		for (int i = 0; i < OutActors.Num(); i++)
 		{
@@ -44,6 +57,12 @@ void UBTService_SelectTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 				}
 			}
 		}
+
+
+
+
+
+
 		OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey, nullptr);
 		return;
 		//아무것도 없을때 타겟 클리어

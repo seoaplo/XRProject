@@ -9,7 +9,8 @@
 #include "Components/InputComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "XRPlayerController.h"
+#include "Perception/AISenseConfig_Damage.h"
+
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
@@ -179,6 +180,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsMouseShow				= false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
+
 	MyShake = UPlayerCameraShake::StaticClass();
 	TestID = 2;
 
@@ -187,7 +189,12 @@ APlayerCharacter::APlayerCharacter()
 
 	//FCharacterSizeInfo aa;
 	//aa = FindCharacterSizeFromDataTable(1);
+
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
+	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
+	PlayerAIPerceptionStimul->bAutoRegister = true;
+	PlayerAIPerceptionStimul->RegisterForSense(AISenseDamage->GetSenseImplementation());
+
 }
 
 APlayerCharacter::~APlayerCharacter()
@@ -249,7 +256,6 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 
-
 	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	
@@ -285,6 +291,7 @@ void APlayerCharacter::PostInitializeComponents()
 
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
+
 }
 
 void APlayerCharacter::PossessedBy(AController* controller)
@@ -306,7 +313,6 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
-	
 
 	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
 
@@ -856,7 +862,6 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		out << GetActorRotation();
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
-
 	}
 }
 
@@ -947,6 +952,10 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
 		if (NPC)
 		{
+			///수정자 조재진///
+			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
+			UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
+			/// 오프라인 공격 테스트용도 지워도 무상관///////
 
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
@@ -968,7 +977,6 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 			GetNetMgr().SendPacket(out);
 
 			AttackOverlapList.push_back(NPC);
-
 		}
 	}
 }

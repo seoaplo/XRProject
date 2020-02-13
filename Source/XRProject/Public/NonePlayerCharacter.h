@@ -70,7 +70,41 @@ public:
 };
 
 
+
+USTRUCT(BlueprintType)
+struct FMonsterSkillTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		FString MonsterSkillID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float DamageRatio;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		int32 SkillType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float Radius;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float Range;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float Speed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float LifeTime;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		float CoolDown;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
+		bool IsKnockBack;
+};
+
+
+
+
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcHitReactDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcReadyState);
+
+
 
 /**
  *
@@ -155,8 +189,8 @@ public:
 
 
 
-
-
+	UPROPERTY(BlueprintAssignable)
+	FOnNpcReadyState OnNpcReady;
 
 	virtual void ExcuteRecvNpcAction(InputStream& input);
 
@@ -174,7 +208,7 @@ public:
 protected:
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		TArray<ABaseCharacter*>		AggroList;
+		TMap<ABaseCharacter*,int>		AggroList;
 
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))

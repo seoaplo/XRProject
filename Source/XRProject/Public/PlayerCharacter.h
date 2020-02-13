@@ -82,7 +82,19 @@ public:
 
 public:
 
-	bool bIsMale; //���� üũ�� ���� bool��.
+
+	UPROPERTY()
+		class  UAISenseConfig_Damage* AISenseDamage;
+
+
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float RotateSpeed;
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float SpringArmLength;
+	UPROPERTY(EditInstanceOnly, Category = "Variable")
+		float MovementSpeed;
+	UPROPERTY()
+		bool bIsMale; //���� üũ�� ���� bool��.
 
 private:
 	UPROPERTY(EditInstanceOnly, Category = "C_Collision")
