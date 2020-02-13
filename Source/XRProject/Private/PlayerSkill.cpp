@@ -153,8 +153,6 @@ void USkill_GaiaCrush::RadiusOverlapEvent(UPrimitiveComponent * OverlappedComp, 
 					return;
 			}
 
-			NPC->SetActorScale3D(FVector(3.0f, 3.0f, 3.0f));
-
 			int64 EnemyID = NPC->ObjectID;
 			int64 MyID = OwnerPlayer->ObjectID;
 
