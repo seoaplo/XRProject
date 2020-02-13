@@ -19,9 +19,6 @@ public:
 		float CoolTime;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float AttackRange;
-
-
-
 };
 
 UENUM(BlueprintType)

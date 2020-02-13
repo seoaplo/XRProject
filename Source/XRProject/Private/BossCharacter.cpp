@@ -25,6 +25,8 @@ void ABossCharacter::SetOnSkillQueue(int32 index)
 
 void ABossCharacter::FireSkill_Implementation()
 {
+
+
 }
 
 void ABossCharacter::SetCurrentBossPhase(int32 phase)
