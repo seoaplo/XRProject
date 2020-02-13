@@ -266,6 +266,8 @@ bool UMapManager::OpenMap(UWorld* World)
 	if (LevelName == nullptr) return false;
 
 	UGameplayStatics::OpenLevel(World, *LevelName);
+
+
 	return true;
 }
 

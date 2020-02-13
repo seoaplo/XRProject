@@ -61,6 +61,14 @@ void AIngameGameMode::BeginPlay()
 			CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
 		}
 	}
+
+	int32 SizeX = 0;
+	int32 SizeY = 0;
+	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
+
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+	
 }
 
 

@@ -32,6 +32,7 @@ public:
 	UPlayerSkill* FindSkillFromList(TArray<UPlayerSkill*>& SkillList, int32 ID);
 	UPlayerSkill* FindSkillFromListByName(TArray<UPlayerSkill*>& SkillList, FString& Name);
 	void AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication);
+	UDataTable* GetSkillDataTable();
 
 	
 };

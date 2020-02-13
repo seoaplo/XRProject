@@ -10,7 +10,8 @@
 #include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
-
+#include "HealthBarWidget.h"
+#include "XRPlayerController.h"
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
@@ -30,11 +31,8 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
-	
-	
 
-
-
+	TestVal = 0.0f;
 
 	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	NameTag->SetupAttachment(GetRootComponent());
@@ -331,7 +329,7 @@ void APlayerCharacter::MoveForward(float Value)
 	ForwardValue = Value;
 
 
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead )
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -351,7 +349,7 @@ void APlayerCharacter::MoveRight(float Value)
 {
 	RightValue = Value;
 
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -575,7 +573,7 @@ FVector2D APlayerCharacter::GetRollingCapsuleSize()
 
 void APlayerCharacter::Attack()
 {	
-	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit)
+	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit || bIsSkillPlaying)
 		return;
 
 
@@ -608,6 +606,9 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
+
+	if (bIsSkillPlaying)
+		return;
 	//후딜레이 동작에서 구르는지 체크
 	if (bIsAttack)
 	{
@@ -644,14 +645,15 @@ void APlayerCharacter::Roll()
 	bIsOverallRollAnimPlaying = true;
 	MyAnimInstance->PlayRollMontage();
 	SetRollingCapsuleMode();
-
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterRolling);
-	out << this->ObjectID;
-	out << this->GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
-
+	if (Cast<APlayerController>(GetController()))
+	{
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kRequestCharacterRolling);
+		out << this->ObjectID;
+		out << this->GetActorRotation();
+		out.CompletePacketBuild();
+		GetNetMgr().SendPacket(out);
+	}
 }
 
 void APlayerCharacter::Sprint()
@@ -659,8 +661,8 @@ void APlayerCharacter::Sprint()
 	if (bIsOverallRollAnimPlaying)
 		return;
 
-	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	bIsSprint = true;
+	GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 
 	if (Cast<APlayerController>(GetController()))
 	{
@@ -805,7 +807,15 @@ void APlayerCharacter::TestInitialize()
 	PlayerStatComp->SetINT(12);
 	PlayerStatComp->SetCurrentStamina(100);
 	PlayerStatComp->SetMaxStamina(100);
+	PlayerStatComp->SetMaxExp(500);
+	PlayerStatComp->SetCurrentExp(0);
 
+
+	UPlayerSkillManager* SkillManager = MyGameInstance->GetPlayerSkillManager();
+	SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
+		SkillManager->CreateSkillFromID(101), true);
+	SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
+		SkillManager->CreateSkillFromID(102), true);
 
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
@@ -864,7 +874,6 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		GetNetMgr().SendPacket(out);
 	}
 }
-
 
 void APlayerCharacter::ContinueCombo()
 {
@@ -954,7 +963,7 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 		{
 			///수정자 조재진///
 			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
-			UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
+			//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
 			/// 오프라인 공격 테스트용도 지워도 무상관///////
 
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
@@ -1055,6 +1064,11 @@ void APlayerCharacter::SetbIsSkillMove(bool b)
 	bIsSkillMove = b;
 }
 
+void APlayerCharacter::SetbIsSkillPlaying(bool b)
+{
+	bIsSkillPlaying = b;
+}
+
 bool APlayerCharacter::GetbIsRolling()
 {
 	return bIsRolling;
@@ -1070,16 +1084,30 @@ bool APlayerCharacter::GetbIsSkillMove()
 	return bIsSkillMove;
 }
 
+bool APlayerCharacter::GetbIsSkillPlaying()
+{
+	return bIsSkillPlaying;
+}
+
 void APlayerCharacter::TestPlay()
 {
-
 	int32 aaa = PlayerStatComp->GetMaxExp();
 	FString Fstr = "GaiaCrush";
 	UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
 		FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer,Fstr);
 
-	Skill->Play(this);
-	
+	if(!bIsSkillPlaying)
+		Skill->Play(this);
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+	out << 101;
+	out << GetActorLocation();
+	out << GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+	CurrentAttackID = ComboCount;
+
 }
 
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)

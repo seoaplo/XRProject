@@ -3,6 +3,7 @@
 
 #include "PlayerSkill.h"
 #include "PlayerCharacter.h"
+#include "NonePlayerCharacter.h"
 #include "XRGameInstance.h"
 
 UPlayerSkill::UPlayerSkill()
@@ -19,6 +20,8 @@ UPlayerSkill::~UPlayerSkill()
 
 void UPlayerSkill::Play(APlayerCharacter* Character)
 {
+	if (OwnerPlayer == nullptr)
+		OwnerPlayer = Character;
 }
 
 bool UPlayerSkill::End(APlayerCharacter* Character)
@@ -34,6 +37,11 @@ bool UPlayerSkill::ConditionCheck(APlayerCharacter * Character)
 
 USkill_GaiaCrush::USkill_GaiaCrush()
 {
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		CMesh(TEXT("StaticMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Skill/SkillOverlapCylinder.SkillOverlapCylinder'"));
+
+	RadMesh = CMesh.Object;
 	
 }
 
@@ -44,18 +52,26 @@ USkill_GaiaCrush::~USkill_GaiaCrush()
 
 void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 {
+	if (OwnerPlayer == nullptr)
+		OwnerPlayer = Character;
+
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
-		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("End"));
+		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("GaiaTargetCheck"));
+
+	if (!Character->MyAnimInstance->Delegate_GaiaCrushProcessEnd.IsBound())
+		Character->MyAnimInstance->Delegate_GaiaCrushProcessEnd.BindUFunction(this, FName("End"));
+
+	OwnerPlayer->SetbIsSkillPlaying(true);
 
 	UPlayerCharacterAnimInstance* MyAnimInst = Character->MyAnimInstance;
+	
 	if (!MyAnimInst)
 		check(false);
 	
-	if (ConditionCheck(Character))
-		Character->PlayerStatComp->SubtractStamina(GetRequireStamina());
-	else
+	if (!ConditionCheck(Character))
 		return;
-	
+	  //주의 : 테스트 끝나면 복구할 것
+
 	FString GaiaStr = "GaiaCrush";
 	int32 Idx = MyAnimInst->SkillMontage->GetSectionIndex(FName(*GaiaStr));
 	float length = MyAnimInst->SkillMontage->GetSectionLength(Idx);
@@ -68,14 +84,46 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	MyAnimInst->JumpToSkillMonatgeSection(GaiaStr);
 }
 
-bool USkill_GaiaCrush::End(APlayerCharacter* Character)
+void USkill_GaiaCrush::GaiaTargetCheck(APlayerCharacter* Character)
 {
-	
+	FActorSpawnParameters param;
+	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	Character->SetbIsSkillMove(false);
-	return true;
+	FVector Loc = Character->GetActorLocation() + Character->GetActorForwardVector() * kCircleDistance - FVector(0.0f, 0.0f, 30.0f);
+
+	RadiusChecker = Character->GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), 
+		Loc,
+		Character->GetActorRotation(), param);
+	
+	if (RadiusChecker)
+	{
+		RadiusChecker->SetActorScale3D(FVector(5.0f, 5.0f, 0.4f));
+		RadiusChecker->SetMobility(EComponentMobility::Movable);
+		RadiusChecker->GetStaticMeshComponent()->SetStaticMesh(RadMesh);
+		RadiusChecker->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		RadiusChecker->GetStaticMeshComponent()->SetCollisionProfileName("PlayerWeapon");
+		RadiusChecker->GetStaticMeshComponent()->SetGenerateOverlapEvents(true);
+		RadiusChecker->GetStaticMeshComponent()->OnComponentBeginOverlap.AddDynamic(this, &USkill_GaiaCrush::RadiusOverlapEvent);
+		RadiusChecker->GetStaticMeshComponent()->SetVisibility(true);
+		RadiusChecker->SetActorRelativeLocation(RadiusChecker->GetActorLocation() +  FVector(0.0f, 0.0f, 0.1f));
+
+		Character->SetbIsSkillMove(false);
+	}
+	else
+		check(false);
 }
 
+bool USkill_GaiaCrush::End(APlayerCharacter* Character)
+{
+	if (IsValid(RadiusChecker))
+	{
+		RadiusChecker->GetStaticMeshComponent()->OnComponentBeginOverlap.Clear();
+		RadiusChecker->Destroy();
+	}
+	AttackOverlapList.clear();
+	OwnerPlayer->SetbIsSkillPlaying(false);
+	return true;
+}
 bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
 {
 	if (Character->PlayerStatComp->GetCurrentStamina() >= GetRequireStamina())
@@ -83,6 +131,40 @@ bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
 		return true;
 	}
 	return false;
+}
+
+void USkill_GaiaCrush::RadiusOverlapEvent(UPrimitiveComponent * OverlappedComp, AActor * OtherActor,
+	UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (Cast<APlayerController>(OwnerPlayer->GetController()))
+	{
+		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
+		if (NPC)
+		{
+			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
+			{
+				if (FlagNpc == NPC)
+					return;
+			}
+
+			NPC->SetActorScale3D(FVector(3.0f, 3.0f, 3.0f));
+
+			int64 EnemyID = NPC->ObjectID;
+			int64 MyID = OwnerPlayer->ObjectID;
+
+			OutputStream out;
+			out.WriteOpcode(ENetworkCSOpcode::kCharcterHitSuccess);
+			out << MyID;
+			out << EnemyID;
+			out << 101;
+			out << OwnerPlayer->GetActorLocation();
+			out << OwnerPlayer->GetActorRotation();
+			out.CompletePacketBuild();
+			GetNetMgr().SendPacket(out);
+
+			AttackOverlapList.push_back(NPC);
+		}
+	}
 }
 
 void USkill_GaiaCrush::SetMoveDistance(float MoveDistance)
