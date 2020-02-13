@@ -22,6 +22,7 @@ enum class ENetworkCSOpcode : uint16_t
 
 	kInventoryUpdateRequest = 1003,
 	kQuickSlotUseRequest = 1004,
+	kEquipmentMountRequest = 1005,
 
 	kMatchingRequest = 1006,
 	kMatchingConfirmRequest = 1007, // true / false
@@ -36,8 +37,6 @@ enum class ENetworkCSOpcode : uint16_t
 	kRequestCharacterSprint = 1021,
 	kRequestChangeZone = 1022,
 	kRequestCharacterRolling = 1023,
-
-
 };
 
 
@@ -83,4 +82,7 @@ enum class ENetworkSCOpcode : uint16_t
 
 	kNotifySpawnPotal = 1022,
 	kNotifyCharacterDead = 1023,
+
+	kNotifyStatChange = 1024,
+	kNotifyDungeonReward = 1025,
 };

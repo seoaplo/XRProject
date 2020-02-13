@@ -84,7 +84,6 @@ private:
 	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);
-
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-

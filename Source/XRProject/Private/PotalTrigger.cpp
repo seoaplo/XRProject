@@ -18,6 +18,7 @@ void APotalTrigger::BeginPlay()
 {
 	Super::BeginPlay();
 	SetActorHiddenInGame(false);
+	
 }
 
 void APotalTrigger::OnOverlapBegin(class AActor* OverlappedActor, class AActor* OtherActor)

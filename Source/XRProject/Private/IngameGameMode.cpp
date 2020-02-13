@@ -45,6 +45,8 @@ void AIngameGameMode::BeginPlay()
 		this, &AIngameGameMode::NotifyMatchResult);
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchCanceled)->BindUObject(
 		this, &AIngameGameMode::NotifyMatchCanceled);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyDungeonReward)->BindUObject(
+		this, &AIngameGameMode::NotifyDungeonReward);
 
 	if (CurrentWidget->MiniMap != nullptr)
 	{
@@ -93,4 +95,10 @@ void AIngameGameMode::NotifyMatchCanceled(class InputStream& input)
 {
 	if (CurrentWidget == nullptr) return;
 	CurrentWidget->MatchingWindow->DungeonEnterFail();
+}
+
+void AIngameGameMode::NotifyDungeonReward(class InputStream& input)
+{
+	if (CurrentWidget == nullptr) return;
+	CurrentWidget->CreateDungeonResultWidget(input);
 }
