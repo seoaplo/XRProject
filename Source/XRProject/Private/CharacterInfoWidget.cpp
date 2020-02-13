@@ -1,4 +1,6 @@
 #include "CharacterInfoWidget.h"
+#include "XRProject.h"
+#include "XRGameInstance.h"
 
 UCharacterInfoWidget* UCharacterInfoWidget::CharacterInfoInstance = nullptr;
 
@@ -32,6 +34,7 @@ bool UCharacterInfoWidget::GetVisible()
 void UCharacterInfoWidget::SwitchVisible()
 {
 	SetVisible(!bIsVisible);
+	SetCharacterInfo();
 }
 
 void UCharacterInfoWidget::SetSlot(USlotWidget * Body, USlotWidget * Hand, USlotWidget * Foot, USlotWidget * Weapon)
@@ -53,6 +56,58 @@ void UCharacterInfoWidget::SetSlot(USlotWidget * Body, USlotWidget * Hand, USlot
 	Slot[1] = HandSlot;
 	Slot[2] = FootSlot;
 	Slot[3] = WeaponSlot;
+}
+
+FText UCharacterInfoWidget::GetTargetState(EStateType Type)
+{
+	UXRGameInstance* XRGI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+	if (!GetMapMgr().GetPlayer()) return FText();
+	int Data = 0;
+	switch (Type)
+	{
+	case EStateType::Name:
+		return FText::FromString(GetMapMgr().GetPlayer()->PlayerStatComp->GetCharacterName());
+		break;
+	case EStateType::LEVEL:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetLevel();
+		break;
+	case EStateType::Gender:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetGender();
+		break;
+	case EStateType::MaxHP:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetMaxHP();
+		break;
+	case EStateType::MaxStamina:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetMaxStamina();
+		break;
+	case EStateType::ATK_Min:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetAttack_Min();
+		break;
+	case EStateType::ATK_Max:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetAttack_Max();
+		break;
+	case EStateType::ATK_Range:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetAttack_Range();
+		break;
+	case EStateType::ATK_Speed:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetAttack_Speed();
+		break;
+	case EStateType::DEF:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetDefence();
+		break;
+	case EStateType::STR:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetSTR();
+		break;
+	case EStateType::DEX:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetDEX();
+		break;
+	case EStateType::INT:
+		Data = GetMapMgr().GetPlayer()->PlayerStatComp->GetINT();
+		break;
+	default:
+		break;
+	}
+	return int_to_comma_text(Data);
 }
 
 void UCharacterInfoWidget::SetSlotInfo()

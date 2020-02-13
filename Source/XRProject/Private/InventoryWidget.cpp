@@ -1,4 +1,5 @@
 #include "InventoryWidget.h"
+#include "XRProject.h"
 #include <string>
 
 UInventoryWidget* UInventoryWidget::InventoryInstance = nullptr;
@@ -57,39 +58,10 @@ void UInventoryWidget::SetUp()
 	}
 }
 
-FString UInventoryWidget::GetGlod()
+FText UInventoryWidget::GetGlod()
 {
 	int Money = Inventory::GetInstance().GetGold();
-	std::string str = std::to_string(Money);
-	int Length = str.length();
-	int Remain = Length % 3;
-
-	int Flag = 0;
-	int SicleFlag = 0;
-
-	std::string Result;
-	for (int i = 0; i < Remain; i++)
-	{
-		Result += str[Flag];
-		Flag++;
-		if (Flag == Remain)
-		{
-			Result += ',';
-		}
-	}
-	while (true)
-	{
-		if (Flag == Length) break;
-		if (SicleFlag == 3)
-		{
-			Result += ',';
-			SicleFlag = 0;
-		}
-		SicleFlag++;
-		Result += str[Flag++];
-	}
-	FString ReturnValue(Result.c_str());
-	return ReturnValue;
+	return int_to_comma_text(Money);
 }
 
 void UInventoryWidget::AddList(USlotWidget * newslot)
