@@ -12,6 +12,7 @@
 
 
 DECLARE_DELEGATE_OneParam(PotalTrigger, AActor*)
+
 UCLASS()
 class XRPROJECT_API APotalTrigger : public ATriggerSphere
 {
@@ -28,7 +29,6 @@ public:
 	// overlap end function
 	UFUNCTION()
 		void OnOverlapEnd(class AActor* OverlappedActor, class AActor* OtherActor);
-
 public:
 	void SetSize(float SphereRadius);
 public:

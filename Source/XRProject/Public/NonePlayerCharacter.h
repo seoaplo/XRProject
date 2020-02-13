@@ -38,39 +38,12 @@ public:
 
 
 
-USTRUCT(BlueprintType)
-struct FMonsterTableRow : public FTableRowBase
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		FString MonsterName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterSkeletalID;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterAnimBP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterBT;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterBB;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterMaxHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackMin;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackMax;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackRange;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackDefence;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterSpeed;
-};
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcHitReactDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcReadyState);
+
+
 
 /**
  *
@@ -123,8 +96,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bCanHitReaction;
 
-	UPROPERTY()
-		class UDataTable* NPCDataTable;
 
 
 	UFUNCTION(BlueprintCallable)
@@ -142,6 +113,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
 
+	UFUNCTION(BlueprintCallable)
+		virtual void SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor);
+
+
+
 
 	UFUNCTION(BlueprintCallable)
 		virtual void SetInBattle(bool battle);
@@ -155,8 +131,8 @@ public:
 
 
 
-
-
+	UPROPERTY(BlueprintAssignable)
+	FOnNpcReadyState OnNpcReady;
 
 	virtual void ExcuteRecvNpcAction(InputStream& input);
 
@@ -172,9 +148,13 @@ public:
 
 
 protected:
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		class AXRAIController* AICon;
+
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		TArray<ABaseCharacter*>		AggroList;
+		TMap<ABaseCharacter*,int>		AggroList;
 
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
@@ -192,10 +172,6 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		int32 BBID;
 
-
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		class AXRAIController* AICon;
 
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))

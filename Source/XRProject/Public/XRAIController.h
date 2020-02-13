@@ -45,6 +45,9 @@ private:
 
 
 private:
+	UFUNCTION()
+	void TestPrint(const TArray<AActor*>& recvActor);
+
 	UPROPERTY()
 		class UBehaviorTree* BTAsset;
 
@@ -54,7 +57,8 @@ private:
 		UAIPerceptionComponent* EnermyPerceptionComponent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Sight* SightConfig;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+		class UAISenseConfig_Damage* DamageConfig;
 
 
 	FTimerHandle RepeatTimerHandle;

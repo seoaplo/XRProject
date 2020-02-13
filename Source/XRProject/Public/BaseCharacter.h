@@ -99,9 +99,6 @@ protected:
 		FRotator RemoteRotator;
 
 private:
-	//UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Meta=(AllowPrivateAccess = true))
-	//	UCharacterStatComponent*	StatComponent;
-
 
 };
 

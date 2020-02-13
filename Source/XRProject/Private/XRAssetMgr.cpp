@@ -20,6 +20,18 @@ UXRAssetMgr::UXRAssetMgr()
 		XRLOG(Error, TEXT("Can't Find ResourceTable"));
 
 	}
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> NPCDATATABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterTable.MonsterTable'"));
+	if (NPCDATATABLE.Succeeded())
+	{
+		XRLOG(Warning, TEXT("Finded NPCTable"));
+		NPCDataTable = NPCDATATABLE.Object;
+	}
+	else
+	{
+		XRLOG(Error, TEXT("Can't Find NPCTable"));
+	}
+
 }
 
 bool UXRAssetMgr::ReadAssetDirectory(FString DirName, UClass* baseClass)
@@ -72,12 +84,39 @@ FSoftObjectPath UXRAssetMgr::FindResourceFromDataTable(int32 ResousrceID)
 			if (!AssetSoftPathList.Find(ResousrceID))
 			{
 				AssetSoftPathList.Add(ResousrceID, FSoftObjectPath(ResourceTableRow->ResourcePath));
+
 			}
 			return AssetSoftPathList[ResousrceID];
 		}
 	}
 	XRLOG(Warning, TEXT("ResourceID %d Not Exist "), ResousrceID);
 	return nullptr;
+}
+
+
+FResourceLocalSize UXRAssetMgr::FindResourceSizeFromTable(int32 ResousrceID)
+{
+	FResourceLocalSize OutTransForm;
+	if (ResourceDataTable != nullptr)
+	{
+		FResourceTableRow* ResourceTableRow =
+			ResourceDataTable->FindRow<FResourceTableRow>
+			(FName(*(FString::FromInt(ResousrceID))), FString(""));
+		if (ResourceTableRow)
+		{
+			XRLOG(Warning, TEXT("Finded Resource ID : %d  Path : %s  Name : %s "), ResousrceID, *ResourceTableRow->ResourcePath, *ResourceTableRow->ResourceName);
+			
+			OutTransForm.LocalTransform.InitFromString(ResourceTableRow->ResourceLocalTransForm);
+			OutTransForm.CapsuleHeight = ResourceTableRow->CapsuleHeight;
+			OutTransForm.CapsuleRad = ResourceTableRow->CapsuleRad;
+
+			XRLOG(Warning, TEXT("TransForm : %s"), *OutTransForm.LocalTransform.ToString());
+			
+			return OutTransForm;
+		}
+	}
+	XRLOG(Warning, TEXT("ResourceID %d Not Exist "), ResousrceID);
+	return OutTransForm;
 }
 
 

@@ -58,6 +58,9 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterDead)->BindUObject(
 		this, &UXRGameInstance::CharacterDead);
 
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStatChange)->BindUObject(
+		this, &UXRGameInstance::CharacterStatChange);
+
 }
 
 void UXRGameInstance::Shutdown()
@@ -269,16 +272,39 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 
 	if (TargetPlayer)
 	{
-		TargetPlayer->SetActorRotation(TargetRotation);
-		TargetPlayer->MyAnimInstance->PlayAttackOnlyPlayMontage();
-		TargetPlayer->MyAnimInstance->JumpToComboMontageSection(MotionID);
 
+		if (MotionID == 101)
+		{
+			FPlayerSkillResources* SkillInfo = GetPlayerSkillManager()->
+				GetSkillDataTable()->FindRow<FPlayerSkillResources>(FName(*(FString::FromInt(MotionID))), TEXT("ST"));
+
+			FString GaiaStr = "GaiaCrush";
+			int32 Idx = TargetPlayer->MyAnimInstance->SkillMontage->GetSectionIndex(FName(*GaiaStr));
+			float length = TargetPlayer->MyAnimInstance->SkillMontage->GetSectionLength(Idx);
+
+			TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = FCString::Atof(*(SkillInfo->MoveDistance)) / length;
+			TargetPlayer->GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+			TargetPlayer->SetbIsSkillMove(true);
+
+			TargetPlayer->MyAnimInstance->PlaySkillMontage();
+			TargetPlayer->MyAnimInstance->JumpToSkillMonatgeSection(GaiaStr);
+		}
+		else
+		{
+			TargetPlayer->SetActorRotation(TargetRotation);
+			TargetPlayer->MyAnimInstance->PlayAttackOnlyPlayMontage();
+			TargetPlayer->MyAnimInstance->JumpToComboMontageSection(MotionID);
+		}
+		
 		UE_LOG(LogTemp,
 			Warning,
 			TEXT("CharacterMotionDebug ID : %d, MotionID : %d, TargetVec : %f %f %f, TargetRot : %f %f %f"),
 			ObjectID, MotionID, TargetLocation.X, TargetLocation.Y, TargetLocation.Z,
 			TargetRotation.Yaw, TargetRotation.Pitch, TargetRotation.Roll);
+
 	}
+
+
 
 
 }
@@ -380,6 +406,17 @@ void UXRGameInstance::CharacterDead(InputStream& input)
 	}
 }
 
+template<typename T>
+constexpr int64_t ToINT64(T value) {
+	return static_cast<int64>(value);
+}
+
+
+#define READ_STAT_BIT(bit, setter)\
+if(flag & ToINT64(bit)) {\
+	TargetPlayer->PlayerStatComp->setter(input.ReadInt32());\
+}
+
 void UXRGameInstance::CharacterRolling(InputStream& input)
 {
 	int64 RollerID = input.ReadInt64();
@@ -404,3 +441,66 @@ void UXRGameInstance::CharacterRolling(InputStream& input)
 
 }
 
+void UXRGameInstance::CharacterStatChange(InputStream & input)
+{
+	int64 TargetID = input.ReadInt64();
+	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
+	int64 flag = input.ReadInt64();
+	int32 val = 0;
+
+	if (TargetPlayer == MapManager->GetPlayer())
+	{
+		READ_STAT_BIT(StatBit::kHP, SetCurrentHP);
+		READ_STAT_BIT(StatBit::kMaxHp, SetMaxHP);
+		READ_STAT_BIT(StatBit::kAttackMin, SetAttack_Min);
+		READ_STAT_BIT(StatBit::kAttackMax, SetAttack_Max);
+		READ_STAT_BIT(StatBit::kDefence, SetDefence);
+		READ_STAT_BIT(StatBit::kSpeed, SetSpeed);
+		READ_STAT_BIT(StatBit::kLv, SetLevel);
+		//READ_STAT_BIT(StatBit::kJob, SetJob);
+		if (flag & ToINT64(StatBit::kGold))
+			Inventory::GetInstance().SetGold(input.ReadInt32());
+		READ_STAT_BIT(StatBit::kStr, SetSTR);
+		READ_STAT_BIT(StatBit::kDex, SetDEX);
+		READ_STAT_BIT(StatBit::kIntel, SetINT);
+		READ_STAT_BIT(StatBit::kExp, SetCurrentExp);
+		READ_STAT_BIT(StatBit::kMaxExp, SetMaxExp);
+		READ_STAT_BIT(StatBit::kStamina, SetCurrentStamina);
+		READ_STAT_BIT(StatBit::kMaxStamina, SetMaxStamina);
+
+#pragma region DUMMY
+		/*if (flag & ToINT64(StatBit::kHP))
+		{
+			int32 CurHp = TargetPlayer->PlayerStatComp->GetCurrentHP();
+			TargetPlayer->PlayerStatComp->SetCurrentHP(input.ReadInt32());
+			XRLOG(Warning, TEXT("CurHP Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetCurrentHP());
+		}
+		if (flag | ToINT64(StatBit::kMaxHp))
+		{
+			int32 CurMaxHP = TargetPlayer->PlayerStatComp->GetMaxHP();
+			TargetPlayer->PlayerStatComp->SetMaxHP(input.ReadInt32());
+			XRLOG(Warning, TEXT("MaxHP Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetMaxHP());
+		}
+		if (flag | ToINT64(StatBit::kAttackMin))
+		{
+			int32 AttackMin = TargetPlayer->PlayerStatComp->GetAttack_Min();
+			TargetPlayer->PlayerStatComp->SetAttack_Min(input.ReadInt32());
+			XRLOG(Warning, TEXT("AttackMin Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetAttack_Min());
+		}
+		if (flag | ToINT64(StatBit::kAttackMax))
+		{
+			int32 AttackMin = TargetPlayer->PlayerStatComp->GetAttack_Max();
+			TargetPlayer->PlayerStatComp->SetAttack_Max(input.ReadInt32());
+			XRLOG(Warning, TEXT("AttackMax Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetAttack_Max());
+		}
+		if (flag | ToINT64(StatBit::kDefence))
+		{
+			int32 AttackMin = TargetPlayer->PlayerStatComp->GetAttack_Max();
+			TargetPlayer->PlayerStatComp->SetAttack_Max(input.ReadInt32());
+			XRLOG(Warning, TEXT("AttackMax Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetAttack_Max());
+		}*/
+
+#pragma endregion
+		
+	}
+}

@@ -31,3 +31,8 @@ void UNonePlayerCharacterAnimInstance::AnimNotify_AttackColliOff()
 	auto npcChar = Cast<ANonePlayerCharacter>(TryGetPawnOwner());
 	npcChar->GetMesh()->SetGenerateOverlapEvents(false);
 }
+
+void UNonePlayerCharacterAnimInstance::AnimNotify_FireSkill()
+{
+	OnSkillFire.Broadcast();
+}
