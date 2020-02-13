@@ -12,6 +12,9 @@ class APlayerCharacter;
 DECLARE_DELEGATE(FCheckNextComboValid)
 DECLARE_DELEGATE(FCheckCharacterAttackMoveStart)
 DECLARE_DELEGATE(FCheckCharacterAttackMoveEnd)
+DECLARE_DELEGATE_OneParam(FGaiaCrushEnd, APlayerCharacter*)
+
+
 
 /**
  *
@@ -29,6 +32,7 @@ public:
 	FCheckNextComboValid Delegate_CheckNextCombo;
 	FCheckCharacterAttackMoveStart Delegate_CharacterAttackMoveStart;
 	FCheckCharacterAttackMoveEnd Delegate_CharacterAttackMoveEnd;
+	FGaiaCrushEnd Delegate_GaiaCrushEnd;
 public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
@@ -85,6 +89,8 @@ public:
 		void AnimNotify_RemoteRollingEnd();
 	UFUNCTION()
 		void AnimNotify_RemoteRollingAllEnd();
+	UFUNCTION()
+		void AnimNotify_GaiaHit();
 
 	void PlayAttackMontage();
 	void PlaySkillMontage();

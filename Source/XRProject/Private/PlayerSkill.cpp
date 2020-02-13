@@ -7,13 +7,15 @@
 
 UPlayerSkill::UPlayerSkill()
 {
-	bIsActiveMove = false;
+
 }
 
 UPlayerSkill::~UPlayerSkill()
 {
 
 }
+
+
 
 void UPlayerSkill::Play(APlayerCharacter* Character)
 {
@@ -32,7 +34,7 @@ bool UPlayerSkill::ConditionCheck(APlayerCharacter * Character)
 
 USkill_GaiaCrush::USkill_GaiaCrush()
 {
-
+	
 }
 
 USkill_GaiaCrush::~USkill_GaiaCrush()
@@ -42,6 +44,9 @@ USkill_GaiaCrush::~USkill_GaiaCrush()
 
 void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 {
+	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
+		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("End"));
+
 	UPlayerCharacterAnimInstance* MyAnimInst = Character->MyAnimInstance;
 	if (!MyAnimInst)
 		check(false);
@@ -57,7 +62,7 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = MoveDistance / length;
 	Character->GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
-	bIsActiveMove = true;
+	Character->SetbIsSkillMove(true);
 
 	MyAnimInst->PlaySkillMontage();
 	MyAnimInst->JumpToSkillMonatgeSection(GaiaStr);
@@ -65,7 +70,7 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 
 bool USkill_GaiaCrush::End(APlayerCharacter* Character)
 {
-	bIsActiveMove = false;
+	Character->SetbIsSkillMove(false);
 	return true;
 }
 

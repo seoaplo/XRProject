@@ -70,6 +70,7 @@ private:
 	void ReadInventoryInfo(class InputStream& input); /*인벤토리 정보 읽기*/
 	void ReadQuickSlot(class InputStream& input); /*퀵 슬롯 정보 읽기*/
 	void ReadMapData(class InputStream& input); /*맵 데이터 정보 읽기*/
+	void ReadSkillData(class InputStream& input); /*스킬 데이터 정보 읽기*/
 	void SpawnCharacterFromServer(class InputStream& input);/* 실시간 캐릭터 스폰 데이터 읽기*/
 	void UpdateCharacterPosition(class InputStream& input);
 	void SetMonsterController(class InputStream& input);

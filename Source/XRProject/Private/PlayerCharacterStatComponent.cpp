@@ -61,7 +61,7 @@ void UPlayerCharacterStatComponent::SetINT(int32 INT_)
 void UPlayerCharacterStatComponent::AddStamina(float Value)
 {
 	CurrentStamina += Value;
-	CurrentStamina = FMath::Max(Value, MaxStamina);
+	CurrentStamina = FMath::Max(CurrentStamina, MaxStamina);
 	OnStatChange.Broadcast();
 }
 
@@ -69,6 +69,12 @@ void UPlayerCharacterStatComponent::SubtractStamina(float Value)
 {
 	CurrentStamina -= Value;
 	CurrentStamina = FMath::Max(CurrentStamina, 0.0f);
+	OnStatChange.Broadcast();
+}
+
+void UPlayerCharacterStatComponent::SetMaxStamina(float Stamina)
+{
+	MaxStamina = FMath::Max(Stamina, 0.0f);
 	OnStatChange.Broadcast();
 }
 
@@ -83,12 +89,41 @@ void UPlayerCharacterStatComponent::SetCurrentStamina(float Stamina)
 	OnStatChange.Broadcast();
 }
 
-void UPlayerCharacterStatComponent::SetMaxStamina(float Stamina)
+void UPlayerCharacterStatComponent::AddExp(int32 Value)
 {
-	MaxStamina = FMath::Max(Stamina, 0.f);
+	CurrentExp += Value;
+	CurrentExp = FMath::Max(CurrentExp, MaxExp);
 	OnStatChange.Broadcast();
 }
 
+void UPlayerCharacterStatComponent::SubtractExp(int32 Value)
+{
+	CurrentExp -= Value;
+	CurrentExp = FMath::Max(CurrentExp, 0);
+	OnStatChange.Broadcast();
+}
+
+int32 UPlayerCharacterStatComponent::GetCurrentExp()
+{
+	return CurrentExp;
+}
+
+void UPlayerCharacterStatComponent::SetCurrentExp(int32 Exp)
+{
+	CurrentExp = FMath::Clamp(Exp, 0, MaxExp);
+	OnStatChange.Broadcast();
+}
+
+void UPlayerCharacterStatComponent::SetMaxExp(int32 Exp)
+{
+	MaxExp = FMath::Max(Exp, 0);
+	OnStatChange.Broadcast();
+}
+
+int32 UPlayerCharacterStatComponent::GetMaxExp()
+{
+	return MaxExp;
+}
 
 bool UPlayerCharacterStatComponent::GetStatDataFromServer(InputStream& input)
 {

@@ -9,6 +9,7 @@
 #include "Components/InputComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "XRPlayerController.h"
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
@@ -249,7 +250,7 @@ void APlayerCharacter::Tick(float deltatime)
 	NameTag->SetRelativeLocation(NameTagLocation);
 
 
-	if (bIsRolling || bIsAttackMoving)
+	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	
 	if (bIsAttackMoving)
@@ -693,11 +694,13 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		PlayerStatComp->SetSTR(Data.STR);
 		PlayerStatComp->SetDEX(Data.DEX);
 		PlayerStatComp->SetINT(Data.INT);
-		PlayerStatComp->SetCurrentStamina(Data.CurrentStamina);
-		PlayerStatComp->SetMaxStamina(Data.MaxStamina);
+		PlayerStatComp->SetCurrentStamina(Data.Current_Stamina);
+		PlayerStatComp->SetMaxStamina(Data.Max_Stamina);
 		PlayerStatComp->SetCharacterName(Data.Name.c_str());
+		PlayerStatComp->SetMaxExp(Data.Max_Exp);
+		PlayerStatComp->SetCurrentStamina(Data.Current_Stamina);
 
-		if (PlayerStatComp->Gender == 0)
+		if (PlayerStatComp->GetGender() == 0)
 			bIsMale = true;
 		else
 			bIsMale = false;
@@ -1039,6 +1042,11 @@ float APlayerCharacter::GetYawFromArrowKeys(float ForwardValue, float RightValue
 	return Yaw;
 }
 
+void APlayerCharacter::SetbIsSkillMove(bool b)
+{
+	bIsSkillMove = b;
+}
+
 bool APlayerCharacter::GetbIsRolling()
 {
 	return bIsRolling;
@@ -1049,9 +1057,20 @@ bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
 	return bIsOverallRollAnimPlaying;
 }
 
+bool APlayerCharacter::GetbIsSkillMove()
+{
+	return bIsSkillMove;
+}
+
 void APlayerCharacter::TestPlay()
 {
-	
+
+	int32 aaa = PlayerStatComp->GetMaxExp();
+	FString Fstr = "GaiaCrush";
+	UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
+		FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer,Fstr);
+
+	Skill->Play(this);
 	
 }
 

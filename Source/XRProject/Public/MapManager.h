@@ -63,9 +63,13 @@ public:
 	void PotalInPlayer(AActor* OtherCharacter);
 	// 삭제
 	bool DeleteRemotePlayer(UWorld* World);
+
+	void InputExpData(class InputStream& input); //EXP 받을방법이 없어서 임의로 만든 클래스.
 public:
 	CharacterDataProcess Spawn_Character;
 	CharacterDataProcess Delete_Character;
+	TArray<int> CharacterSkillIDList; //캐릭터 스킬 리스트 받아놓는곳
+
 private:
 	UPROPERTY()
 	APlayerCharacter* PlayerCharacter;

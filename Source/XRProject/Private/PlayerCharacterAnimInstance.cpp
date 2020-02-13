@@ -177,3 +177,9 @@ void UPlayerCharacterAnimInstance::JumpToSkillMonatgeSection(FString Section)
 {
 	Montage_JumpToSection(FName(*Section));
 }
+
+void UPlayerCharacterAnimInstance::AnimNotify_GaiaHit()
+{
+	if (Delegate_GaiaCrushEnd.IsBound())
+		Delegate_GaiaCrushEnd.Execute(MyCharacter);
+}

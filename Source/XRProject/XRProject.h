@@ -59,12 +59,12 @@ struct CharacterData
 	int32 STR = -1;
 	int32 DEX = -1;
 	int32 INT = -1;
-	float CurrentStamina;
-	float MaxStamina;
-
+	int32 Current_Exp;
+	int32 Max_Exp;
 
 	// Equipment
 	Equipment EquipArray[4];
+	
 };
 
 struct MonsterData

@@ -10,15 +10,13 @@
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
-#include "UserWidget.h"
-#include "HealthBarWidget.h"
-#include "XRPlayerController.h"
 #include "PlayerCameraShake.h"
 #include "PlayerSkillManager.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
 class UXRGameInstance;
+
 
 UENUM()
 enum class EEquipmentsType : uint8
@@ -122,6 +120,7 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FCameraShakeInfo ShakeInfo;
 
+
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -131,6 +130,8 @@ public:
 		UPlayerCharacterAnimInstance* MyAnimInstance;
 	UPROPERTY(VisibleAnywhere, Category = "C_GameInstance")
 		UXRGameInstance* CurGameInstance;
+	UPROPERTY(VisibleAnywhere, Category = "C_CharacterSkill")
+		TArray<UPlayerSkill*> SkillList;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
@@ -151,6 +152,8 @@ public:
 		bool bIsCharacterDead;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsHit;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bIsSkillMove;
 
 	/*TEST*/
 private:
@@ -190,8 +193,7 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* controller) override;
-
-
+	
 public:
 	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
 	void ChangePartsById(EPartsType Type, int32 ID);
@@ -205,9 +207,11 @@ public:
 	void SetRollingCapsuleMode(); //구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
+	void SetbIsSkillMove(bool b);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
+	bool GetbIsSkillMove();
 
 	/*Test Function*/
 	void TestPlay();

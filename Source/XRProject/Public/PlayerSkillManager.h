@@ -25,9 +25,13 @@ public:
 private:
 	class UDataTable* SkillDataTable;
 public:
-
+	UPROPERTY(VisibleAnywhere)
 	TArray<UPlayerSkill*> SkillListForPlalyer;
+
 	UPlayerSkill* CreateSkillFromID(int32 ID);
-	UPlayerSkill* FindSkillFromList(TArray<UPlayerSkill*> SkillList, int32 ID);
-	void AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication);
+	UPlayerSkill* FindSkillFromList(TArray<UPlayerSkill*>& SkillList, int32 ID);
+	UPlayerSkill* FindSkillFromListByName(TArray<UPlayerSkill*>& SkillList, FString& Name);
+	void AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication);
+
+	
 };

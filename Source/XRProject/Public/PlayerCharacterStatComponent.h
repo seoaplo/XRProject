@@ -14,11 +14,15 @@ class XRPROJECT_API UPlayerCharacterStatComponent : public UCharacterStatCompone
 {
 	GENERATED_BODY()
 	
-public:
+private:
 	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		float MaxStamina;
 	UPROPERTY(Transient, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		float CurrentStamina;
+	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
+		int32 MaxExp;
+	UPROPERTY(Transient, BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
+		int32 CurrentExp;
 	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
 		int32 Level;
 	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
@@ -33,15 +37,28 @@ public:
 
 
 public:
+
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		const float GetCurrentStamina() const;
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SetCurrentStamina(float Stamina);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void AddExp(int32 Value);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SubtractExp(int32 Value);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		int32 GetCurrentExp();
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SetCurrentExp(int32 Stamina);
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		int32 GetMaxExp();
+	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
+		void SetMaxExp(int32 Stamina);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		/*Stamina µ¡¼À*/
 		void AddStamina(float Value);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		void SubtractStamina(float Value);
-	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
-		const float GetCurrentStamina() const;
-	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
-		void SetCurrentStamina(float Stamina);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")
 		void SetMaxStamina(float Stamina);
 	UFUNCTION(BlueprintCallable, Category = "C_StatFunction")

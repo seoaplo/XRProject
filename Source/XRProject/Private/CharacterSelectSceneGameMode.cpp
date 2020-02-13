@@ -22,10 +22,10 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 {
 	UPlayerCharacterStatComponent* MyComponent = Character->PlayerStatComp;
 
-	MyComponent->Level = Info.Level;
-	MyComponent->STR = Info.Str;
-	MyComponent->DEX = Info.Dex;
-	MyComponent->INT = Info.Int;
+	MyComponent->SetLevel(Info.Level);
+	MyComponent->SetSTR(Info.Str);
+	MyComponent->SetDEX(Info.Dex);
+	MyComponent->SetINT(Info.Int);
 
 	MyComponent->SetCharacterName(FString(Info.Name.c_str()));
 
@@ -93,7 +93,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	else
 		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
 
-	MyComponent->Gender = Info.gender;
+	MyComponent->SetGender(Info.gender);
 }
 
 void ACharacterSelectSceneGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type, APlayerCharacter* Character)

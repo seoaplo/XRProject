@@ -23,41 +23,56 @@ UPlayerSkill * UPlayerSkillManager::CreateSkillFromID(int32 ID)
 	
 	check(SkillInfo);
 
-	UPlayerSkill* NewSkill = NewObject<UPlayerSkill>();
-	
-	NewSkill->SetSkillName(SkillInfo->SkillName);
-	NewSkill->SetDamageMagnification(SkillInfo->DamageMagnification);
-	NewSkill->SetIsKnockBack(SkillInfo->IsKnockBack);
-	NewSkill->SetRequireStamina(SkillInfo->RequireStamina);
-	NewSkill->SetCoolTime(SkillInfo->CoolTime);
-	NewSkill->SetIconID(SkillInfo->IconID);
-	NewSkill->SetID(ID);
-
 	if (SkillInfo->SkillName == "GaiaCrush")
 	{
-		USkill_GaiaCrush* Gaia = Cast<USkill_GaiaCrush>(NewSkill);
+		USkill_GaiaCrush* Gaia = NewObject<USkill_GaiaCrush>();
 		Gaia->SetMoveDistance(FCString::Atof(*(SkillInfo->MoveDistance)));
 		Gaia->SetAffectRadius(FCString::Atof(*(SkillInfo->AffectRadius)));
+
+		Gaia->SetSkillName(SkillInfo->SkillName);
+		Gaia->SetDamageMagnification(SkillInfo->DamageMagnification);
+		Gaia->SetIsKnockBack(SkillInfo->IsKnockBack);
+		Gaia->SetRequireStamina(SkillInfo->RequireStamina);
+		Gaia->SetCoolTime(SkillInfo->CoolTime);
+		Gaia->SetIconID(SkillInfo->IconID);
+		Gaia->SetID(ID);
 		return Gaia;
 	}
-	else
-		check(false);
+	else if (SkillInfo->SkillName == "Berserk")
+	{
+		return nullptr;
+	}
 
-	return NewSkill;
+	return nullptr;
 }
 
-UPlayerSkill * UPlayerSkillManager::FindSkillFromList(TArray<UPlayerSkill*> SkillList, int32 ID)
+UPlayerSkill * UPlayerSkillManager::FindSkillFromList(TArray<UPlayerSkill*>& SkillList, int32 ID)
 {
 	for (UPlayerSkill* Skill : SkillList)
 	{
 		if (Skill->GetID() == ID)
 			return Skill;
 	}
+	return nullptr;
+}
+
+UPlayerSkill * UPlayerSkillManager::FindSkillFromListByName(TArray<UPlayerSkill*>& SkillList, FString& Name)
+{
+	//UPlayerSkill* Skill = *(SkillList.FindByKey(Name));
+	for (UPlayerSkill* Skill : SkillList)
+	{
+		if (Skill->GetSkillName() == Name)
+			return Skill;
+	}
+
+	XRLOG(Warning, TEXT("Skill not found"));
+
+	check(false);
 
 	return nullptr;
 }
 
-void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication)
+void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication)
 {
 	if (bNeedCheckDuplication)
 	{
@@ -67,6 +82,9 @@ void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*> SkillList, UPlayerSkill
 				return;
 		}
 	}
+
+	if (Skill == nullptr)
+		return;
 
 	SkillList.Add(Skill);
 }

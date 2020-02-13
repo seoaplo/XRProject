@@ -24,20 +24,25 @@ public:
 
 
 protected:
+	UPROPERTY(VisibleAnyWhere)
 	int32			SkillID;
+	UPROPERTY(VisibleAnyWhere)
 	FString			SkillName;
+	UPROPERTY(VisibleAnyWhere)
 	float			DamageMagnification;
+	UPROPERTY(VisibleAnyWhere)
 	int32			IsKnockBack;
+	UPROPERTY(VisibleAnyWhere)
 	float			RequireStamina;
+	UPROPERTY(VisibleAnyWhere)
 	float			CoolTime;
+	UPROPERTY(VisibleAnyWhere)
 	int32			IconID;
-	bool			bIsActiveMove;
 
 public:
 	virtual void Play(APlayerCharacter* Character);
 	virtual bool End(APlayerCharacter* Character);
 	virtual bool ConditionCheck(APlayerCharacter* Character);
-
 public:
 	void SetID(int32 ID) { SkillID = ID; }
 	void SetSkillName(FString SkillName) { this->SkillName = SkillName; }
@@ -54,7 +59,9 @@ public:
 	float GetCoolTime() { return CoolTime; }
 	int32 GetIconID() { return IconID; }
 	float GetRequireStamina() { return RequireStamina; }
-	inline bool GetIsActiveMove() { return bIsActiveMove; }
+	//inline bool GetIsActiveMove() { return bIsActiveMove; }
+
+protected:
 
 };
 
@@ -70,12 +77,17 @@ public:
 	~USkill_GaiaCrush();
 
 private:
+	UPROPERTY(VisibleAnyWhere)
 	float MoveDistance; //공중도약시 이동거리
+	UPROPERTY(VisibleAnyWhere)
 	float AffectRadius; //공격이 미치는 원형 범위
 
 public:
+	UFUNCTION()
 	virtual void Play(APlayerCharacter* Character) override;
+	UFUNCTION()
 	virtual bool End(APlayerCharacter* Character) override;
+	UFUNCTION()
 	virtual bool ConditionCheck(APlayerCharacter* Character) override;
 	//void Set();
 
