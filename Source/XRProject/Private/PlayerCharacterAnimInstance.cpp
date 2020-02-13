@@ -192,6 +192,7 @@ void UPlayerCharacterAnimInstance::AnimNotify_GaiaHit()
 		if (Delegate_GaiaCrushEnd.IsBound())
 			Delegate_GaiaCrushEnd.Execute(MyCharacter);
 	}
+	MyCharacter->SetbIsSkillMove(false);
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_GaiaEnd()
@@ -201,4 +202,5 @@ void UPlayerCharacterAnimInstance::AnimNotify_GaiaEnd()
 		if (Delegate_GaiaCrushProcessEnd.IsBound())
 			Delegate_GaiaCrushProcessEnd.Execute(MyCharacter);
 	}
+	MyCharacter->SetbIsSkillPlaying(false);
 }

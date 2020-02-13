@@ -4,6 +4,7 @@
 #include "PlayerSkill.h"
 #include "PlayerCharacter.h"
 #include "NonePlayerCharacter.h"
+#include "MapManager.h"
 #include "XRGameInstance.h"
 
 UPlayerSkill::UPlayerSkill()
@@ -78,7 +79,9 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 
 	Character->GetCharacterMovement()->MaxWalkSpeed = MoveDistance / length;
 	Character->GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+
 	Character->SetbIsSkillMove(true);
+
 
 	MyAnimInst->PlaySkillMontage();
 	MyAnimInst->JumpToSkillMonatgeSection(GaiaStr);
@@ -107,7 +110,9 @@ void USkill_GaiaCrush::GaiaTargetCheck(APlayerCharacter* Character)
 		RadiusChecker->GetStaticMeshComponent()->SetVisibility(true);
 		RadiusChecker->SetActorRelativeLocation(RadiusChecker->GetActorLocation() +  FVector(0.0f, 0.0f, 0.1f));
 
+
 		Character->SetbIsSkillMove(false);
+
 	}
 	else
 		check(false);
@@ -121,7 +126,10 @@ bool USkill_GaiaCrush::End(APlayerCharacter* Character)
 		RadiusChecker->Destroy();
 	}
 	AttackOverlapList.clear();
+
 	OwnerPlayer->SetbIsSkillPlaying(false);
+
+	
 	return true;
 }
 bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
