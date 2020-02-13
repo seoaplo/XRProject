@@ -53,7 +53,7 @@ USkill_GaiaCrush::~USkill_GaiaCrush()
 
 void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 {
-	if (OwnerPlayer == nullptr)
+	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
 
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
@@ -107,9 +107,8 @@ void USkill_GaiaCrush::GaiaTargetCheck(APlayerCharacter* Character)
 		RadiusChecker->GetStaticMeshComponent()->SetCollisionProfileName("PlayerWeapon");
 		RadiusChecker->GetStaticMeshComponent()->SetGenerateOverlapEvents(true);
 		RadiusChecker->GetStaticMeshComponent()->OnComponentBeginOverlap.AddDynamic(this, &USkill_GaiaCrush::RadiusOverlapEvent);
-		RadiusChecker->GetStaticMeshComponent()->SetVisibility(true);
+		RadiusChecker->GetStaticMeshComponent()->SetVisibility(false);
 		RadiusChecker->SetActorRelativeLocation(RadiusChecker->GetActorLocation() +  FVector(0.0f, 0.0f, 0.1f));
-
 
 		Character->SetbIsSkillMove(false);
 
@@ -128,7 +127,6 @@ bool USkill_GaiaCrush::End(APlayerCharacter* Character)
 	AttackOverlapList.clear();
 
 	OwnerPlayer->SetbIsSkillPlaying(false);
-
 	
 	return true;
 }
