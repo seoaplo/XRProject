@@ -13,7 +13,14 @@ UCLASS()
 class XRPROJECT_API UMainMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
+private:
+	bool bIsVisible;
 public:
-	UFUNCTION(BlueprintCallable, Category = "C_Widget")
-		TArray<FVector2D> GetSizeList();
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void SetVisible(bool IsVisible);
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		bool GetVisible();
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void SwitchVisible();
+	void QuitGame();
 };
