@@ -44,7 +44,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_WidgetClass")
 		TSubclassOf<UDungeonResultWidget> DungeonResultWidget;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_WidgetClass")
-		TSubclassOf<UDungeonResultWidget> LoadingBarWidget;
+		TSubclassOf<ULoadingBarWidget> LoadingBarWidget;
 public:
 	void CreateDungeonResultWidget(class InputStream& input);
 	ULoadingBarWidget* CreateLoadingBarWidget();

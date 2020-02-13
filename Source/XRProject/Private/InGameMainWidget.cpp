@@ -15,8 +15,7 @@ void UInGameMainWidget::CreateDungeonResultWidget(InputStream & input)
 
 ULoadingBarWidget* UInGameMainWidget::CreateLoadingBarWidget()
 {
-	ULoadingBarWidget* ReslutWidget = WidgetTree->ConstructWidget<UDungeonResultWidget>(LoadingBarWidget);
-	ReslutWidget->GetReward(input);
+	ULoadingBarWidget* ReslutWidget = WidgetTree->ConstructWidget<ULoadingBarWidget>(LoadingBarWidget);
 	ReslutWidget->AddToViewport();
 	return ReslutWidget;
 }

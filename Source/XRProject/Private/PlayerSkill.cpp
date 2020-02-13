@@ -70,6 +70,8 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 
 bool USkill_GaiaCrush::End(APlayerCharacter* Character)
 {
+	
+
 	Character->SetbIsSkillMove(false);
 	return true;
 }
