@@ -16,6 +16,7 @@
 
 class ANonePlayerCharacter;
 class UXRGameInstance;
+class UHealthBarWidget;
 
 
 UENUM()
