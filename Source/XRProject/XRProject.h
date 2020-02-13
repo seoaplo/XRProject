@@ -16,6 +16,7 @@ DECLARE_LOG_CATEGORY_EXTERN(XRProject, Log, All);
 
 std::string wcs_to_mbs(std::wstring const& str, std::locale const& loc);
 std::wstring mbs_to_wcs(std::string const& str, std::locale const& loc);
+FText int_to_comma_text(int Data);
 
 struct Equipment
 {

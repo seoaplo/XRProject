@@ -32,3 +32,40 @@ std::wstring mbs_to_wcs(std::string const& str, std::locale const& loc)
 		&buf[0], &buf[0] + buf.size(), out_next);
 	return std::wstring(&buf[0]);
 }
+
+FText int_to_comma_text(int Data)
+{
+	std::string str = std::to_string(Data);
+	int Length = str.length();
+	int Remain = Length % 3;
+
+	int Flag = 0;
+	int SicleFlag = 0;
+
+	std::string Result;
+	for (int i = 0; i < Remain; i++)
+	{
+		Result += str[Flag];
+		Flag++;
+		if (Flag == Remain)
+		{
+			if (Length > 3)
+			{
+				Result += ',';
+			}
+		}
+	}
+	while (true)
+	{
+		if (Flag == Length) break;
+		if (SicleFlag == 3)
+		{
+			Result += ',';
+			SicleFlag = 0;
+		}
+		SicleFlag++;
+		Result += str[Flag++];
+	}
+	FString ReturnValue(Result.c_str());
+	return FText::FromString(ReturnValue);
+}
