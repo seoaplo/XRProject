@@ -38,67 +38,6 @@ public:
 
 
 
-USTRUCT(BlueprintType)
-struct FMonsterTableRow : public FTableRowBase
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		FString MonsterName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterSkeletalID;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterAnimBP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterBT;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterBB;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterMaxHP;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackMin;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackMax;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackRange;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackSpeed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterAttackDefence;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float MonsterSpeed;
-};
-
-
-
-USTRUCT(BlueprintType)
-struct FMonsterSkillTableRow : public FTableRowBase
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		FString MonsterSkillID;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float DamageRatio;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 SkillType;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float Radius;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float Range;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float Speed;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float LifeTime;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		float CoolDown;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		bool IsKnockBack;
-};
-
-
-
-
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnNpcHitReactDelegate);
@@ -157,8 +96,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bCanHitReaction;
 
-	UPROPERTY()
-		class UDataTable* NPCDataTable;
 
 
 	UFUNCTION(BlueprintCallable)
@@ -175,6 +112,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		virtual void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
+
+	UFUNCTION(BlueprintCallable)
+		virtual void SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor);
+
+
 
 
 	UFUNCTION(BlueprintCallable)
@@ -206,6 +148,10 @@ public:
 
 
 protected:
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
+		class AXRAIController* AICon;
+
 private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		TMap<ABaseCharacter*,int>		AggroList;
@@ -226,10 +172,6 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		int32 BBID;
 
-
-
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Meta = (AllowPrivateAccess = true))
-		class AXRAIController* AICon;
 
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))

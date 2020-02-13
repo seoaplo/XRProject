@@ -43,6 +43,7 @@ public:
 	// widget data from server
 	void NotifyMatchResult(class InputStream& input);
 	void NotifyMatchCanceled(class InputStream& input);
+	void NotifyDungeonReward(class InputStream& input);
 private:
 	FTimerHandle PacketExcuteTimerHandle;
 };

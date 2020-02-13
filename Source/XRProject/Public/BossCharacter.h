@@ -11,12 +11,17 @@ struct FBossSkill
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		UAnimMontage* AttackAction;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float AttackRange;
+		int32 SkilID;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float CoolTime;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float AttackRange;
+
+
+
 };
 
 UENUM(BlueprintType)
@@ -52,6 +57,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<int> ReadySkillList;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 CurrentUseSkill;
+
 	UFUNCTION(BlueprintCallable)
 		void SetOnSkillQueue(int32 index);
 
@@ -71,10 +79,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetCurrentBossPhase(int32 phase);
 
+	virtual void ExcuteRecvNpcAction(InputStream& input);
 protected:
 private:
-
-
 	void SetCharacterLoadState(ECharacterLoadState NewState) override;
 
 };

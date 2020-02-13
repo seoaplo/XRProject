@@ -37,8 +37,8 @@ enum class ENetworkCSOpcode : uint16_t
 	kRequestCharacterSprint = 1021,
 	kRequestChangeZone = 1022,
 	kRequestCharacterRolling = 1023,
-
 	kNoticeMonsterSkill = 1024,
+
 };
 
 

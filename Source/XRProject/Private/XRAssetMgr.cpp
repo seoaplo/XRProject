@@ -20,6 +20,18 @@ UXRAssetMgr::UXRAssetMgr()
 		XRLOG(Error, TEXT("Can't Find ResourceTable"));
 
 	}
+
+	static ConstructorHelpers::FObjectFinder<UDataTable> NPCDATATABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterTable.MonsterTable'"));
+	if (NPCDATATABLE.Succeeded())
+	{
+		XRLOG(Warning, TEXT("Finded NPCTable"));
+		NPCDataTable = NPCDATATABLE.Object;
+	}
+	else
+	{
+		XRLOG(Error, TEXT("Can't Find NPCTable"));
+	}
+
 }
 
 bool UXRAssetMgr::ReadAssetDirectory(FString DirName, UClass* baseClass)

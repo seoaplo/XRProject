@@ -16,16 +16,7 @@
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
-	static ConstructorHelpers::FObjectFinder<UDataTable> NPCDATATABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterTable.MonsterTable'"));
-	if (NPCDATATABLE.Succeeded())
-	{
-		XRLOG(Warning, TEXT("Finded NPCTable"));
-		NPCDataTable = NPCDATATABLE.Object;
-	}
-	else
-	{
-		XRLOG(Error, TEXT("Can't Find NPCTable"));
-	}
+
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
 
@@ -156,10 +147,7 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 void ANonePlayerCharacter::DetectTarget(const TArray<AActor*>& DetectingPawn)
 {
 
-	for (auto detec : DetectingPawn)
-	{
-		XRLOG(Warning, TEXT("%s"), *detec->GetName());
-	}
+
 
 }
 
@@ -261,10 +249,10 @@ void ANonePlayerCharacter::OnDead()
 
 void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 {
-	if (NPCDataTable != nullptr)
+	if (GetAssetMgr()->NPCDataTable != nullptr)
 	{
 		FMonsterTableRow* ResourceTableRow =
-			NPCDataTable->FindRow<FMonsterTableRow>
+			GetAssetMgr()->NPCDataTable->FindRow<FMonsterTableRow>
 			(FName(*(FString::FromInt(NpcID))), FString(""));
 		if (ResourceTableRow)
 		{
@@ -340,6 +328,29 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	GetNetMgr().SendPacket(out);
 
 	//XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+}
+
+void ANonePlayerCharacter::SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor)
+{
+	auto castPlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (castPlayerCharacter)
+	{
+		auto PlayerCon = Cast<APlayerController>(castPlayerCharacter->GetController());
+		if (PlayerCon)
+		{
+				XRLOG(Warning, TEXT("OverlapPlayer"));
+				OutputStream out;
+				out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
+				out << ObjectID;
+				out << castPlayerCharacter->ObjectID;
+				out << 1;
+				out << Location;
+				out << Rotator;
+				out.CompletePacketBuild();
+				GetNetMgr().SendPacket(out);
+		}
+	}
+
 }
 
 void ANonePlayerCharacter::SetInBattle(bool battle)
