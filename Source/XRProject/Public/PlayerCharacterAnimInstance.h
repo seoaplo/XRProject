@@ -10,6 +10,11 @@ class APlayerCharacter;
 
 
 DECLARE_DELEGATE(FCheckNextComboValid)
+DECLARE_DELEGATE(FCheckCharacterAttackMoveStart)
+DECLARE_DELEGATE(FCheckCharacterAttackMoveEnd)
+DECLARE_DELEGATE_OneParam(FGaiaCrushEnd, APlayerCharacter*)
+
+
 
 /**
  *
@@ -25,7 +30,9 @@ public:
 
 public:
 	FCheckNextComboValid Delegate_CheckNextCombo;
-
+	FCheckCharacterAttackMoveStart Delegate_CharacterAttackMoveStart;
+	FCheckCharacterAttackMoveEnd Delegate_CharacterAttackMoveEnd;
+	FGaiaCrushEnd Delegate_GaiaCrushEnd;
 public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
@@ -37,6 +44,8 @@ public:
 		UAnimMontage* HitMontage;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* RollMontage;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		UAnimMontage* SkillMontage;
 
 
 private:
@@ -69,6 +78,10 @@ public:
 	UFUNCTION()
 		void AnimNotify_CheckNextComboValid();
 	UFUNCTION()
+		void AnimNotify_AttackStart();
+	UFUNCTION()
+		void AnimNotify_AttackEnd();
+	UFUNCTION()
 		void AnimNotify_RollingEnd();
 	UFUNCTION()
 		void AnimNotify_HitMotionEnd();
@@ -76,8 +89,12 @@ public:
 		void AnimNotify_RemoteRollingEnd();
 	UFUNCTION()
 		void AnimNotify_RemoteRollingAllEnd();
+	UFUNCTION()
+		void AnimNotify_GaiaHit();
 
 	void PlayAttackMontage();
+	void PlaySkillMontage();
+
 	void PlayAttackOnlyPlayMontage();
 	void PlayMoveOnlyPlayMontage();
 	void StopAttackMontage();
@@ -87,6 +104,6 @@ public:
 
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToMoveMontageSection(FString Section);
-
+	void JumpToSkillMonatgeSection(FString Section);
 
 };

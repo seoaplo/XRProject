@@ -8,7 +8,6 @@
 #include "ItemEquipment.h"
 #include "ItemConsumption.h"
 #include "ItemETC.h"
-#include "Engine/DataTable.h"
 #include "PlayerCharacter.h"
 #include "XRAssetMgr.h"
 #include "AccountManager.h"

@@ -20,6 +20,8 @@ void UXRGameInstance::Init()
 	ItemManager = NewObject<UItemManager>();
 	MapManager = NewObject<UMapManager>();
 	MapManager->Init();
+	PlayerSkillManager = NewObject<UPlayerSkillManager>();
+
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
 		this, &UXRGameInstance::HandleEnterZone);
@@ -92,6 +94,7 @@ void UXRGameInstance::HandleEnterZone(InputStream & input)
 	ReadBaseCharacterInfo(input);
 	ReadInventoryInfo(input);
 	ReadQuickSlot(input);
+	ReadSkillData(input);
 	MapManager->OpenMap(GetWorld());
 }
 
@@ -175,6 +178,19 @@ void UXRGameInstance::ReadMapData(InputStream & input)
 {
 	MapManager->ReadMapDataFromServer(input);
 }
+void UXRGameInstance::ReadSkillData(InputStream & input)
+{
+	int32 NumberOfSkills = 0;
+	NumberOfSkills = input.ReadInt32();
+	for (int ii = 0; ii < NumberOfSkills; ii++)
+	{
+		int32 ID = input.ReadInt32();
+		MapManager->CharacterSkillIDList.Add(ID);
+	}
+
+	MapManager->InputExpData(input);
+}
+
 
 
 void UXRGameInstance::SpawnCharacterFromServer(class InputStream& input)
@@ -387,3 +403,4 @@ void UXRGameInstance::CharacterRolling(InputStream& input)
 	}
 
 }
+

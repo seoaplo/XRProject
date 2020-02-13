@@ -2,7 +2,7 @@
 
 
 #include "XRPlayerController.h"
-
+#include "IngameGameMode.h"
 
 
 void AXRPlayerController::BeginPlay()
@@ -11,6 +11,9 @@ void AXRPlayerController::BeginPlay()
 	XRLOG(Warning, TEXT("PlayerController IS Ready"));
 	SetGenericTeamId(FGenericTeamId(10));
 	TeamId = FGenericTeamId(10);
+	//MainWidget = CreateWidget<UInGameMainWidget>(GetWorld(), WidgetClass);
+	
+	
 }
 
 FGenericTeamId AXRPlayerController::GetGenericTeamId() const
@@ -18,10 +21,44 @@ FGenericTeamId AXRPlayerController::GetGenericTeamId() const
 	return TeamId;
 }
 
+void AXRPlayerController::OpenInventory()
+{
+	AIngameGameMode* Mode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+
+	if(!MainWidget)
+		MainWidget = Mode->CurrentWidget;
+
+	MainWidget->Inventory->InventoryInstance->SwitchVisible();
+}
+
+void AXRPlayerController::OpenPartyMatching()
+{
+	AIngameGameMode* Mode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!MainWidget)
+		MainWidget = Mode->CurrentWidget;
+
+	MainWidget->MatchingWindow->SwitchVisible();
+}
+
+void AXRPlayerController::OpenCharacterInfo()
+{
+	AIngameGameMode* Mode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!MainWidget)
+		MainWidget = Mode->CurrentWidget;
+
+	MainWidget->CharacterInfo->SwitchVisible();
+}
+
 void AXRPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	InputComponent->BindAction(TEXT("TemporaryEnterZone"), IE_Pressed, this, &AXRPlayerController::TemporaryEnterZone);
+	InputComponent->BindAction(TEXT("OpenInventory"), IE_Pressed, this, &AXRPlayerController::OpenInventory);
+	InputComponent->BindAction(TEXT("OpenPartyMatching"), IE_Pressed, this, &AXRPlayerController::OpenPartyMatching);
+	InputComponent->BindAction(TEXT("OpenCharacterInfo"), IE_Pressed, this, &AXRPlayerController::OpenCharacterInfo);
+
 }
 
 void AXRPlayerController::TemporaryEnterZone()

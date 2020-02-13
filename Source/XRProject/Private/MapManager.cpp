@@ -102,6 +102,7 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 		CurrentData.Speed = Input.ReadFloat32();
 		CurrentData.Defence = Input.ReadFloat32();
 
+
 		std::string c_name = Input.ReadCString();
 		CurrentData.Name = mbs_to_wcs(c_name, std::locale("kor"));
 		CurrentData.Level = Input.ReadInt32();
@@ -111,10 +112,10 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 		CurrentData.STR = Input.ReadInt32();
 		CurrentData.DEX = Input.ReadInt32();
 		CurrentData.INT = Input.ReadInt32();
-		CurrentData.CurrentStamina = Input.ReadFloat32();
-		CurrentData.MaxStamina = Input.ReadFloat32();
+		CurrentData.Current_Stamina = Input.ReadFloat32();
+		CurrentData.Max_Stamina = Input.ReadFloat32();
 
-		int EquipmentSize = 4;
+		const int EquipmentSize = 4;
 		for (int iCount = 0; iCount < EquipmentSize; iCount++)
 		{
 			Equipment& CurrentEquip = CurrentData.EquipArray[iCount];
@@ -133,13 +134,14 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 				CurrentEquip.Count = Input.ReadInt32();
 			}
 		}
+
+
 	}
 }
 
 
 void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 {
-
 	CharacterData& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
 
 	Input >> CurrentData.ObjectID;
@@ -164,8 +166,8 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	CurrentData.STR = Input.ReadInt32();
 	CurrentData.DEX = Input.ReadInt32();
 	CurrentData.INT = Input.ReadInt32();
-	CurrentData.CurrentStamina = Input.ReadFloat32();
-	CurrentData.MaxStamina = Input.ReadFloat32();
+	CurrentData.Current_Stamina = Input.ReadFloat32();
+	CurrentData.Max_Stamina = Input.ReadFloat32();
 
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
@@ -187,6 +189,7 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 		}
 	}
 	PlayerID = CurrentData.ObjectID;
+
 }
 bool UMapManager::ReadPlayerDeleteFromServer(InputStream& Input)
 {
@@ -229,8 +232,8 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 	CurrentData.STR = Input.ReadInt32();
 	CurrentData.DEX = Input.ReadInt32();
 	CurrentData.INT = Input.ReadInt32();
-	CurrentData.CurrentStamina = Input.ReadFloat32();
-	CurrentData.MaxStamina = Input.ReadFloat32();
+	CurrentData.Current_Stamina = Input.ReadFloat32();
+	CurrentData.Max_Stamina = Input.ReadFloat32();
 
 	int EquipmentSize = 4;
 	for (int i = 0; i < EquipmentSize; i++)
@@ -281,10 +284,23 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
  		
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 
-		if(CurrentData.ObjectID != PlayerID)
+		UXRGameInstance* GI = Cast<UXRGameInstance>(Player->GetWorld()->GetGameInstance());
+
+		if (CurrentData.ObjectID != PlayerID)
+		{
 			Player->InitializeCharacter(false, CurrentData);
+		}
 		else
+		{
+			for (int ii = 0; ii < CharacterSkillIDList.Num(); ii++)
+			{
+				UPlayerSkillManager* SkillManager = GI->GetPlayerSkillManager();
+				SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
+					SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
+			}
+
 			Player->InitializeCharacter(true, CurrentData);
+		}
 
 		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
 
@@ -369,4 +385,10 @@ void UMapManager::SendChangeZoneFromClient()
 	out.WriteOpcode(ENetworkCSOpcode::kRequestChangeZone);
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
+}
+void UMapManager::InputExpData(class InputStream& input)
+{
+	CharacterData& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
+	CurrentData.Current_Exp	 = input.ReadInt32();
+	CurrentData.Max_Exp		 = input.ReadInt32();
 }

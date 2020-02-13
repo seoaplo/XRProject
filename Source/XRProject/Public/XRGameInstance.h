@@ -8,6 +8,7 @@
 #include "XRAssetMgr.h"
 #include "ItemManager.h"
 #include "MapManager.h"
+#include "PlayerSkillManager.h"
 #include "XRGameInstance.generated.h"
 
 const float kSprintMovementSpeed = 750.0f;
@@ -15,6 +16,7 @@ const float kNormalMovementSpeed = 450.0f;
 const float kMaxMovementAcceleration = 8192.0f;
 const float kNormalMovementAcceleration = 2048.0f;
 const float kRollingMovementSpeed = 800.0f;
+const float kAttackMovementSpeed = 250.0f;
 
 class UIngameGameMode;
 /**
@@ -44,6 +46,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
 		UItemManager* ItemManager;
 
+	UPlayerSkillManager* GetPlayerSkillManager() { return PlayerSkillManager; }
+	
+
 public:
 
 
@@ -52,6 +57,8 @@ private:
 		UNetworkManager* NetworkManager;
 	UPROPERTY()
 		UMapManager* MapManager;
+	UPROPERTY()
+		UPlayerSkillManager* PlayerSkillManager;
 private:
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Meta =(AllowPrivateAccess=true))
 	bool  IsSuper = false;
@@ -63,6 +70,7 @@ private:
 	void ReadInventoryInfo(class InputStream& input); /*인벤토리 정보 읽기*/
 	void ReadQuickSlot(class InputStream& input); /*퀵 슬롯 정보 읽기*/
 	void ReadMapData(class InputStream& input); /*맵 데이터 정보 읽기*/
+	void ReadSkillData(class InputStream& input); /*스킬 데이터 정보 읽기*/
 	void SpawnCharacterFromServer(class InputStream& input);/* 실시간 캐릭터 스폰 데이터 읽기*/
 	void UpdateCharacterPosition(class InputStream& input);
 	void SetMonsterController(class InputStream& input);

@@ -22,10 +22,10 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 {
 	UPlayerCharacterStatComponent* MyComponent = Character->PlayerStatComp;
 
-	MyComponent->Level = Info.Level;
-	MyComponent->STR = Info.Str;
-	MyComponent->DEX = Info.Dex;
-	MyComponent->INT = Info.Int;
+	MyComponent->SetLevel(Info.Level);
+	MyComponent->SetSTR(Info.Str);
+	MyComponent->SetDEX(Info.Dex);
+	MyComponent->SetINT(Info.Int);
 
 	MyComponent->SetCharacterName(FString(Info.Name.c_str()));
 
@@ -33,7 +33,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 
 	const int32 NudeBodyID = 130;
 	const int32 NudeHandID = 140;
-	const int32 NudeLegID =  150;
+	const int32 NudeLegID =	 150;
 
 	//Çì¾îÆÄÃ÷
 	FSoftObjectPath HairAssetPath = nullptr;
@@ -92,7 +92,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	else
 		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
 
-	MyComponent->Gender = Info.gender;
+	MyComponent->SetGender(Info.gender);
 }
 
 void ACharacterSelectSceneGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type, APlayerCharacter* Character)
@@ -278,6 +278,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	InitData.EquipArray[3].ID = Info.weapon_itemid;
 	InitData.Max_HP = 10.0f;
 	InitData.Current_HP = 10.0f;
+	InitData.Gender = 0;
 
 	Character->InitializeCharacter(false, InitData);
 	Character->SetActorEnableCollision(false);

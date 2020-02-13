@@ -92,6 +92,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SubtractHP(float Value);
 
+
 	UPROPERTY(BlueprintAssignable)
 		FOnCharacterStatChange	OnStatChange;
 	UPROPERTY(BlueprintAssignable)

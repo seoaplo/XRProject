@@ -9,6 +9,7 @@
 #include "Components/InputComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "XRPlayerController.h"
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
@@ -29,6 +30,11 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
 	
+	
+
+
+
+
 	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	NameTag->SetupAttachment(GetRootComponent());
 	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
@@ -166,6 +172,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsSprint					 = false;
 	bIsCharacterDead			= false;
 	bIsHit						= false;
+	bIsAttackMoving = false;
 	bIsPlayer					= false;
 	bInitialized				= false;
 	bIsTestMode					= false;
@@ -173,8 +180,8 @@ APlayerCharacter::APlayerCharacter()
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
 	MyShake = UPlayerCameraShake::StaticClass();
-	TestID = 0;
-	
+	TestID = 2;
+
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -242,9 +249,15 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 
-	if (bIsRolling)
+
+	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	
+	if (bIsAttackMoving)
+	{
+		FRotator NextRot = FMath::RInterpConstantTo(GetActorRotation(), AttackNextRotation, deltatime, 1200.0f);
+		SetActorRotation(NextRot);
+	}
 
 }
 
@@ -270,11 +283,8 @@ void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(UAISense_Sight::StaticClass());
-
-
 }
 
 void APlayerCharacter::PossessedBy(AController* controller)
@@ -298,18 +308,15 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 	
 
-	auto GameInstance = Cast < UXRGameInstance >(GetGameInstance());
-	
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
-	GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
+	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
+
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
+	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
 
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
-
-	
-
 
 }
 
@@ -354,40 +361,39 @@ void APlayerCharacter::MoveRight(float Value)
 
 void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 {
-	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
-
-	FPartsResource* PartResourceTable = MyGameInstance->ItemManager->PartsDataTable->
+	
+	FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
 		FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));
 
 	if (Type == EPartsType::HAIR)
 	{
 		//헤어파츠
 		FSoftObjectPath HairAssetPath = nullptr;
-		HairAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		HairAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate HairAssetLoadDelegate;
 		HairAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			HairAssetPath, EPartsType::HAIR);
-		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
+		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(HairAssetPath, HairAssetLoadDelegate);
 	}
 	else if (Type == EPartsType::FACE)
 	{
 		//페이스 파츠
 		FSoftObjectPath FaceAssetPath = nullptr;
-		FaceAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		FaceAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate FaceAssetLoadDelegate;
 		FaceAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			FaceAssetPath, EPartsType::FACE);
-		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
+		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(FaceAssetPath, FaceAssetLoadDelegate);
 	}
 	else
 	{
 		FSoftObjectPath ETCAssetPath = nullptr;
-		ETCAssetPath = MyGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
+		ETCAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate ETCAssetLoadDelegate;
 		ETCAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &APlayerCharacter::LoadPartsComplete,
 			ETCAssetPath, Type);
 
-		MyGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
+		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
 	}
 
@@ -566,11 +572,14 @@ void APlayerCharacter::Attack()
 	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit)
 		return;
 
+
 	AttackOverlapList.clear(); //Overlap list 초기화
 
 	//first
 	if (bIsAttack == false)
 	{
+		AttackNextRotation = GetActorRotation(); //공격 시작시에, 액터로케이션과 Next로테이션을 동일하게 맞춤
+
 		bIsAttack = true;
 		MyAnimInstance->PlayAttackMontage();
 		
@@ -605,6 +614,8 @@ void APlayerCharacter::Roll()
 			if (SecStr == CompStr)
 				return;
 		}
+
+		bIsAttackMoving = false;
 	}
 
 	if (bIsOverallRollAnimPlaying)
@@ -614,28 +625,7 @@ void APlayerCharacter::Roll()
 	bool bArrowKeyNotPressed = false;
 
 	//무식한건 아는데 당장 생각이 안남
-	float Yaw = 0.0f;
-	if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && FMath::IsNearlyEqual(RightValue, 0.0f))
-	{
-		Yaw = GetActorRotation().Yaw;
-		bArrowKeyNotPressed = true;
-	}
-	else if (ForwardValue > 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
-		Yaw = 0.0f;
-	else if (ForwardValue > 0.0f && RightValue > 0.0f)
-		Yaw = 45.0f;
-	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue > 0.0f)
-		Yaw = 90.0f;
-	else if (ForwardValue < 0.0f && RightValue > 0.0f)
-		Yaw = 135.0f;
-	else if (ForwardValue < 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
-		Yaw = 180.0f;  //-180?
-	else if (ForwardValue < 0.0f && RightValue < 0.0f)
-		Yaw = -135.0f;
-	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue < 0.0f)
-		Yaw = -90.0f;
-	else if (ForwardValue > 0.0f && RightValue < 0.0f)
-		Yaw = -45.0f;
+	float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
 
 	const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
 	
@@ -704,11 +694,13 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		PlayerStatComp->SetSTR(Data.STR);
 		PlayerStatComp->SetDEX(Data.DEX);
 		PlayerStatComp->SetINT(Data.INT);
-		PlayerStatComp->SetCurrentStamina(Data.CurrentStamina);
-		PlayerStatComp->SetMaxStamina(Data.MaxStamina);
+		PlayerStatComp->SetCurrentStamina(Data.Current_Stamina);
+		PlayerStatComp->SetMaxStamina(Data.Max_Stamina);
 		PlayerStatComp->SetCharacterName(Data.Name.c_str());
+		PlayerStatComp->SetMaxExp(Data.Max_Exp);
+		PlayerStatComp->SetCurrentStamina(Data.Current_Stamina);
 
-		if (PlayerStatComp->Gender == 0)
+		if (PlayerStatComp->GetGender() == 0)
 			bIsMale = true;
 		else
 			bIsMale = false;
@@ -722,6 +714,8 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 
 			MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 			MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+			MyAnimInstance->Delegate_CharacterAttackMoveStart.BindUFunction(this, FName("StartMoveAttack"));
+			MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 			MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 			UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 		}
@@ -810,6 +804,8 @@ void APlayerCharacter::TestInitialize()
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
+	MyAnimInstance->Delegate_CharacterAttackMoveStart.BindUFunction(this, FName("StartMoveAttack"));
+	MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 	MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 	//UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 
@@ -867,6 +863,9 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 
 void APlayerCharacter::ContinueCombo()
 {
+	bIsAttackMoving = false;
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+
 	if (bSavedCombo)
 	{
 		if (ComboCount >= kMaxComboCount)
@@ -878,6 +877,23 @@ void APlayerCharacter::ContinueCombo()
 		ComboCount++;
 		MyAnimInstance->JumpToComboMontageSection(ComboCount);
 		bSavedCombo = false;
+		
+
+		bool bArrowKeyNotPressed = false;
+		float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
+		const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
+		
+		if (bArrowKeyNotPressed)
+		{
+			const FRotator Rot = FRotator(0.0f, Yaw, 0.0f);
+			AttackNextRotation = Rot;
+		}
+		else
+		{
+			const FRotator Rot = CameraForward + FRotator(0.0f, Yaw, 0.0f);
+			AttackNextRotation = Rot;
+		}
+
 
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
@@ -890,6 +906,24 @@ void APlayerCharacter::ContinueCombo()
 	}
 }
 
+void APlayerCharacter::StartMoveAttack()
+{
+	bIsAttackMoving = true;
+	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
+}
+void APlayerCharacter::EndMoveAttack()
+{
+	bIsAttackMoving = false;
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+	
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kNotifyCurrentChrPosition);
+	out << 999;
+	out << GetActorLocation();
+	out << GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+}
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
 {
@@ -954,7 +988,8 @@ bool APlayerCharacter::GetIsTestMode()
 	return bIsTestMode;
 }
 
-void APlayerCharacter::SetRollingCapsuleMode()
+//구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
+void APlayerCharacter::SetRollingCapsuleMode() 
 {
 	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
@@ -966,6 +1001,7 @@ void APlayerCharacter::SetRollingCapsuleMode()
 
 }
 
+//구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 void APlayerCharacter::SetNormalCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(GetNormalCapsuleSize().X);
@@ -978,6 +1014,39 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
+float APlayerCharacter::GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed)
+{
+	float Yaw = 0.0f;
+	if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && FMath::IsNearlyEqual(RightValue, 0.0f))
+	{
+		Yaw = GetActorRotation().Yaw;
+		Out_ArrowKeyPressed = true;
+	}
+	else if (ForwardValue > 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 0.0f;
+	else if (ForwardValue > 0.0f && RightValue > 0.0f)
+		Yaw = 45.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue > 0.0f)
+		Yaw = 90.0f;
+	else if (ForwardValue < 0.0f && RightValue > 0.0f)
+		Yaw = 135.0f;
+	else if (ForwardValue < 0.0f && FMath::IsNearlyEqual(RightValue, 0.0f))
+		Yaw = 180.0f;  //-180?
+	else if (ForwardValue < 0.0f && RightValue < 0.0f)
+		Yaw = -135.0f;
+	else if (FMath::IsNearlyEqual(ForwardValue, 0.0f) && RightValue < 0.0f)
+		Yaw = -90.0f;
+	else if (ForwardValue > 0.0f && RightValue < 0.0f)
+		Yaw = -45.0f;
+
+	return Yaw;
+}
+
+void APlayerCharacter::SetbIsSkillMove(bool b)
+{
+	bIsSkillMove = b;
+}
+
 bool APlayerCharacter::GetbIsRolling()
 {
 	return bIsRolling;
@@ -988,17 +1057,21 @@ bool APlayerCharacter::GetbIsOverallRollAnimPlaying()
 	return bIsOverallRollAnimPlaying;
 }
 
+bool APlayerCharacter::GetbIsSkillMove()
+{
+	return bIsSkillMove;
+}
+
 void APlayerCharacter::TestPlay()
 {
 
-	if (TestID == 1)
-	{
+	int32 aaa = PlayerStatComp->GetMaxExp();
+	FString Fstr = "GaiaCrush";
+	UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
+		FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer,Fstr);
 
-	}
-	else if (TestID == 2)
-	{
-
-	}
+	Skill->Play(this);
+	
 }
 
 UItemEquipment * APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
