@@ -22,5 +22,6 @@ public:
 		bool GetVisible();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void SwitchVisible();
-	void QuitGame();
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void QuitGame();
 };
