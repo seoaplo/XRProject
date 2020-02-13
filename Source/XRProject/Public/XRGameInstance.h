@@ -18,6 +18,25 @@ const float kNormalMovementAcceleration = 2048.0f;
 const float kRollingMovementSpeed = 800.0f;
 const float kAttackMovementSpeed = 250.0f;
 
+enum class StatBit : int64_t {
+	kHP = 0x0000000000000001,
+	kMaxHp = 0x0000000000000002,
+	kAttackMin = 0x0000000000000004,
+	kAttackMax = 0x0000000000000008,
+	kDefence = 0x0000000000000010,
+	kSpeed = 0x0000000000000020,
+	kLv = 0x0000000000000040,
+	kJob = 0x0000000000000080,
+	kStr = 0x0000000000000100,
+	kDex = 0x0000000000000200,
+	kIntel = 0x0000000000000400,
+	kGold = 0x0000000000000800,
+	kExp = 0x0000000000001000,
+	kMaxExp = 0x0000000000002000,
+	kStamina = 0x0000000000004000,
+	kMaxStamina = 0x0000000000008000,
+};
+
 class UIngameGameMode;
 /**
  * 
@@ -80,6 +99,7 @@ private:
 	void CharacterWait(class InputStream& input);
 	void CharacterSprint(class InputStream& input);
 	void CharacterDead(class InputStream& input);
+	void CharacterStatChange(class InputStream& input);
 	void CharacterRolling(class InputStream& input);
 	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);

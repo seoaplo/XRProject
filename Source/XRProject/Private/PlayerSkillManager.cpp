@@ -88,3 +88,8 @@ void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkil
 
 	SkillList.Add(Skill);
 }
+
+UDataTable* UPlayerSkillManager::GetSkillDataTable()
+{
+	return SkillDataTable;
+}

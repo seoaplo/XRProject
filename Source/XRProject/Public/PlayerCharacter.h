@@ -16,6 +16,7 @@
 
 class ANonePlayerCharacter;
 class UXRGameInstance;
+class UXRPlayerController;
 class UHealthBarWidget;
 
 
@@ -159,14 +160,12 @@ public:
 		bool bSavedCombo;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		int32 ComboCount;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
-		bool bIsMove;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
-		bool bIsCharacterDead;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
-		bool bIsHit;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
-		bool bIsSkillMove;
+	
+	bool bIsMove;
+	bool bIsCharacterDead;
+	bool bIsHit;
+	bool bIsSkillMove;
+	bool bIsSkillPlaying;
 
 	/*TEST*/
 private:
@@ -191,12 +190,13 @@ private:
 	FVector WeaponScaleVector;
 	FVector NameTagLocation;
 
+public:
 	/*Test Value*/
 	bool bIsTestMode;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
 		int32 TestID; //실제 출시 땐 제거될 테스트ID
-
-
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
+		float TestVal; //실제 출시 땐 제거될 테스트ID
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -218,10 +218,12 @@ public:
 	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
 	void SetbIsSkillMove(bool b);
+	void SetbIsSkillPlaying(bool b);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
 	bool GetbIsSkillMove();
+	bool GetbIsSkillPlaying();
 
 	/*Test Function*/
 	void TestPlay();

@@ -105,6 +105,10 @@ void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 		MyCharacter->bIsRolling = false;
 		bIsRolling = false;
 		MyCharacter->SetNormalCapsuleMode();
+
+		if(MyCharacter->bIsSprint)
+			MyCharacter->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
 	}
 }
 void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
@@ -117,6 +121,9 @@ void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingEnd()
 {
 	MyCharacter->bIsRolling = false; 
 	bIsRolling = false;
+
+	MyCharacter->GetCharacterMovement()->MaxAcceleration = kNormalMovementAcceleration;
+	MyCharacter->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingAllEnd()
@@ -180,6 +187,18 @@ void UPlayerCharacterAnimInstance::JumpToSkillMonatgeSection(FString Section)
 
 void UPlayerCharacterAnimInstance::AnimNotify_GaiaHit()
 {
-	if (Delegate_GaiaCrushEnd.IsBound())
-		Delegate_GaiaCrushEnd.Execute(MyCharacter);
+	if (IsValid(MyCharacter))
+	{
+		if (Delegate_GaiaCrushEnd.IsBound())
+			Delegate_GaiaCrushEnd.Execute(MyCharacter);
+	}
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_GaiaEnd()
+{
+	if (IsValid(MyCharacter))
+	{
+		if (Delegate_GaiaCrushProcessEnd.IsBound())
+			Delegate_GaiaCrushProcessEnd.Execute(MyCharacter);
+	}
 }

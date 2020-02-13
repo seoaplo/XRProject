@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "Engine/DataTable.h"
+#include <vector>
+#include "Engine/StaticMeshActor.h"
 #include "PlayerSkill.generated.h"
 
 class APlayerCharacter;
-
+class ANonePlayerCharacter;
 
 /**
  * 
@@ -38,6 +40,8 @@ protected:
 	float			CoolTime;
 	UPROPERTY(VisibleAnyWhere)
 	int32			IconID;
+	UPROPERTY()
+	APlayerCharacter* OwnerPlayer;
 
 public:
 	virtual void Play(APlayerCharacter* Character);
@@ -69,6 +73,7 @@ protected:
 UCLASS()
 class XRPROJECT_API USkill_GaiaCrush : public UPlayerSkill
 {
+	const float kCircleDistance = 300.0f;
 	//ETC1 : 비행거리(MoveDistance) || ETC2 : 원형범위(AffectRadius)
 	GENERATED_BODY()
 
@@ -81,14 +86,25 @@ private:
 	float MoveDistance; //공중도약시 이동거리
 	UPROPERTY(VisibleAnyWhere)
 	float AffectRadius; //공격이 미치는 원형 범위
+		UStaticMesh* RadMesh;
+
+		std::vector<ANonePlayerCharacter*> AttackOverlapList;
+	UPROPERTY()
+		AStaticMeshActor* RadiusChecker;
+
 
 public:
 	UFUNCTION()
-	virtual void Play(APlayerCharacter* Character) override;
+		virtual void Play(APlayerCharacter* Character) override;
 	UFUNCTION()
-	virtual bool End(APlayerCharacter* Character) override;
+		virtual bool End(APlayerCharacter* Character) override;
 	UFUNCTION()
-	virtual bool ConditionCheck(APlayerCharacter* Character) override;
+		virtual bool ConditionCheck(APlayerCharacter* Character) override;
+	UFUNCTION()
+		void RadiusOverlapEvent(UPrimitiveComponent * OverlappedComp, AActor * OtherActor,
+		UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	UFUNCTION()
+		void GaiaTargetCheck(APlayerCharacter* Character);
 	//void Set();
 
 public:
