@@ -1,5 +1,7 @@
 #include "Inventory.h"
 #include "NetworkManager.h"
+#include "InventoryWidget.h"
+
 Inventory::Inventory()
 {
 	for (int i = 0; i < kMaxInventorySlotSize; i++)
@@ -21,6 +23,7 @@ int64 Inventory::GetGold()
 void Inventory::SetGold(int64 Money)
 {
 	Gold = Money;
+	if (UInventoryWidget::GetInstance()) UInventoryWidget::GetInstance()->GoldUpdate();
 }
 
 void Inventory::AddGold(int64 Money)

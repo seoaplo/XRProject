@@ -8,14 +8,14 @@ UInGameMainWidget::UInGameMainWidget(const FObjectInitializer& ObjectInitializer
 
 void UInGameMainWidget::CreateDungeonResultWidget(InputStream & input)
 {
-	UDungeonResultWidget* ReslutWidget = WidgetTree->ConstructWidget<UDungeonResultWidget>(DungeonResultWidget);
+	UDungeonResultWidget* ReslutWidget = Cast<UDungeonResultWidget>(CreateWidget(GetWorld(), DungeonResultWidget));
 	ReslutWidget->GetReward(input);
 	ReslutWidget->AddToViewport();
 }
 
 ULoadingBarWidget* UInGameMainWidget::CreateLoadingBarWidget()
 {
-	ULoadingBarWidget* ReslutWidget = WidgetTree->ConstructWidget<ULoadingBarWidget>(LoadingBarWidget);
+	ULoadingBarWidget* ReslutWidget = Cast<ULoadingBarWidget>(CreateWidget(GetWorld(), LoadingBarWidget));
 	ReslutWidget->AddToViewport();
 	return ReslutWidget;
 }
