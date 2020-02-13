@@ -40,6 +40,8 @@ public:
 		FText GetGlod();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void AddList(USlotWidget* newslot);
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void ClearInstance();
 	UFUNCTION(BlueprintImplementableEvent, Category = "MG_Function")
 		void GoldUpdate();
 

@@ -68,3 +68,8 @@ void UInventoryWidget::AddList(USlotWidget * newslot)
 {
 	if (newslot) list.push_back(newslot);
 }
+
+void UInventoryWidget::ClearInstance()
+{
+	InventoryInstance = nullptr;
+}
