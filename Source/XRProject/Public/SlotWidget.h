@@ -18,6 +18,7 @@ class XRPROJECT_API USlotWidget : public UUserWidget
 public:
 	USlotWidget(const FObjectInitializer& ObjectInitializer);
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
 		USlotObject* SlotObject;
 		bool IsEquipment;
 		int Index;

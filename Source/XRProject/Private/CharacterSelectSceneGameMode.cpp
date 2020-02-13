@@ -35,7 +35,6 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	const int32 NudeHandID = 140;
 	const int32 NudeLegID =	 150;
 
-
 	//Çì¾îÆÄÃ÷
 	FSoftObjectPath HairAssetPath = nullptr;
 	FPartsResource* HairResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.Hair)), TEXT("t"));
