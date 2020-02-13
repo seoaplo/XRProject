@@ -4,6 +4,7 @@
 #include "MapManager.h"
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
+#include "BossCharacter.h"
 
 UMapManager::UMapManager()
 {
@@ -335,12 +336,39 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 
 	for (auto& CurrentData : MonsterDataList)
 	{
+
 		FActorSpawnParameters param;
 		param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		AActor* actor =
-			World->SpawnActor
-			(ANonePlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, param);
+		AActor* actor = nullptr;
 
+		if (CurrentData.MonsterID == 20003)
+		{
+			auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
+	
+				FMonsterTableRow* ResourceTableRow =
+					gInst->GetXRAssetMgr()->NPCDataTable->FindRow<FMonsterTableRow>
+				(FName(*(FString::FromInt(CurrentData.MonsterID))), FString(""));
+				if (ResourceTableRow)
+				{
+					FSoftObjectPath BPPath =  gInst->GetXRAssetMgr()->FindResourceFromDataTable(ResourceTableRow->MonsterBP);
+					UAssetManager::GetStreamableManager().RequestSyncLoad(BPPath);
+					UAssetManager::GetStreamableManager().LoadSynchronous(BPPath);
+
+					UClass* GeneratedBP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *BPPath.ToString()));
+
+					//TSoftClassPtr<ABossCharacter> LoadedBP(BPPath);
+					//actor = World->SpawnActor
+					//(LoadedBP.Get()->StaticClass(), &CurrentData.Location, &CurrentData.Rotator, param);
+				
+					actor = World->SpawnActor<ABossCharacter>(GeneratedBP, CurrentData.Location, CurrentData.Rotator,param);
+				} 
+		}
+		else
+		{
+			actor = World->SpawnActor
+				(ANonePlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, param);
+		}
+		
 		ANonePlayerCharacter* Monster = Cast<ANonePlayerCharacter>(actor);
 		if (Monster)
 		{

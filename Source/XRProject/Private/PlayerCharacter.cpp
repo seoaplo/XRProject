@@ -954,7 +954,7 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent * OverlappedComp, AAct
 		{
 			///수정자 조재진///
 			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
-			UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
+			//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
 			/// 오프라인 공격 테스트용도 지워도 무상관///////
 
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)

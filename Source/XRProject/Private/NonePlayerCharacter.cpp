@@ -16,16 +16,7 @@
 
 ANonePlayerCharacter::ANonePlayerCharacter()
 {
-	static ConstructorHelpers::FObjectFinder<UDataTable> NPCDATATABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterTable.MonsterTable'"));
-	if (NPCDATATABLE.Succeeded())
-	{
-		XRLOG(Warning, TEXT("Finded NPCTable"));
-		NPCDataTable = NPCDATATABLE.Object;
-	}
-	else
-	{
-		XRLOG(Error, TEXT("Can't Find NPCTable"));
-	}
+
 
 	EnermyStatComponent = CreateDefaultSubobject<UCharacterStatComponent>(TEXT("EnermyStat"));
 
@@ -258,10 +249,10 @@ void ANonePlayerCharacter::OnDead()
 
 void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 {
-	if (NPCDataTable != nullptr)
+	if (GetAssetMgr()->NPCDataTable != nullptr)
 	{
 		FMonsterTableRow* ResourceTableRow =
-			NPCDataTable->FindRow<FMonsterTableRow>
+			GetAssetMgr()->NPCDataTable->FindRow<FMonsterTableRow>
 			(FName(*(FString::FromInt(NpcID))), FString(""));
 		if (ResourceTableRow)
 		{

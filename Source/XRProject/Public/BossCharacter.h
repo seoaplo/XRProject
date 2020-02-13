@@ -57,6 +57,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<int> ReadySkillList;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 CurrentUseSkill;
+
 	UFUNCTION(BlueprintCallable)
 		void SetOnSkillQueue(int32 index);
 
@@ -76,10 +79,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void SetCurrentBossPhase(int32 phase);
 
+	virtual void ExcuteRecvNpcAction(InputStream& input);
 protected:
 private:
-
-
 	void SetCharacterLoadState(ECharacterLoadState NewState) override;
 
 };

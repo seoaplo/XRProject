@@ -184,9 +184,6 @@ private:
 	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
 	float SumSec = 0;
 	bool bIsAttackMoving; //공격 시 일보 전진
-	float RotateSpeed;
-	float SpringArmLength;
-	float MovementSpeed;
 	float BaseTurnRate;
 	float BaseLookUpRate;
 	FVector MeshLocationVector;
