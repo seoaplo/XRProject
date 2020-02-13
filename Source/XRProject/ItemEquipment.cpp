@@ -9,6 +9,11 @@ UItemEquipment::UItemEquipment()
 
 }
 
+int UItemEquipment::GetCount()
+{
+	return 0;
+}
+
 int UItemEquipment::GetID()
 {
 	return DefaultInfo.ID;

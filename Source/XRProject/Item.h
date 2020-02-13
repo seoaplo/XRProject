@@ -20,7 +20,7 @@ enum class EItemType : uint8
 	EQUIPMENT,
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class XRPROJECT_API UItem : public USlotObject
 {
 	GENERATED_BODY()

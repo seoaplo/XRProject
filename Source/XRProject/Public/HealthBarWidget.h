@@ -28,9 +28,9 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 		void SetInatance();
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void SetMaxHp(int PlayerMaxHP);
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void ApplyHp(int PlayerCurrentHP);
 
 

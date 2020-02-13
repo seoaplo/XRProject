@@ -48,6 +48,12 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	if (ROLL_MONTAGE.Succeeded())
 		RollMontage = ROLL_MONTAGE.Object;
 
+
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		SKILL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/SkillMontage.SkillMontage'"));
+	if (SKILL_MONTAGE.Succeeded())
+		SkillMontage = SKILL_MONTAGE.Object;
+
 }
 
 UPlayerCharacterAnimInstance::~UPlayerCharacterAnimInstance()
@@ -80,9 +86,17 @@ void UPlayerCharacterAnimInstance::AnimNotify_CheckNextComboValid()
 {
 	if (Delegate_CheckNextCombo.IsBound())
 		Delegate_CheckNextCombo.Execute();
-
 }
-
+void UPlayerCharacterAnimInstance::AnimNotify_AttackStart()
+{
+	if (Delegate_CharacterAttackMoveStart.IsBound())
+		Delegate_CharacterAttackMoveStart.Execute();
+}
+void UPlayerCharacterAnimInstance::AnimNotify_AttackEnd()
+{
+	if (Delegate_CharacterAttackMoveEnd.IsBound())
+		Delegate_CharacterAttackMoveEnd.Execute();
+}
 void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 {
 	//구르는 동작의 끝(애니메이션의 끝이 아님)
@@ -154,3 +168,18 @@ void UPlayerCharacterAnimInstance::JumpToMoveMontageSection(FString Section)
 	Montage_JumpToSection(FName(*Section));
 }
 
+void UPlayerCharacterAnimInstance::PlaySkillMontage()
+{
+	float ret = Montage_Play(SkillMontage, 1.f);
+}
+
+void UPlayerCharacterAnimInstance::JumpToSkillMonatgeSection(FString Section)
+{
+	Montage_JumpToSection(FName(*Section));
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_GaiaHit()
+{
+	if (Delegate_GaiaCrushEnd.IsBound())
+		Delegate_GaiaCrushEnd.Execute(MyCharacter);
+}

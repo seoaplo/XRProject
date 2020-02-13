@@ -5,6 +5,7 @@
 #include "XRProject.h"
 #include "GameFramework/PlayerController.h"
 #include "GenericTeamAgentInterface.h"
+#include "InGameMainWidget.h"
 #include "XRPlayerController.generated.h"
 
 /**
@@ -17,7 +18,6 @@ UCLASS()
 class XRPROJECT_API AXRPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
-
 
 public:
 
@@ -40,6 +40,15 @@ private:
 
 		bool bIsSuper = false;
 
+	UPROPERTY()
+		UInGameMainWidget* MainWidget;
+		TSubclassOf<UInGameMainWidget> WidgetClass;
+
 	FGenericTeamId TeamId;
 	FGenericTeamId GetGenericTeamId() const;
+
+	void OpenInventory();
+	void OpenPartyMatching();
+	void OpenCharacterInfo();
+
 };

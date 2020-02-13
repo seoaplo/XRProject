@@ -21,10 +21,10 @@ UItemManager::UItemManager()
 
 
 
-	if (DT_EQUIPITEM.Succeeded()) EquipmentItemDataTable = DT_EQUIPITEM.Object;
-	if (DT_CONSUMPTIONITEM.Succeeded()) ConsumptionItemDataTable = DT_CONSUMPTIONITEM.Object;
-	if (DT_ETCITEM.Succeeded()) ETCItemDataTable = DT_ETCITEM.Object;
-	if (DT_PARTS.Succeeded()) PartsDataTable = DT_PARTS.Object;
+	if (DT_EQUIPITEM.Succeeded())		EquipmentItemDataTable = DT_EQUIPITEM.Object;
+	if (DT_CONSUMPTIONITEM.Succeeded())	ConsumptionItemDataTable = DT_CONSUMPTIONITEM.Object;
+	if (DT_ETCITEM.Succeeded())			ETCItemDataTable = DT_ETCITEM.Object;
+	if (DT_PARTS.Succeeded())			PartsDataTable = DT_PARTS.Object;
 
 }
 
@@ -107,6 +107,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
 		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
+		Item->DefaultInfo.ATK = Table->ATK;
 		Item->DefaultInfo.DEF = Table->DEF;
 		Item->DefaultInfo.STR = Table->STR;
 		Item->DefaultInfo.DEX = Table->DEX;
@@ -167,6 +168,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 		Item->DefaultInfo.Type = Table->Type;
 		Item->DefaultInfo.SubType = Table->SubType;
 		Item->DefaultInfo.ReqLEV = Table->RequiredLevel;
+		Item->DefaultInfo.ATK = Table->ATK;
 		Item->DefaultInfo.DEF = Table->DEF;
 		Item->DefaultInfo.STR = Table->STR;
 		Item->DefaultInfo.DEX = Table->DEX;
@@ -204,7 +206,6 @@ void UItemManager::BuildItem(EItemType Type, int32 ID, UWorld* World, APlayerCha
 	if (ItemOptional.IsSet())
 	{
 		RetItem = ItemOptional.GetValue();
-		CurrentItemId = ID;
 	}
 
 	FSoftObjectPath AssetPath = nullptr;

@@ -33,7 +33,7 @@ struct ConsumptionInfo // 서버에서 보내주는 데이터
 	int32_t Count;
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class XRPROJECT_API UItemConsumption : public UItem
 {
 	GENERATED_BODY()

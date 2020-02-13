@@ -22,16 +22,18 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 {
 	UPlayerCharacterStatComponent* MyComponent = Character->PlayerStatComp;
 
-	MyComponent->Level = Info.Level;
-	MyComponent->STR = Info.Str;
-	MyComponent->DEX = Info.Dex;
-	MyComponent->INT = Info.Int;
+	MyComponent->SetLevel(Info.Level);
+	MyComponent->SetSTR(Info.Str);
+	MyComponent->SetDEX(Info.Dex);
+	MyComponent->SetINT(Info.Int);
 
 	MyComponent->SetCharacterName(FString(Info.Name.c_str()));
 
 	auto GameInstance = Cast<UXRGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 
-
+	const int32 NudeBodyID = 130;
+	const int32 NudeHandID = 140;
+	const int32 NudeLegID =	 150;
 
 	//Çì¾îÆÄÃ÷
 	FSoftObjectPath HairAssetPath = nullptr;
@@ -56,7 +58,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	if (Info.armor_itemid == -1)
 	{
 		FSoftObjectPath NudeAssetPath = nullptr;
-		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.armor_itemid)), TEXT("t"));
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(NudeBodyID)), TEXT("t"));
 		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
 		FStreamableDelegate NudeAssetLoadDelegate;
 		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
@@ -68,7 +70,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	if (Info.hand_itemid == -1)
 	{
 		FSoftObjectPath NudeAssetPath = nullptr;
-		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.hand_itemid)), TEXT("t"));
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(NudeHandID)), TEXT("t"));
 		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
 		FStreamableDelegate NudeAssetLoadDelegate;
 		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
@@ -80,7 +82,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	if (Info.shoes_itemid == -1)
 	{
 		FSoftObjectPath NudeAssetPath = nullptr;
-		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(Info.shoes_itemid)), TEXT("t"));
+		FPartsResource* FaceResourceTable = PartsDataTable->FindRow<FPartsResource>(*(FString::FromInt(NudeLegID)), TEXT("t"));
 		NudeAssetPath = GameInstance->GetXRAssetMgr()->FindResourceFromDataTable(FaceResourceTable->ResourceID);
 		FStreamableDelegate NudeAssetLoadDelegate;
 		NudeAssetLoadDelegate = FStreamableDelegate::CreateUObject(this, &ACharacterSelectSceneGameMode::LoadPartsComplete,
@@ -90,7 +92,7 @@ void ACharacterSelectSceneGameMode::CreatePlayerCharacter(APlayerCharacter* Char
 	else
 		GameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, Info.shoes_itemid, GetWorld(), Character);
 
-	MyComponent->Gender = Info.gender;
+	MyComponent->SetGender(Info.gender);
 }
 
 void ACharacterSelectSceneGameMode::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type, APlayerCharacter* Character)
@@ -276,6 +278,7 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	InitData.EquipArray[3].ID = Info.weapon_itemid;
 	InitData.Max_HP = 10.0f;
 	InitData.Current_HP = 10.0f;
+	InitData.Gender = 0;
 
 	Character->InitializeCharacter(false, InitData);
 	Character->SetActorEnableCollision(false);

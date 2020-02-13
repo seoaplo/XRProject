@@ -131,6 +131,8 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
  }
 
 
+
+
 // Called every frame
 void UCharacterStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {

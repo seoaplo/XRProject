@@ -10,13 +10,13 @@
 #include "PlayerCharacterAnimInstance.h"
 #include "PlayerCharacterStatComponent.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
-#include "UserWidget.h"
-#include "HealthBarWidget.h"
-#include "XRPlayerController.h"
 #include "PlayerCameraShake.h"
+#include "PlayerSkillManager.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
+class UXRGameInstance;
+
 
 UENUM()
 enum class EEquipmentsType : uint8
@@ -82,11 +82,9 @@ public:
 
 public:
 
+
 	UPROPERTY()
 		class  UAISenseConfig_Damage* AISenseDamage;
-
-
-
 
 
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
@@ -98,9 +96,7 @@ public:
 	UPROPERTY()
 		bool bIsMale; //���� üũ�� ���� bool��.
 
-
-	UPROPERTY(EditAnywhere)
-		FEquipment Equipments;
+private:
 	UPROPERTY(EditInstanceOnly, Category = "C_Collision")
 		class UCapsuleComponent* HitCapsule;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
@@ -109,49 +105,45 @@ public:
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Parts")
+	UPROPERTY(EditInstanceOnly, Category = "C_Parts")
 		class USkeletalMeshComponent* FaceComponent;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_Parts")
+	UPROPERTY(EditInstanceOnly, Category = "C_Parts")
 		class USkeletalMeshComponent* HairComponent;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleAnimInstance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> RemoteAnimInstance;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_AnimInstance")
+	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "C_AnimInstance")
-		UPlayerCharacterAnimInstance* MyAnimInstance;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseTurnRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-		float BaseLookUpRate;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
-		UPlayerCharacterStatComponent* PlayerStatComp;
-
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FVector ScaleVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLISION")
+	UPROPERTY(EditInstanceOnly, Category = "C_COLLISION")
 		FVector2D CapsuleSize;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_COLLLISION")
+	UPROPERTY(EditInstanceOnly, Category = "C_COLLLISION")
 		FVector2D RollingHitCapsuleSize;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_VALUE")
+	UPROPERTY(EditInstanceOnly, Category = "C_VALUE")
 		float RollingCapsuleOffset;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		FVector MeshLocationVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		FVector WeaponScaleVector;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "C_LOCATION")
-		FVector NameTagLocation;
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<UCameraShake> MyShake;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_CharacterStatus")
+	UPROPERTY(VisibleAnywhere, Category = "C_CharacterStatus")
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_TEST")
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FCameraShakeInfo ShakeInfo;
 
+
 public:
+	UPROPERTY(EditAnywhere)
+		FEquipment Equipments;
+	UPROPERTY(VisibleAnywhere, Category = "C_CharacterStatus")
+		UPlayerCharacterStatComponent* PlayerStatComp;
+	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
+		UPlayerCharacterAnimInstance* MyAnimInstance;
+	UPROPERTY(VisibleAnywhere, Category = "C_GameInstance")
+		UXRGameInstance* CurGameInstance;
+	UPROPERTY(VisibleAnywhere, Category = "C_CharacterSkill")
+		TArray<UPlayerSkill*> SkillList;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsAttack;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
@@ -172,10 +164,13 @@ public:
 		bool bIsCharacterDead;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		bool bIsHit;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_Character", Meta = (AllowPrivateAccess = true))
+		bool bIsSkillMove;
 
 	/*TEST*/
 private:
 	FRotator DeltaRotation;
+	FRotator AttackNextRotation; //공격 시에 방향전환에 사용되는 로테이터.
 	FRotator AdditionalRotationValue;
 	FVector SpringArmLocation;
 	bool bForwardKeyIsNeutral;
@@ -183,12 +178,25 @@ private:
 	int32 CurrentComboCount;
 	bool bIsPlayer;
 	bool bInitialized;
-	bool bIsTestMode;
 	bool bIsMouseShow;
 	int32 CurrentAttackID;
 	float ForwardValue; //앞 방향키를 누르고 있는가(-1~1)
 	float RightValue;  // 오른쪽 방향키를 누르고 있는가?(-1~1)
 	float SumSec = 0;
+	bool bIsAttackMoving; //공격 시 일보 전진
+	float RotateSpeed;
+	float SpringArmLength;
+	float MovementSpeed;
+	float BaseTurnRate;
+	float BaseLookUpRate;
+	FVector MeshLocationVector;
+	FVector WeaponScaleVector;
+	FVector NameTagLocation;
+
+	/*Test Value*/
+	bool bIsTestMode;
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
+		int32 TestID; //실제 출시 땐 제거될 테스트ID
 
 
 public:
@@ -197,8 +205,7 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* controller) override;
-
-
+	
 public:
 	void InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data);
 	void ChangePartsById(EPartsType Type, int32 ID);
@@ -211,10 +218,14 @@ public:
 	bool GetIsTestMode();
 	void SetRollingCapsuleMode(); //구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
+	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
+	void SetbIsSkillMove(bool b);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
+	bool GetbIsSkillMove();
 
+	/*Test Function*/
 	void TestPlay();
 
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
@@ -233,6 +244,10 @@ public:
 		void OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void ContinueCombo();
+	UFUNCTION()
+		void StartMoveAttack();
+	UFUNCTION()
+		void EndMoveAttack();
 	UFUNCTION()
 		void LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type);
 	UFUNCTION(BlueprintCallable, Category ="C_TEST")
