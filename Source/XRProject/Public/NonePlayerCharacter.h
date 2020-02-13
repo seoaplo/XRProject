@@ -113,6 +113,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void SendAction(int32 ActionID, FVector Location, FRotator Rotator);
 
+	UFUNCTION(BlueprintCallable)
+		virtual void SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor);
+
+
+
 
 	UFUNCTION(BlueprintCallable)
 		virtual void SetInBattle(bool battle);

@@ -330,6 +330,29 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	//XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 }
 
+void ANonePlayerCharacter::SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor)
+{
+	auto castPlayerCharacter = Cast<APlayerCharacter>(OtherActor);
+	if (castPlayerCharacter)
+	{
+		auto PlayerCon = Cast<APlayerController>(castPlayerCharacter->GetController());
+		if (PlayerCon)
+		{
+				XRLOG(Warning, TEXT("OverlapPlayer"));
+				OutputStream out;
+				out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
+				out << ObjectID;
+				out << castPlayerCharacter->ObjectID;
+				out << 1;
+				out << Location;
+				out << Rotator;
+				out.CompletePacketBuild();
+				GetNetMgr().SendPacket(out);
+		}
+	}
+
+}
+
 void ANonePlayerCharacter::SetInBattle(bool battle)
 {
 	bInBattle = battle;
