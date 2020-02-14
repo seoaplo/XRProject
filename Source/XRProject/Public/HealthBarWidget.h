@@ -16,6 +16,7 @@ class XRPROJECT_API UHealthBarWidget : public UUserWidget
 public:
 	UHealthBarWidget(const FObjectInitializer& ObjectInitializer);
 public:
+	virtual ~UHealthBarWidget();
 	static UHealthBarWidget* HealthBarInstance;
 	static UHealthBarWidget* GetInatance() { return HealthBarInstance; };
 protected:

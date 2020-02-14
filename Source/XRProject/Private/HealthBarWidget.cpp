@@ -9,6 +9,11 @@ UHealthBarWidget::UHealthBarWidget(const FObjectInitializer& ObjectInitializer) 
 {
 }
 
+UHealthBarWidget::~UHealthBarWidget()
+{
+	HealthBarInstance = nullptr;
+}
+
 void UHealthBarWidget::SetInatance()
 {
 	UHealthBarWidget::HealthBarInstance = this;
