@@ -51,7 +51,6 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
-
 	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
 	CapsuleSize = FVector2D(90.0f, 34.0f);
 	RollingHitCapsuleSize = FVector2D(45.0f, 34.0f);
@@ -280,6 +279,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::SprintEnd);
 	PlayerInputComponent->BindAction("ShowCursor", IE_Pressed, this, &APlayerCharacter::ToggleMouseCursor);
 	PlayerInputComponent->BindAction("TEST", IE_Pressed, this, &APlayerCharacter::TestPlay);
+	PlayerInputComponent->BindAction("WheelUp", IE_Pressed, this, &APlayerCharacter::WheelUp);
+	PlayerInputComponent->BindAction("WheelDown", IE_Pressed, this, &APlayerCharacter::WheelDown);
 
 }
 
@@ -313,15 +314,8 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 
 	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
-
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
-
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
-
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -526,6 +520,9 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 	if (NPC == nullptr)
 		check(false);
 
+	if (bIsSkillPlaying)
+		return -1.0f;
+
 	PlayerStatComp->SetCurrentHP(Damage);
 
 	if (bIsTestMode == false)
@@ -533,20 +530,21 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 
 	bIsHit = true;
 
-	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false)
+	if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
-		if (MyShake)
-		{
-			auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
-			Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
-		}
 	}
 	else
 		bIsHit = false;
+
+	if (MyShake)
+	{
+		auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+		Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
+	}
 
 
 	/*동작 취소 처리*/
@@ -604,7 +602,6 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
-
 	if (bIsSkillPlaying)
 		return;
 	//후딜레이 동작에서 구르는지 체크
@@ -625,7 +622,6 @@ void APlayerCharacter::Roll()
 
 	if (bIsOverallRollAnimPlaying)
 		return;
-
 
 	bool bArrowKeyNotPressed = false;
 
@@ -859,7 +855,7 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		bIsHit = false;
 	}
-	else if (MyAnimInstance->RollMontage)
+	else if (MyAnimInstance->RollMontage == Montage)
 	{
 		bIsOverallRollAnimPlaying = false;
 
@@ -944,6 +940,9 @@ void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType T
 
 void APlayerCharacter::OnDead()
 {
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
+		return;
+
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
 
@@ -1087,6 +1086,11 @@ bool APlayerCharacter::GetbIsSkillPlaying()
 	return bIsSkillPlaying;
 }
 
+bool APlayerCharacter::GetbIsDead()
+{
+	return bIsCharacterDead;
+}
+
 void APlayerCharacter::TestPlay()
 {
 	int32 aaa = PlayerStatComp->GetMaxExp();
@@ -1178,4 +1182,18 @@ void APlayerCharacter::ToggleMouseCursor()
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 	}
 
+}
+
+void APlayerCharacter::WheelUp()
+{
+	XRLOG(Warning, TEXT("WheelUp"));
+	float len = FMath::Max(SpringArmComponent->TargetArmLength - kCameraWheelSpeed, static_cast<float>(kCameraWheelMinLimit));
+	SpringArmComponent->TargetArmLength = len;
+}
+
+void APlayerCharacter::WheelDown()
+{
+	XRLOG(Warning, TEXT("WheelDown"));
+	float len = FMath::Min(SpringArmComponent->TargetArmLength + kCameraWheelSpeed, static_cast<float>(kCameraWheelMaxLimit));
+	SpringArmComponent->TargetArmLength = len;
 }

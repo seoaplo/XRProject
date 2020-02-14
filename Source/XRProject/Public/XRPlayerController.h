@@ -50,5 +50,6 @@ private:
 	void OpenInventory();
 	void OpenPartyMatching();
 	void OpenCharacterInfo();
+	void OpenOptionWindow();
 
 };

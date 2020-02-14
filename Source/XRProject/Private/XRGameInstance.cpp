@@ -272,7 +272,6 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 
 	if (TargetPlayer)
 	{
-
 		if (MotionID == 101)
 		{
 			FPlayerSkillResources* SkillInfo = GetPlayerSkillManager()->

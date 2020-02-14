@@ -81,6 +81,9 @@ public:
 	const int32 kMaxComboCount = 4;
 	const float kSprintMovementSpeed = 750.0f;
 	const float kNormalMovementSpeed = 450.0f;
+	const int32 kCameraWheelSpeed = 40.0f;
+	const int32 kCameraWheelMaxLimit = 550.0f;
+	const int32 kCameraWheelMinLimit = 150.0f;
 
 public:
 
@@ -224,6 +227,7 @@ public:
 	bool GetbIsOverallRollAnimPlaying();
 	bool GetbIsSkillMove();
 	bool GetbIsSkillPlaying();
+	bool GetbIsDead();
 
 	/*Test Function*/
 	void TestPlay();
@@ -265,6 +269,8 @@ private:
 	void Sprint();
 	void SprintEnd();
 	void ToggleMouseCursor();
+	void WheelUp();
+	void WheelDown();
 
 };
 
