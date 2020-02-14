@@ -1,4 +1,4 @@
-#include "MiniMapWidget.h"
+﻿#include "MiniMapWidget.h"
 #include "CanvasPanelSlot.h"
 #include "WidgetTree.h"
 
@@ -119,6 +119,29 @@ void UMiniMapWidget::AddActorList(AActor * Actor, int Type)
 		}
 	}
 	ActorIconList.insert(std::make_pair(ActorIcon, Actor));
+}
+
+void UMiniMapWidget::DeleteActorList(AActor * Actor)
+{
+
+	for (std::list<AActor*>::iterator temp = ActorList.begin(); temp != ActorList.end(); temp++)
+	{
+		if ((*temp) == Actor)
+		{
+			auto saver = temp;
+			temp--;
+			ActorList.erase(saver);
+		}
+	}
+	for (auto temp = ActorIconList.begin(); temp != ActorIconList.end(); temp++)
+	{
+		if ((*temp).second == Actor)
+		{
+			auto saver = temp;
+			temp--;
+			ActorIconList.erase(saver);
+		}
+	}
 }
 
 void UMiniMapWidget::Update()
