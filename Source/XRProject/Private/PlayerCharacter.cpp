@@ -263,6 +263,15 @@ void APlayerCharacter::Tick(float deltatime)
 		SetActorRotation(NextRot);
 	}
 
+	if (bIsOverallRollAnimPlaying)
+	{
+		XRLOG(Warning, TEXT("OverallPlaying ON"));
+	}
+	else
+	{
+		XRLOG(Warning, TEXT("OverallPlaying OFFFFFFF"));
+	}
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -311,17 +320,9 @@ void APlayerCharacter::LookUpAtRate(float Rate)
 void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
-
-	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
-
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
-
+	
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
-
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -604,7 +605,6 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
-
 	if (bIsSkillPlaying)
 		return;
 	//후딜레이 동작에서 구르는지 체크
@@ -625,7 +625,6 @@ void APlayerCharacter::Roll()
 
 	if (bIsOverallRollAnimPlaying)
 		return;
-
 
 	bool bArrowKeyNotPressed = false;
 
@@ -859,7 +858,7 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		bIsHit = false;
 	}
-	else if (MyAnimInstance->RollMontage)
+	else if (MyAnimInstance->RollMontage == Montage)
 	{
 		bIsOverallRollAnimPlaying = false;
 
@@ -944,6 +943,9 @@ void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType T
 
 void APlayerCharacter::OnDead()
 {
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
+		return;
+
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
 

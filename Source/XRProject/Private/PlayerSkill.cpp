@@ -82,7 +82,6 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 
 	Character->SetbIsSkillMove(true);
 
-
 	MyAnimInst->PlaySkillMontage();
 	MyAnimInst->JumpToSkillMonatgeSection(GaiaStr);
 }
@@ -128,6 +127,9 @@ bool USkill_GaiaCrush::End(APlayerCharacter* Character)
 
 	OwnerPlayer->SetbIsSkillPlaying(false);
 	
+	if (OwnerPlayer->bIsSprint)
+		OwnerPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+	
 	return true;
 }
 bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
@@ -142,6 +144,8 @@ bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
 void USkill_GaiaCrush::RadiusOverlapEvent(UPrimitiveComponent * OverlappedComp, AActor * OtherActor,
 	UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	//UXRGameInstance* Inst = Cast<UXRGameInstance>(OwnerPlayer->GetGameInstance());
+	
 	if (Cast<APlayerController>(OwnerPlayer->GetController()))
 	{
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
