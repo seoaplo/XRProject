@@ -83,7 +83,12 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 		check(false);
 	
 	if (!ConditionCheck(Character))
+	{
+		OwnerPlayer->SetbIsSkillPlaying(false);
+		OwnerPlayer->SetbIsSkillMove(false);
 		return;
+	}
+		
 	  //주의 : 테스트 끝나면 복구할 것
 
 

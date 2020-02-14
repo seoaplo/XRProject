@@ -74,7 +74,11 @@ void UPlayerCharacterStatComponent::SubtractStamina(float Value)
 
 void UPlayerCharacterStatComponent::SetMaxStamina(float Stamina)
 {
+
 	MaxStamina = FMath::Max(Stamina, 0.0f);
+	if (UHealthBarWidget::GetInatance())
+		UHealthBarWidget::GetInatance()->SetMaxStamina(Stamina);
+
 	OnStatChange.Broadcast();
 }
 
@@ -87,7 +91,8 @@ void UPlayerCharacterStatComponent::SetCurrentStamina(float Stamina)
 {
 	CurrentStamina = FMath::Clamp(Stamina, 0.f, MaxStamina);
 	XRLOG(Warning, TEXT("Stamina Set %f"), Stamina);
-	//UHealthBarWidget::GetInatance()->stami
+	if(UHealthBarWidget::GetInatance())
+		UHealthBarWidget::GetInatance()->ApplyStamina(Stamina);
 	OnStatChange.Broadcast();
 }
 
@@ -113,13 +118,16 @@ int32 UPlayerCharacterStatComponent::GetCurrentExp()
 void UPlayerCharacterStatComponent::SetCurrentExp(int32 Exp)
 {
 	CurrentExp = FMath::Clamp(Exp, 0, MaxExp);
-	//UExpBar::GetInatance()->SetCurrentExp(Exp);
+	if(UExpBar::GetInstance())
+		UExpBar::GetInstance()->SetCurrentExp(Exp);
 	OnStatChange.Broadcast();
 }
 
 void UPlayerCharacterStatComponent::SetMaxExp(int32 Exp)
 {
 	MaxExp = FMath::Max(Exp, 0);
+	if (UExpBar::GetInstance())
+		UExpBar::GetInstance()->SetMaxExp(Exp);
 	OnStatChange.Broadcast();
 }
 

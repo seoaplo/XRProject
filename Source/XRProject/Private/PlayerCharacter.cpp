@@ -592,6 +592,9 @@ void APlayerCharacter::Attack()
 	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit || bIsSkillPlaying)
 		return;
 
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
+		return;
+
 
 	AttackOverlapList.clear(); //Overlap list 초기화
 
@@ -623,6 +626,8 @@ void APlayerCharacter::Attack()
 void APlayerCharacter::Roll()
 {
 	if (bIsSkillPlaying)
+		return;
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 	//후딜레이 동작에서 구르는지 체크
 	if (bIsAttack)

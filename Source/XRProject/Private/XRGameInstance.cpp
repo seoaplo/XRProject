@@ -411,10 +411,10 @@ constexpr int64_t ToINT64(T value) {
 }
 
 
-#define READ_STAT_BIT(bit, setter)\
-if(flag & ToINT64(bit)) {\
-	TargetPlayer->PlayerStatComp->setter(input.ReadInt32());\
-}
+//#define READ_STAT_BIT(bit, setter)\
+//if(flag & ToINT64(bit)) {\
+//	TargetPlayer->PlayerStatComp->setter(input.ReadInt32());\
+//}
 
 void UXRGameInstance::CharacterRolling(InputStream& input)
 {
@@ -449,23 +449,59 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 
 	if (TargetPlayer == MapManager->GetPlayer())
 	{
-		READ_STAT_BIT(StatBit::kHP, SetCurrentHP);
-		READ_STAT_BIT(StatBit::kMaxHp, SetMaxHP);
-		READ_STAT_BIT(StatBit::kAttackMin, SetAttack_Min);
-		READ_STAT_BIT(StatBit::kAttackMax, SetAttack_Max);
-		READ_STAT_BIT(StatBit::kDefence, SetDefence);
-		READ_STAT_BIT(StatBit::kSpeed, SetSpeed);
-		READ_STAT_BIT(StatBit::kLv, SetLevel);
-		//READ_STAT_BIT(StatBit::kJob, SetJob);
+		if (flag & ToINT64(StatBit::kHP))
+		{
+			int32 NewHP = input.ReadInt32();
+			if (UHealthBarWidget::GetInatance() != nullptr)
+				UHealthBarWidget::GetInatance()->ApplyHp(NewHP);
+			TargetPlayer->PlayerStatComp->SetCurrentHP(NewHP);
+		}
+		if (flag & ToINT64(StatBit::kMaxHp))
+			TargetPlayer->PlayerStatComp->SetMaxHP(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kAttackMin))
+			TargetPlayer->PlayerStatComp->SetAttack_Min(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kAttackMax))
+			TargetPlayer->PlayerStatComp->SetAttack_Max(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kDefence))
+			TargetPlayer->PlayerStatComp->SetDefence(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kSpeed))
+			TargetPlayer->PlayerStatComp->SetSpeed(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kLv))
+			TargetPlayer->PlayerStatComp->SetLevel(input.ReadInt32());
 		if (flag & ToINT64(StatBit::kGold))
 			Inventory::GetInstance().SetGold(input.ReadInt32());
-		READ_STAT_BIT(StatBit::kStr, SetSTR);
-		READ_STAT_BIT(StatBit::kDex, SetDEX);
-		READ_STAT_BIT(StatBit::kIntel, SetINT);
-		READ_STAT_BIT(StatBit::kExp, SetCurrentExp);
-		READ_STAT_BIT(StatBit::kMaxExp, SetMaxExp);
-		READ_STAT_BIT(StatBit::kStamina, SetCurrentStamina);
-		READ_STAT_BIT(StatBit::kMaxStamina, SetMaxStamina);
+		if (flag & ToINT64(StatBit::kStr))
+			TargetPlayer->PlayerStatComp->SetSTR(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kDex))
+			TargetPlayer->PlayerStatComp->SetDEX(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kIntel))
+			TargetPlayer->PlayerStatComp->SetINT(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kExp))
+			TargetPlayer->PlayerStatComp->SetCurrentExp(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kMaxExp))
+			TargetPlayer->PlayerStatComp->SetMaxExp(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kStamina))
+			TargetPlayer->PlayerStatComp->SetCurrentStamina(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kMaxStamina))
+			TargetPlayer->PlayerStatComp->SetMaxStamina(input.ReadInt32());
+
+		//READ_STAT_BIT(StatBit::kHP, SetCurrentHP);
+		//READ_STAT_BIT(StatBit::kMaxHp, SetMaxHP);
+		//READ_STAT_BIT(StatBit::kAttackMin, SetAttack_Min);
+		//READ_STAT_BIT(StatBit::kAttackMax, SetAttack_Max);
+		//READ_STAT_BIT(StatBit::kDefence, SetDefence);
+		//READ_STAT_BIT(StatBit::kSpeed, SetSpeed);
+		//READ_STAT_BIT(StatBit::kLv, SetLevel);
+		////READ_STAT_BIT(StatBit::kJob, SetJob);
+		//if (flag & ToINT64(StatBit::kGold))
+		//	Inventory::GetInstance().SetGold(input.ReadInt32());
+		//READ_STAT_BIT(StatBit::kStr, SetSTR);
+		//READ_STAT_BIT(StatBit::kDex, SetDEX);
+		//READ_STAT_BIT(StatBit::kIntel, SetINT);
+		//READ_STAT_BIT(StatBit::kExp, SetCurrentExp);
+		//READ_STAT_BIT(StatBit::kMaxExp, SetMaxExp);
+		//READ_STAT_BIT(StatBit::kStamina, SetCurrentStamina);
+		//READ_STAT_BIT(StatBit::kMaxStamina, SetMaxStamina);
 		XRLOG(Warning, TEXT("Status Change Received"));
 #pragma region DUMMY
 		/*if (flag & ToINT64(StatBit::kHP))

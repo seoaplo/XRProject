@@ -14,6 +14,8 @@ class XRPROJECT_API UExpBar : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	virtual ~UExpBar();
+public:
 	static UExpBar* Instance;
 	static UExpBar* GetInstance() { return Instance; };
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Info")

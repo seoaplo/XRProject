@@ -32,9 +32,6 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
 		 OnHPZero.Broadcast();
 	 }
 
-	 if(UHealthBarWidget::GetInatance() != nullptr)
-		UHealthBarWidget::GetInatance()->ApplyHp(NewHP);
-
 	 XRLOG(Warning, TEXT("HP Set %f"), Current_HP);
 	 OnStatChange.Broadcast();
  }
