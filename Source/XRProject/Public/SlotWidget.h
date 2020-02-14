@@ -34,6 +34,8 @@ public:
 		virtual bool IsEmpty();
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		void DropIn(UUserWidget * SlotWidget);
+	UFUNCTION(BlueprintCallable, Category = "C_Function")
+		void GetIcon();
 	UFUNCTION(BlueprintImplementableEvent)
 		void Update();
 };

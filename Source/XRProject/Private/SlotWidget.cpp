@@ -22,6 +22,13 @@ bool USlotWidget::IsEmpty()
 	return !SlotObject;
 }
 
+void USlotWidget::GetIcon()
+{
+	UXRGameInstance* XRGI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+	if (!XRGI) return;
+	XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+}
+
 void USlotWidget::SetSlotObject()
 {
 	UXRGameInstance* XRGI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
