@@ -3,6 +3,8 @@
 
 #include "ExpBar.h"
 
+UExpBar* UExpBar::Instance = nullptr;
+
 void UExpBar::SetMaxExp(int Exp)
 {
 	TargetMaxExp = Exp;

@@ -26,6 +26,10 @@ protected:
 		int TargetCurrentHP;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Info")
 		int TargetBeforeHP;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Info")
+		int TargetMaxStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Info")
+		int TargetCurrentStamina;
 public:
 	UFUNCTION(BlueprintCallable)
 		void SetInatance();
@@ -33,6 +37,9 @@ public:
 		void SetMaxHp(int PlayerMaxHP);
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 		void ApplyHp(int PlayerCurrentHP);
-
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void SetMaxStamina(int PlayerMaxStamina);
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+		void ApplyStamina(int PlayerCurrentStamina);
 
 };
