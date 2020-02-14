@@ -53,8 +53,12 @@ USkill_GaiaCrush::~USkill_GaiaCrush()
 
 void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 {
+
 	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
+
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead())
+		return;
 
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
 		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("GaiaTargetCheck"));
