@@ -46,7 +46,7 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterPosition);
 		
-	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAction)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kInventoryUpdate)->BindUObject(
@@ -466,7 +466,7 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 		READ_STAT_BIT(StatBit::kMaxExp, SetMaxExp);
 		READ_STAT_BIT(StatBit::kStamina, SetCurrentStamina);
 		READ_STAT_BIT(StatBit::kMaxStamina, SetMaxStamina);
-
+		XRLOG(Warning, TEXT("Status Change Received"));
 #pragma region DUMMY
 		/*if (flag & ToINT64(StatBit::kHP))
 		{
@@ -499,7 +499,7 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 			XRLOG(Warning, TEXT("AttackMax Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetAttack_Max());
 		}*/
 
-#pragma endregion
+#pragma endregion	
 		
 	}
 }

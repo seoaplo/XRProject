@@ -86,6 +86,8 @@ const float UPlayerCharacterStatComponent::GetCurrentStamina() const
 void UPlayerCharacterStatComponent::SetCurrentStamina(float Stamina)
 {
 	CurrentStamina = FMath::Clamp(Stamina, 0.f, MaxStamina);
+	XRLOG(Warning, TEXT("Stamina Set %f"), Stamina);
+	//UHealthBarWidget::GetInatance()->stami
 	OnStatChange.Broadcast();
 }
 
@@ -111,6 +113,7 @@ int32 UPlayerCharacterStatComponent::GetCurrentExp()
 void UPlayerCharacterStatComponent::SetCurrentExp(int32 Exp)
 {
 	CurrentExp = FMath::Clamp(Exp, 0, MaxExp);
+	//UExpBar::GetInatance()->SetCurrentExp(Exp);
 	OnStatChange.Broadcast();
 }
 

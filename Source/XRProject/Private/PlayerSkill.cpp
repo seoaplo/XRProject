@@ -57,6 +57,15 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
 
+	/*Attack 취소처리*/
+	if (OwnerPlayer->GetbIsAttack())
+	{
+		OwnerPlayer->SetbIsAttack(false);
+		OwnerPlayer->SetComboCount(0);
+		OwnerPlayer->SetbSavedCombo(false);
+		OwnerPlayer->EndMoveAttack();
+	}
+
 	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead())
 		return;
 
@@ -76,6 +85,15 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	if (!ConditionCheck(Character))
 		return;
 	  //주의 : 테스트 끝나면 복구할 것
+
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
+	out << 101;
+	out << Character->GetActorLocation();
+	out << Character->GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
 
 	FString GaiaStr = "GaiaCrush";
 	int32 Idx = MyAnimInst->SkillMontage->GetSectionIndex(FName(*GaiaStr));

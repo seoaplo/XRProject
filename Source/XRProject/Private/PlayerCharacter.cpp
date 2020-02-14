@@ -391,6 +391,13 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 
 		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
+		if (Type == EPartsType::NUDEBODY)
+			Equipments.BodyItem = nullptr;
+		else if (Type == EPartsType::NUDEHAND)
+			Equipments.HandsItem = nullptr;
+		else if (Type == EPartsType::NUDELEG)
+			Equipments.LegsItem = nullptr;
+
 	}
 
 
@@ -407,16 +414,23 @@ void APlayerCharacter::ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh)
 
 	switch (EquipItem->DefaultInfo.Type)
 	{
-	case 0: { Types = EEquipmentsType::BODY; break; }
-	case 1: { Types = EEquipmentsType::HANDS; break; }
-	case 2: { Types = EEquipmentsType::LEGS; break; }
+		case 0: { Types = EEquipmentsType::BODY; break; }
+		case 1: { Types = EEquipmentsType::HANDS; break; }
+		case 2: { Types = EEquipmentsType::LEGS; break; }
 	}
+
+	USkeletalMesh* LegMesh = Equipments.LegsComponent->SkeletalMesh;
+	USkeletalMesh* HandMesh = Equipments.HandsComponent->SkeletalMesh;
 
 	switch (Types)
 	{
 	case EEquipmentsType::BODY:
 		Equipments.BodyItem = EquipItem;
-		Equipments.BodyComponent->SetSkeletalMesh(SkMesh);
+		Equipments.BodyComponent->SetSkeletalMesh(SkMesh); 
+		Equipments.LegsComponent->SetSkeletalMesh(nullptr);
+		Equipments.LegsComponent->SetSkeletalMesh(LegMesh);
+		Equipments.HandsComponent->SetSkeletalMesh(nullptr);
+		Equipments.HandsComponent->SetSkeletalMesh(HandMesh);
 		break;
 	case EEquipmentsType::HANDS:
 		Equipments.HandsItem = EquipItem;
@@ -481,6 +495,10 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(PartAsset);
 
+
+	USkeletalMesh* LegMesh = Equipments.LegsComponent->SkeletalMesh;
+	USkeletalMesh* HandMesh = Equipments.HandsComponent->SkeletalMesh;
+
 	if (Type == EPartsType::HAIR)
 	{
 		HairComponent->SetSkeletalMesh(LoadedMesh.Get());
@@ -493,6 +511,10 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	{
 		Equipments.BodyItem = nullptr;
 		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get());
+		Equipments.LegsComponent->SetSkeletalMesh(nullptr);
+		Equipments.LegsComponent->SetSkeletalMesh(LegMesh);
+		Equipments.HandsComponent->SetSkeletalMesh(nullptr);
+		Equipments.HandsComponent->SetSkeletalMesh(HandMesh);
 	}
 	else if (Type == EPartsType::NUDEHAND)
 	{
@@ -524,9 +546,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		return -1.0f;
 
 	PlayerStatComp->SetCurrentHP(Damage);
-
-	if (bIsTestMode == false)
-		UHealthBarWidget::GetInatance()->ApplyHp(this->PlayerStatComp->GetCurrentHP());
+		
 
 	bIsHit = true;
 
@@ -584,7 +604,7 @@ void APlayerCharacter::Attack()
 		MyAnimInstance->PlayAttackMontage();
 
 		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
 		out << ComboCount;
 		out << GetActorLocation();
 		out << GetActorRotation();
@@ -652,7 +672,7 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
-	if (bIsOverallRollAnimPlaying)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying)
 		return;
 
 	bIsSprint = true;
@@ -904,7 +924,7 @@ void APlayerCharacter::ContinueCombo()
 
 
 		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
 		out << ComboCount;
 		out << GetActorLocation();
 		out << GetActorRotation();
@@ -1101,15 +1121,6 @@ void APlayerCharacter::TestPlay()
 	if(!bIsSkillPlaying)
 		Skill->Play(this);
 
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
-	out << 101;
-	out << GetActorLocation();
-	out << GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
-	CurrentAttackID = ComboCount;
-
 }
 
 UItemEquipment* APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
@@ -1196,4 +1207,35 @@ void APlayerCharacter::WheelDown()
 	XRLOG(Warning, TEXT("WheelDown"));
 	float len = FMath::Min(SpringArmComponent->TargetArmLength + kCameraWheelSpeed, static_cast<float>(kCameraWheelMaxLimit));
 	SpringArmComponent->TargetArmLength = len;
+}
+
+
+void APlayerCharacter::SetbIsAttack(bool b)
+{
+	bIsAttack = b;
+}
+
+void APlayerCharacter::SetbSavedCombo(bool b)
+{
+	bSavedCombo = b;
+}
+
+bool APlayerCharacter::GetbIsAttack()
+{
+	return bIsAttack;
+}
+
+bool APlayerCharacter::GetbSavedCombo()
+{
+	return bSavedCombo;
+}
+
+void APlayerCharacter::SetComboCount(int32 NextCount)
+{
+	ComboCount = NextCount;
+}
+
+int32 APlayerCharacter::GetComboCount()
+{
+	return ComboCount;
 }

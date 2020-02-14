@@ -27,7 +27,7 @@ enum class ENetworkCSOpcode : uint16_t
 	kMatchingRequest = 1006,
 	kMatchingConfirmRequest = 1007, // true / false
 
-	kCharacterAttack = 1008,
+	kCharacterAction = 1008,
 	kCharcterHitSuccess = 1009,
 
 	kMonsterHitCharacter = 1010,
@@ -62,7 +62,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kSpawnCharacter = 1001,
 	kSetMonsterController = 1002,
 
-	kNotifyCharacterAttack = 1003,
+	kNotifyCharacterAction = 1003,
 	kNotifyCharacterRolling = 1004,
 	kActorDamaged = 1005,
 

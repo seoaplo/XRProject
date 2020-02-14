@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CharacterStatComponent.h"
+#include "ExpBar.h"
 #include "PlayerCharacterStatComponent.generated.h"
 
 /**
