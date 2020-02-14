@@ -128,7 +128,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
 		int32 ID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
-		bool Intensity; //강격이면 true, 약격이면 false
+		int32 Intensity; //노격 0 약격 1 강격 2
 };
 
 #define GetNetMgr UNetworkManager::GetInstance

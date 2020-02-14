@@ -51,6 +51,17 @@ void AXRPlayerController::OpenCharacterInfo()
 	MainWidget->CharacterInfo->SwitchVisible();
 }
 
+void AXRPlayerController::OpenOptionWindow()
+{
+	AIngameGameMode* Mode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!MainWidget)
+		MainWidget = Mode->CurrentWidget;
+
+	MainWidget->MainMenu->SwitchVisible();
+}
+
+
 void AXRPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -58,6 +69,7 @@ void AXRPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("OpenInventory"), IE_Pressed, this, &AXRPlayerController::OpenInventory);
 	InputComponent->BindAction(TEXT("OpenPartyMatching"), IE_Pressed, this, &AXRPlayerController::OpenPartyMatching);
 	InputComponent->BindAction(TEXT("OpenCharacterInfo"), IE_Pressed, this, &AXRPlayerController::OpenCharacterInfo);
+	InputComponent->BindAction(TEXT("OptionWindow"), IE_Pressed, this, &AXRPlayerController::OpenOptionWindow);
 
 }
 
