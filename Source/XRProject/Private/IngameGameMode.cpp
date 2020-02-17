@@ -47,6 +47,8 @@ void AIngameGameMode::BeginPlay()
 		this, &AIngameGameMode::NotifyMatchCanceled);
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyDungeonReward)->BindUObject(
 		this, &AIngameGameMode::NotifyDungeonReward);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifiyStartLevel)->BindUObject(
+		this, &AIngameGameMode::NotifiyStartLevel);
 
 	if (CurrentWidget->MiniMap != nullptr)
 	{
@@ -70,7 +72,10 @@ void AIngameGameMode::BeginPlay()
 
 	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-	
+	if (GetMapMgr().IsDungeon())
+	{
+		NotifiyLoadComplete();
+	}
 }
 
 
@@ -109,4 +114,18 @@ void AIngameGameMode::NotifyDungeonReward(class InputStream& input)
 {
 	if (CurrentWidget == nullptr) return;
 	CurrentWidget->CreateDungeonResultWidget(input);
+}
+
+void AIngameGameMode::NotifiyStartLevel(class InputStream& input)
+{
+	XRLOG(Warning, TEXT("NotifiyStartLevel"));
+}
+void AIngameGameMode::NotifiyLoadComplete()
+{
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kNotifiyLoadComplete);
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
+	XRLOG(Warning, TEXT("NotifiyLoadComplete"));
 }

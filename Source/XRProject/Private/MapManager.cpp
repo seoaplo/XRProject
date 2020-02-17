@@ -265,13 +265,7 @@ bool UMapManager::OpenMap(UWorld* World)
 	if (World == nullptr) return false;
 	FName* LevelName = MapList.Find(LevelID);
 	if (LevelName == nullptr) return false;
-
-	ULevelStreaming* level = UGameplayStatics::GetStreamingLevel(World, *LevelName);
-	if (level) return false;
-
-	//while(level->GetCurrentState() == ECurrentState::)
 	UGameplayStatics::OpenLevel(World, *LevelName);
-
 
 	return true;
 }
