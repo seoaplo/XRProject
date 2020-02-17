@@ -1156,6 +1156,7 @@ void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Ite
 	const int32 kMalePrimaryLeg = 150;
 	const int32 kMalePrimaryWeapon = 3300001;
 	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
+
 	if (Item == nullptr)
 	{
 		if (Type == EEquipmentsType::BODY)
@@ -1172,8 +1173,6 @@ void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Ite
 	}
 	else
 		GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
-
-
 
 }
 

@@ -23,7 +23,7 @@ class UHealthBarWidget;
 UENUM()
 enum class EEquipmentsType : uint8
 {
-	BODY,
+	BODY = 0,
 	HANDS,
 	LEGS,
 	WEAPON,

@@ -63,6 +63,10 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStatChange)->BindUObject(
 		this, &UXRGameInstance::CharacterStatChange);
 
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMultiPlayerEquipChange)->BindUObject(
+		this, &UXRGameInstance::CharacterEquipChange);
+	
+
 }
 
 void UXRGameInstance::Shutdown()
@@ -413,6 +417,7 @@ constexpr int64_t ToINT64(T value) {
 }
 
 
+
 //#define READ_STAT_BIT(bit, setter)\
 //if(flag & ToINT64(bit)) {\
 //	TargetPlayer->PlayerStatComp->setter(input.ReadInt32());\
@@ -540,4 +545,42 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 #pragma endregion	
 		
 	}
+}
+
+
+void UXRGameInstance::CharacterEquipChange(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
+	int32 TypeID = input.ReadInt32();
+	int32 ItemID = input.ReadInt32();
+
+	APlayerCharacter* TargetCharacter = MapManager->FindPlayer(TargetID);
+	TOptional<UItem*> Item = ItemManager->GetItemFromId(EItemType::EQUIPMENT, ItemID);
+
+	EEquipmentsType EType;
+
+	switch (TypeID)
+	{
+		case 0:
+			EType = EEquipmentsType::BODY;
+			break;
+		case 1:
+			EType = EEquipmentsType::HANDS;
+			break;
+		case 2:
+			EType = EEquipmentsType::LEGS;
+			break;
+		case 3:
+			EType = EEquipmentsType::WEAPON;
+			break;
+	}
+
+	UItem* RetItem = nullptr;
+
+	if (Item.IsSet())
+		RetItem = Item.GetValue();
+
+	UItemEquipment* EItem = Cast<UItemEquipment>(RetItem);
+
+	TargetCharacter->SetEquippedItem(EType, EItem);
 }

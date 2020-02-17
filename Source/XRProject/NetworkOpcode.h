@@ -87,4 +87,5 @@ enum class ENetworkSCOpcode : uint16_t
 
 	kNotifyStatChange = 1024,
 	kNotifyDungeonReward = 1025,
+	kNotifyMultiPlayerEquipChange = 1026,
 };
