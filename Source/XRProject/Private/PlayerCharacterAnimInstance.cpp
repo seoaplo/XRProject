@@ -96,6 +96,9 @@ void UPlayerCharacterAnimInstance::AnimNotify_AttackEnd()
 {
 	if (Delegate_CharacterAttackMoveEnd.IsBound())
 		Delegate_CharacterAttackMoveEnd.Execute();
+
+	if (MyCharacter->bIsSprint)
+		MyCharacter->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 }
 void UPlayerCharacterAnimInstance::AnimNotify_RollingEnd()
 {

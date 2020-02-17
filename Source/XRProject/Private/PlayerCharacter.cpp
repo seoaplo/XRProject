@@ -822,6 +822,7 @@ void APlayerCharacter::TestInitialize()
 	PlayerStatComp->SetLevel(1);
 	PlayerStatComp->SetGender(0);
 	PlayerStatComp->SetSTR(10);
+	PlayerStatComp->SetSTR(10);
 	PlayerStatComp->SetDEX(11);
 	PlayerStatComp->SetINT(12);
 	PlayerStatComp->SetCurrentStamina(100);
@@ -831,10 +832,8 @@ void APlayerCharacter::TestInitialize()
 
 
 	UPlayerSkillManager* SkillManager = MyGameInstance->GetPlayerSkillManager();
-	SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
-		SkillManager->CreateSkillFromID(101), true);
-	SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
-		SkillManager->CreateSkillFromID(102), true);
+	SkillManager->AddSkill(SkillManager->CreateSkillFromID(101), true);
+	SkillManager->AddSkill(SkillManager->CreateSkillFromID(102), true);
 
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());

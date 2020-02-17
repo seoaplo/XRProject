@@ -21,6 +21,8 @@ void UXRGameInstance::Init()
 	MapManager = NewObject<UMapManager>();
 	MapManager->Init();
 	PlayerSkillManager = NewObject<UPlayerSkillManager>();
+	PlayerSkillManager->SetGameInstance(this);
+
 
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(

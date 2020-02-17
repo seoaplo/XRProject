@@ -3,11 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PlayerSkill.h"
 #include "Engine/DataTable.h"
 #include "UObject/NoExportTypes.h"
-#include <initializer_list>
 #include "PlayerSkillManager.generated.h"
+
+class USkillCooldown;
+class UPlayerSkill;
+class UXRGameInstance;
 
 /**
  * 
@@ -17,21 +19,27 @@ class XRPROJECT_API UPlayerSkillManager : public UObject
 {
 	GENERATED_BODY()
 
-
 public:
 	UPlayerSkillManager();
 	virtual ~UPlayerSkillManager();
 
 private:
 	class UDataTable* SkillDataTable;
+	UXRGameInstance* CurrentInstance;
 public:
 	UPROPERTY(VisibleAnywhere)
-	TArray<UPlayerSkill*> SkillListForPlalyer;
+		TArray<UPlayerSkill*> SkillListForPlalyer;
+	UPROPERTY(VisibleAnywhere)
+		TArray<USkillCooldown*> CoolDownList;
 
+public:
+	void SetGameInstance(UXRGameInstance* GI);
 	UPlayerSkill* CreateSkillFromID(int32 ID);
 	UPlayerSkill* FindSkillFromList(TArray<UPlayerSkill*>& SkillList, int32 ID);
+	int32 FindSkillFromCooldownList(int32 ID);
 	UPlayerSkill* FindSkillFromListByName(TArray<UPlayerSkill*>& SkillList, FString& Name);
-	void AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication);
+	void AddSkill(UPlayerSkill* Skill, bool bNeedCheckDuplication);
+	void AddSkillToCooldownList(UPlayerSkill* Skill, bool AutoSetTimer);
 	UDataTable* GetSkillDataTable();
 
 	
