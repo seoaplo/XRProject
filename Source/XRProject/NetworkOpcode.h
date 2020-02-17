@@ -27,18 +27,20 @@ enum class ENetworkCSOpcode : uint16_t
 	kMatchingRequest = 1006,
 	kMatchingConfirmRequest = 1007, // true / false
 
-	kCharacterAttack = 1008,
+	kCharacterAction = 1008,
 	kCharcterHitSuccess = 1009,
 
 	kMonsterHitCharacter = 1010,
 	kSendChatRequest = 1011,
+	
+	kNotifiyLoadComplete = 1012,
 
 	kRequestCharacterWait = 1020,
 	kRequestCharacterSprint = 1021,
 	kRequestChangeZone = 1022,
 	kRequestCharacterRolling = 1023,
-	kNoticeMonsterSkill = 1024,
 
+	kNoticeMonsterSkill = 1024,
 };
 
 
@@ -62,7 +64,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kSpawnCharacter = 1001,
 	kSetMonsterController = 1002,
 
-	kNotifyCharacterAttack = 1003,
+	kNotifyCharacterAction = 1003,
 	kNotifyCharacterRolling = 1004,
 	kActorDamaged = 1005,
 
@@ -78,6 +80,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyMatchResult = 1012,
 	kNotifyMatchCanceled = 1013,
 	kNotifyChat = 1014,
+	kNotifiyStartLevel = 1015,
 
 	kNotifyCharacterWait = 1020,
 	kNotifyCharacterSprint = 1021,
@@ -87,4 +90,6 @@ enum class ENetworkSCOpcode : uint16_t
 
 	kNotifyStatChange = 1024,
 	kNotifyDungeonReward = 1025,
+	
+	kNotifyMultiPlayerEquipChange = 1026,
 };
