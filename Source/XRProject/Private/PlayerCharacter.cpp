@@ -95,8 +95,6 @@ APlayerCharacter::APlayerCharacter()
 
 	CameraComponent->bUsePawnControlRotation = false;
 
-
-
 	FName HairSocket("HairSocket");
 	FName FaceSocket("FaceSocket");
 	FName WeaponSocket("WeaponSocket");
@@ -113,6 +111,16 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		FIRSTBODYMESH
 		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SWORDTRAIL_NORMAL
+		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrail.P_PlayerSwordTrail'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SWORDTRAIL_FINAL
+		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrailFianl.P_PlayerSwordTrailFianl'"));
+
+	check(SWORDTRAIL_NORMAL.Succeeded());
+	check(SWORDTRAIL_FINAL.Succeeded());
 
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
@@ -161,6 +169,14 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTagLocation = FVector(0.0f, 0.0f, 90.0f);
 
+	SwordTrailNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ST1"));
+	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ST2"));
+	SwordTrailNormal->bAutoActivate = false;
+	SwordTrailFinal->bAutoActivate = false;
+
+	SwordTrailNormal->SetTemplate(SWORDTRAIL_NORMAL.Object);
+	SwordTrailFinal->SetTemplate(SWORDTRAIL_FINAL.Object);
+
 	ComboCount = 1;
 	CurrentAttackID = -1;
 	bIsMove = false;
@@ -183,9 +199,6 @@ APlayerCharacter::APlayerCharacter()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-
-	//FCharacterSizeInfo aa;
-	//aa = FindCharacterSizeFromDataTable(1);
 
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
 	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
@@ -1117,14 +1130,11 @@ bool APlayerCharacter::GetbIsDead()
 
 void APlayerCharacter::TestPlay()
 {
-	int32 aaa = PlayerStatComp->GetMaxExp();
-	FString Fstr = "GaiaCrush";
+	FString Fstr = "Berserk";
 	UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
 		FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
 
-	if(!bIsSkillPlaying)
-		Skill->Play(this);
-
+	Skill->Play(this);
 }
 
 UItemEquipment* APlayerCharacter::GetEquippedItem(EEquipmentsType Type)

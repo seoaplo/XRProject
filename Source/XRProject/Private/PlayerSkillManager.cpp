@@ -43,7 +43,16 @@ UPlayerSkill * UPlayerSkillManager::CreateSkillFromID(int32 ID)
 	}
 	else if (SkillInfo->SkillName == "Berserk")
 	{
-		return nullptr;
+		USkill_Berserk* Bsk = NewObject<USkill_Berserk>();
+		Bsk->SetSkillName(SkillInfo->SkillName);
+		Bsk->SetDamageMagnification(SkillInfo->DamageMagnification);
+		Bsk->SetIsKnockBack(SkillInfo->IsKnockBack);
+		Bsk->SetRequireStamina(SkillInfo->RequireStamina);
+		Bsk->SetCoolTime(SkillInfo->CoolTime);
+		Bsk->SetIconID(SkillInfo->IconID);
+		Bsk->SetID(ID);
+
+		return Bsk;
 	}
 
 	return nullptr;

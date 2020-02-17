@@ -211,3 +211,16 @@ void UPlayerCharacterAnimInstance::AnimNotify_GaiaEnd()
 		check(false);
 	MyCharacter->SetbIsSkillPlaying(false);
 }
+
+void UPlayerCharacterAnimInstance::AnimNotify_BerserkEnd()
+{
+	if (IsValid(MyCharacter))
+	{
+		if (Delegate_BerserkEnd.IsBound())
+			Delegate_BerserkEnd.Execute(MyCharacter);
+	}
+	else
+		check(false);
+
+	MyCharacter->SetbIsSkillPlaying(false);
+}

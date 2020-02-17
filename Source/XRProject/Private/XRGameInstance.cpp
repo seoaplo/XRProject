@@ -294,6 +294,19 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 			TargetPlayer->MyAnimInstance->PlaySkillMontage();
 			TargetPlayer->MyAnimInstance->JumpToSkillMonatgeSection(GaiaStr);
 		}
+		else if (MotionID == 102)
+		{
+			FPlayerSkillResources* SkillInfo = GetPlayerSkillManager()->
+				GetSkillDataTable()->FindRow<FPlayerSkillResources>(FName(*(FString::FromInt(MotionID))), TEXT("ST"));
+
+			TargetPlayer->SetActorLocation(TargetLocation);
+			TargetPlayer->SetActorRotation(TargetRotation);
+
+			FString BerserkStr = "Berserk";
+			int32 Idx = TargetPlayer->MyAnimInstance->SkillMontage->GetSectionIndex(FName(*BerserkStr));
+			TargetPlayer->MyAnimInstance->PlaySkillMontage();
+			TargetPlayer->MyAnimInstance->JumpToSkillMonatgeSection(BerserkStr);
+		}
 		else
 		{
 			TargetPlayer->SetActorRotation(TargetRotation);
