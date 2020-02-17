@@ -61,6 +61,17 @@ void AXRPlayerController::OpenOptionWindow()
 	MainWidget->MainMenu->SwitchVisible();
 }
 
+void AXRPlayerController::FocusChattingWindow()
+{
+	AIngameGameMode* Mode = Cast<AIngameGameMode>(GetWorld()->GetAuthGameMode());
+
+	if (!MainWidget)
+		MainWidget = Mode->CurrentWidget;
+
+	MainWidget->ChatingBar->SendBoxFocus(this);
+
+}
+
 
 void AXRPlayerController::SetupInputComponent()
 {
@@ -70,7 +81,7 @@ void AXRPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("OpenPartyMatching"), IE_Pressed, this, &AXRPlayerController::OpenPartyMatching);
 	InputComponent->BindAction(TEXT("OpenCharacterInfo"), IE_Pressed, this, &AXRPlayerController::OpenCharacterInfo);
 	InputComponent->BindAction(TEXT("OptionWindow"), IE_Pressed, this, &AXRPlayerController::OpenOptionWindow);
-
+	InputComponent->BindAction(TEXT("FocusChattingWindow"), IE_Pressed, this, &AXRPlayerController::FocusChattingWindow);
 }
 
 void AXRPlayerController::TemporaryEnterZone()

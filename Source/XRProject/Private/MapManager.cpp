@@ -302,8 +302,7 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			for (int ii = 0; ii < CharacterSkillIDList.Num(); ii++)
 			{
 				UPlayerSkillManager* SkillManager = GI->GetPlayerSkillManager();
-				SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
-					SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
+				SkillManager->AddSkill(SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
 			}
 
 			Player->InitializeCharacter(true, CurrentData);

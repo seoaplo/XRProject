@@ -2,6 +2,8 @@
 
 
 #include "PlayerSkillManager.h"
+#include "PlayerSkill.h"
+#include "SkillCooldown.h"
 #include "XRGameInstance.h"
 
 UPlayerSkillManager::UPlayerSkillManager()
@@ -9,6 +11,7 @@ UPlayerSkillManager::UPlayerSkillManager()
 	FString SkillDataPath = TEXT("DataTable'/Game/Resources/DataTable/PlayerSkillTable.PlayerSkillTable'");
 	static ConstructorHelpers::FObjectFinder<UDataTable> DT_MUSASKILL(*SkillDataPath);
 	if (DT_MUSASKILL.Succeeded()) SkillDataTable = DT_MUSASKILL.Object;
+	//CurrentInstance = GI;
 }
 
 UPlayerSkillManager::~UPlayerSkillManager()
@@ -56,13 +59,28 @@ UPlayerSkill * UPlayerSkillManager::FindSkillFromList(TArray<UPlayerSkill*>& Ski
 	return nullptr;
 }
 
+int32 UPlayerSkillManager::FindSkillFromCooldownList(int32 ID)
+{
+	for (int ii = 0 ; ii < CoolDownList.Num(); ii++)
+	{
+		if (CoolDownList[ii]->GetID() == ID)
+		{
+			XRLOG(Warning, TEXT("Skill CoolD Found, Index : %d"), ii);
+			return ii;
+		}
+	}
+	return -1;
+}
+
 UPlayerSkill * UPlayerSkillManager::FindSkillFromListByName(TArray<UPlayerSkill*>& SkillList, FString& Name)
 {
 	//UPlayerSkill* Skill = *(SkillList.FindByKey(Name));
 	for (UPlayerSkill* Skill : SkillList)
 	{
 		if (Skill->GetSkillName() == Name)
+		{
 			return Skill;
+		}
 	}
 
 	XRLOG(Warning, TEXT("Skill not found"));
@@ -72,11 +90,11 @@ UPlayerSkill * UPlayerSkillManager::FindSkillFromListByName(TArray<UPlayerSkill*
 	return nullptr;
 }
 
-void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkill* Skill, bool bNeedCheckDuplication)
+void UPlayerSkillManager::AddSkill(UPlayerSkill* Skill, bool bNeedCheckDuplication)
 {
 	if (bNeedCheckDuplication)
 	{
-		for (UPlayerSkill* CurSkill : SkillList)
+		for (UPlayerSkill* CurSkill : SkillListForPlalyer)
 		{
 			if (CurSkill == Skill)
 				return;
@@ -86,10 +104,31 @@ void UPlayerSkillManager::AddSkill(TArray<UPlayerSkill*>& SkillList, UPlayerSkil
 	if (Skill == nullptr)
 		return;
 
-	SkillList.Add(Skill);
+	SkillListForPlalyer.Add(Skill);
+
 }
 
 UDataTable* UPlayerSkillManager::GetSkillDataTable()
 {
 	return SkillDataTable;
+}
+
+
+void UPlayerSkillManager::AddSkillToCooldownList(UPlayerSkill* Skill, bool AutoSetTimer)
+{
+	check(Skill);
+
+	USkillCooldown* Cooldown = NewObject<USkillCooldown>();
+	Cooldown->SetCD(Skill->GetID(), Skill->GetCoolTime(), CurrentInstance);
+	int32 Idx = CoolDownList.Add(Cooldown);
+
+	if (AutoSetTimer)
+	{
+		CoolDownList[Idx]->SetTimer();
+	}
+}
+
+void UPlayerSkillManager::SetGameInstance(UXRGameInstance* GI)
+{
+	CurrentInstance = GI;
 }

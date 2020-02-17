@@ -23,7 +23,7 @@ class UHealthBarWidget;
 UENUM()
 enum class EEquipmentsType : uint8
 {
-	BODY,
+	BODY = 0,
 	HANDS,
 	LEGS,
 	WEAPON,
@@ -178,7 +178,6 @@ private:
 	FVector SpringArmLocation;
 	bool bForwardKeyIsNeutral;
 	std::vector<ANonePlayerCharacter*> AttackOverlapList;
-	int32 CurrentComboCount;
 	bool bIsPlayer;
 	bool bInitialized;
 	bool bIsMouseShow;
@@ -222,12 +221,18 @@ public:
 	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
 	void SetbIsSkillMove(bool b);
 	void SetbIsSkillPlaying(bool b);
+	void SetbIsAttack(bool b);
+	void SetbSavedCombo(bool b);
+	void SetComboCount(int32 NextCombo);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
 	bool GetbIsSkillMove();
 	bool GetbIsSkillPlaying();
 	bool GetbIsDead();
+	bool GetbIsAttack();
+	bool GetbSavedCombo();
+	int32 GetComboCount();
 
 	/*Test Function*/
 	void TestPlay();

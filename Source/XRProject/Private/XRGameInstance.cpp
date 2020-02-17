@@ -21,6 +21,8 @@ void UXRGameInstance::Init()
 	MapManager = NewObject<UMapManager>();
 	MapManager->Init();
 	PlayerSkillManager = NewObject<UPlayerSkillManager>();
+	PlayerSkillManager->SetGameInstance(this);
+
 
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
@@ -46,7 +48,7 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUpdateCharacterPosition)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterPosition);
 		
-	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAttack)->BindUObject(
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyCharacterAction)->BindUObject(
 		this, &UXRGameInstance::UpdateCharacterMotion);
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kInventoryUpdate)->BindUObject(
@@ -60,6 +62,10 @@ void UXRGameInstance::Init()
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStatChange)->BindUObject(
 		this, &UXRGameInstance::CharacterStatChange);
+
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMultiPlayerEquipChange)->BindUObject(
+		this, &UXRGameInstance::CharacterEquipChange);
+	
 
 }
 
@@ -411,10 +417,11 @@ constexpr int64_t ToINT64(T value) {
 }
 
 
-#define READ_STAT_BIT(bit, setter)\
-if(flag & ToINT64(bit)) {\
-	TargetPlayer->PlayerStatComp->setter(input.ReadInt32());\
-}
+
+//#define READ_STAT_BIT(bit, setter)\
+//if(flag & ToINT64(bit)) {\
+//	TargetPlayer->PlayerStatComp->setter(input.ReadInt32());\
+//}
 
 void UXRGameInstance::CharacterRolling(InputStream& input)
 {
@@ -449,24 +456,60 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 
 	if (TargetPlayer == MapManager->GetPlayer())
 	{
-		READ_STAT_BIT(StatBit::kHP, SetCurrentHP);
-		READ_STAT_BIT(StatBit::kMaxHp, SetMaxHP);
-		READ_STAT_BIT(StatBit::kAttackMin, SetAttack_Min);
-		READ_STAT_BIT(StatBit::kAttackMax, SetAttack_Max);
-		READ_STAT_BIT(StatBit::kDefence, SetDefence);
-		READ_STAT_BIT(StatBit::kSpeed, SetSpeed);
-		READ_STAT_BIT(StatBit::kLv, SetLevel);
-		//READ_STAT_BIT(StatBit::kJob, SetJob);
+		if (flag & ToINT64(StatBit::kHP))
+		{
+			int32 NewHP = input.ReadInt32();
+			if (UHealthBarWidget::GetInatance() != nullptr)
+				UHealthBarWidget::GetInatance()->ApplyHp(NewHP);
+			TargetPlayer->PlayerStatComp->SetCurrentHP(NewHP);
+		}
+		if (flag & ToINT64(StatBit::kMaxHp))
+			TargetPlayer->PlayerStatComp->SetMaxHP(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kAttackMin))
+			TargetPlayer->PlayerStatComp->SetAttack_Min(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kAttackMax))
+			TargetPlayer->PlayerStatComp->SetAttack_Max(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kDefence))
+			TargetPlayer->PlayerStatComp->SetDefence(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kSpeed))
+			TargetPlayer->PlayerStatComp->SetSpeed(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kLv))
+			TargetPlayer->PlayerStatComp->SetLevel(input.ReadInt32());
 		if (flag & ToINT64(StatBit::kGold))
 			Inventory::GetInstance().SetGold(input.ReadInt32());
-		READ_STAT_BIT(StatBit::kStr, SetSTR);
-		READ_STAT_BIT(StatBit::kDex, SetDEX);
-		READ_STAT_BIT(StatBit::kIntel, SetINT);
-		READ_STAT_BIT(StatBit::kExp, SetCurrentExp);
-		READ_STAT_BIT(StatBit::kMaxExp, SetMaxExp);
-		READ_STAT_BIT(StatBit::kStamina, SetCurrentStamina);
-		READ_STAT_BIT(StatBit::kMaxStamina, SetMaxStamina);
+		if (flag & ToINT64(StatBit::kStr))
+			TargetPlayer->PlayerStatComp->SetSTR(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kDex))
+			TargetPlayer->PlayerStatComp->SetDEX(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kIntel))
+			TargetPlayer->PlayerStatComp->SetINT(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kExp))
+			TargetPlayer->PlayerStatComp->SetCurrentExp(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kMaxExp))
+			TargetPlayer->PlayerStatComp->SetMaxExp(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kStamina))
+			TargetPlayer->PlayerStatComp->SetCurrentStamina(input.ReadInt32());
+		if (flag & ToINT64(StatBit::kMaxStamina))
+			TargetPlayer->PlayerStatComp->SetMaxStamina(input.ReadInt32());
 
+		//READ_STAT_BIT(StatBit::kHP, SetCurrentHP);
+		//READ_STAT_BIT(StatBit::kMaxHp, SetMaxHP);
+		//READ_STAT_BIT(StatBit::kAttackMin, SetAttack_Min);
+		//READ_STAT_BIT(StatBit::kAttackMax, SetAttack_Max);
+		//READ_STAT_BIT(StatBit::kDefence, SetDefence);
+		//READ_STAT_BIT(StatBit::kSpeed, SetSpeed);
+		//READ_STAT_BIT(StatBit::kLv, SetLevel);
+		////READ_STAT_BIT(StatBit::kJob, SetJob);
+		//if (flag & ToINT64(StatBit::kGold))
+		//	Inventory::GetInstance().SetGold(input.ReadInt32());
+		//READ_STAT_BIT(StatBit::kStr, SetSTR);
+		//READ_STAT_BIT(StatBit::kDex, SetDEX);
+		//READ_STAT_BIT(StatBit::kIntel, SetINT);
+		//READ_STAT_BIT(StatBit::kExp, SetCurrentExp);
+		//READ_STAT_BIT(StatBit::kMaxExp, SetMaxExp);
+		//READ_STAT_BIT(StatBit::kStamina, SetCurrentStamina);
+		//READ_STAT_BIT(StatBit::kMaxStamina, SetMaxStamina);
+		XRLOG(Warning, TEXT("Status Change Received"));
 #pragma region DUMMY
 		/*if (flag & ToINT64(StatBit::kHP))
 		{
@@ -499,7 +542,45 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 			XRLOG(Warning, TEXT("AttackMax Changed %d to %d"), CurHp, TargetPlayer->PlayerStatComp->GetAttack_Max());
 		}*/
 
-#pragma endregion
+#pragma endregion	
 		
 	}
+}
+
+
+void UXRGameInstance::CharacterEquipChange(InputStream& input)
+{
+	int64 TargetID = input.ReadInt64();
+	int32 TypeID = input.ReadInt32();
+	int32 ItemID = input.ReadInt32();
+
+	APlayerCharacter* TargetCharacter = MapManager->FindPlayer(TargetID);
+	TOptional<UItem*> Item = ItemManager->GetItemFromId(EItemType::EQUIPMENT, ItemID);
+
+	EEquipmentsType EType;
+
+	switch (TypeID)
+	{
+		case 0:
+			EType = EEquipmentsType::BODY;
+			break;
+		case 1:
+			EType = EEquipmentsType::HANDS;
+			break;
+		case 2:
+			EType = EEquipmentsType::LEGS;
+			break;
+		case 3:
+			EType = EEquipmentsType::WEAPON;
+			break;
+	}
+
+	UItem* RetItem = nullptr;
+
+	if (Item.IsSet())
+		RetItem = Item.GetValue();
+
+	UItemEquipment* EItem = Cast<UItemEquipment>(RetItem);
+
+	TargetCharacter->SetEquippedItem(EType, EItem);
 }

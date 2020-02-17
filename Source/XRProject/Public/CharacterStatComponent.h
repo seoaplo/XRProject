@@ -5,6 +5,7 @@
 #include "XRProject.h"
 #include "Components/ActorComponent.h"
 #include "InputStream.h"
+#include "HealthBarWidget.h"
 #include "CharacterStatComponent.generated.h"
 
 /*

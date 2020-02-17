@@ -5,6 +5,7 @@
 #include "PlayerCharacter.h"
 #include "NonePlayerCharacter.h"
 #include "MapManager.h"
+#include "SkillCooldown.h"
 #include "XRGameInstance.h"
 
 UPlayerSkill::UPlayerSkill()
@@ -57,8 +58,32 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
 
+	
 	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead())
 		return;
+
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(SkillID);
+	if (Ret != -1) //쿨다운리스트에 해당 스킬이 있음. 즉 쿨다운이 돌고있거나, 이미 다 돌고 clear된 노드가 있는 상황
+	{
+		
+		GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetIsEnable();
+		bool IsEnable = GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetIsEnable();
+		if (IsEnable == false)
+		{
+			XRLOG(Warning, TEXT("Skill CoolTime Still Remain %f"), GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetRemainCoolTime());
+			return;
+		}
+		else //enable = true
+		{
+			GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
+		}
+	}
+	else //쿨다운리스트에 해당 스킬이 없음. 한번도 스킬을 사용한 적이 없음
+	{
+		GI->GetPlayerSkillManager()->AddSkillToCooldownList(this, true);
+	}
+
 
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
 		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("GaiaTargetCheck"));
@@ -70,12 +95,36 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 
 	UPlayerCharacterAnimInstance* MyAnimInst = Character->MyAnimInstance;
 	
+	/*Attack 취소처리*/
+	if (OwnerPlayer->GetbIsAttack())
+	{
+		OwnerPlayer->SetbIsAttack(false);
+		OwnerPlayer->SetComboCount(0);
+		OwnerPlayer->SetbSavedCombo(false);
+		OwnerPlayer->EndMoveAttack();
+	}
+
+
+
 	if (!MyAnimInst)
 		check(false);
 	
 	if (!ConditionCheck(Character))
+	{
+		OwnerPlayer->SetbIsSkillPlaying(false);
+		OwnerPlayer->SetbIsSkillMove(false);
 		return;
-	  //주의 : 테스트 끝나면 복구할 것
+	}
+
+
+	
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
+	out << 101;
+	out << Character->GetActorLocation();
+	out << Character->GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
 
 	FString GaiaStr = "GaiaCrush";
 	int32 Idx = MyAnimInst->SkillMontage->GetSectionIndex(FName(*GaiaStr));

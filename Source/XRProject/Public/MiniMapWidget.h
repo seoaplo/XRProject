@@ -64,6 +64,8 @@ public:
 		void SetMyCharacter(AActor* MyActor);
 	UFUNCTION(BlueprintCallable, Category = "C_Widget")
 		void AddActorList(AActor* Actor, int Type);
+	UFUNCTION(BlueprintCallable, Category = "C_Widget")
+		void DeleteActorList(AActor* Actor);
 public:
 	UFUNCTION(BlueprintCallable, Category = "C_Widget")
 		void Update();

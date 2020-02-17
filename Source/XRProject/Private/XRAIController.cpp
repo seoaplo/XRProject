@@ -11,8 +11,6 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
 
-
-
 const FName AXRAIController::HomePosKey(TEXT("HomePos"));
 const FName AXRAIController::PatrolPosKey(TEXT("PatrolPos"));
 const FName AXRAIController::TargetKey(TEXT("Target"));

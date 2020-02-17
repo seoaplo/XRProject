@@ -14,11 +14,17 @@ class XRPROJECT_API UExpBar : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	virtual ~UExpBar();
+public:
+	static UExpBar* Instance;
+	static UExpBar* GetInstance() { return Instance; };
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Info")
 		int TargetMaxExp;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Info")
 		int TargetCurrentExp;
 public:
+	UFUNCTION(BlueprintCallable)
+		void SetInstance() { Instance = this; };
 	UFUNCTION(BlueprintCallable)
 		void SetMaxExp(int Exp);
 	UFUNCTION(BlueprintCallable)

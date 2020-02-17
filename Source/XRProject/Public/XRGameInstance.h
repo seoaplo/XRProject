@@ -101,6 +101,7 @@ private:
 	void CharacterDead(class InputStream& input);
 	void CharacterStatChange(class InputStream& input);
 	void CharacterRolling(class InputStream& input);
+	void CharacterEquipChange(class InputStream& input);
 	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);

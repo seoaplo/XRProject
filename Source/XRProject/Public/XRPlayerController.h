@@ -51,5 +51,6 @@ private:
 	void OpenPartyMatching();
 	void OpenCharacterInfo();
 	void OpenOptionWindow();
+	void FocusChattingWindow();
 
 };
