@@ -144,4 +144,6 @@ public:
 		FString DMG_Increase;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
 		FString DEF_Increase;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
+		FString TimeDuration;
 };

@@ -15,6 +15,7 @@
 #include "DungeonResultWidget.h"
 #include "LoadingBarWidget.h"
 #include "MainMenuWidget.h"
+#include "SkillWindowWidget.h"
 #include "InGameMainWidget.generated.h"
 
 UCLASS()
@@ -44,6 +45,8 @@ public:
 		UExpBar* ExpBar;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
 		UMainMenuWidget* MainMenu;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
+		USkillWindowWidget* SkillWindow;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_WidgetClass")
 		TSubclassOf<UDungeonResultWidget> DungeonResultWidget;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "C_WidgetClass")

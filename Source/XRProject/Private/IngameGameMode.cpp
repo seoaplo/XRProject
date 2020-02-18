@@ -64,6 +64,15 @@ void AIngameGameMode::BeginPlay()
 		}
 	}
 
+	if (CurrentWidget->SkillWindow)
+	{
+		CurrentWidget->SkillWindow->CreateSkillList();
+	}
+	if (CurrentWidget->QuickBar)
+	{
+		CurrentWidget->QuickBar->SetQuickSlot();
+	}
+
 	int32 SizeX = 0;
 	int32 SizeY = 0;
 	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);

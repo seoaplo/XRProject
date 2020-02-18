@@ -128,7 +128,7 @@ TOptional<UItem*> UItemManager::CreateItem(InputStream & input)
 	return nullptr;
 }
 
-void UItemManager::GetIcon(USlotWidget* Target, int ID)
+void UItemManager::GetIcon(UImage* Target, int ID)
 {
 	FSoftObjectPath AssetPath;
 	auto GI = Cast<UXRGameInstance>(Target->GetGameInstance());
@@ -137,7 +137,7 @@ void UItemManager::GetIcon(USlotWidget* Target, int ID)
 	ResultCallback = FStreamableDelegate::CreateLambda([AssetPath, Target, this]()
 	{
 		TSoftObjectPtr<UTexture2D> Loaded(AssetPath);
-		Target->Icon->SetBrushFromTexture(Loaded.Get());
+		Target->SetBrushFromTexture(Loaded.Get());
 		XRLOG(Warning, TEXT("IconLoadComplete"));
 	});
 	GI->GetXRAssetMgr()->ASyncLoadAssetFromPath(AssetPath, ResultCallback);
@@ -183,7 +183,24 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 	}
 	break;
 	case EItemType::CONSUMPTION:
-		break;
+	{
+		FConsumptionTableResource* Table = ConsumptionItemDataTable->FindRow<FConsumptionTableResource>(FName(*(FString::FromInt(ID))), TEXT("z"));
+		if (Table == nullptr)
+			check(false);
+		UItemConsumption* Item = NewObject<UItemConsumption>();
+		Item->DefaultInfo.ID = ID;
+		Item->DefaultInfo.Name = Table->Name;
+		Item->DefaultInfo.IconResourceID = Table->IconID;
+		Item->DefaultInfo.Type = Table->Type;
+		Item->DefaultInfo.RecoveryHP = Table->RecoveryHP;
+		Item->DefaultInfo.RecoveryStamina = Table->RecoveryStamina;
+		Item->DefaultInfo.ToolTip = Table->ToolTip;
+		Item->SetCount(0);
+		Item->ItemType = EItemType::CONSUMPTION;
+		Item->AddToRoot();
+		return Item;
+	}
+	break;
 	case EItemType::ETC:
 		break;
 	default:

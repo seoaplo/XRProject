@@ -65,7 +65,6 @@ struct CharacterData
 
 	// Equipment
 	Equipment EquipArray[4];
-	
 };
 
 struct MonsterData
