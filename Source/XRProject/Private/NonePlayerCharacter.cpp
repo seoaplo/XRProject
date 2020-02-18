@@ -76,7 +76,7 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 					if (followstatus == EPathFollowingStatus::Type::Moving)
 					{
 						SendAction(1000, GetActorLocation(), GetActorRotation());
-						XRLOG(Warning, TEXT("%s Is Moving, %s "), *GetName(), *GetActorLocation().ToString());
+						//XRLOG(Warning, TEXT("%s Is Moving, %s "), *GetName(), *GetActorLocation().ToString());
 					}
 				}
 			}

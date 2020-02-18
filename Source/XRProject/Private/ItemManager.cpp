@@ -147,6 +147,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 {
 	if (EquipmentItemDataTable == nullptr)
 		check(false);
+
 	switch (Type)
 	{
 	case EItemType::EQUIPMENT:
@@ -154,9 +155,7 @@ TOptional<UItem*> UItemManager::GetItemFromId(EItemType Type, int32 ID)
 		FEquipmentTableResource* Table = EquipmentItemDataTable->FindRow<FEquipmentTableResource>(FName(*(FString::FromInt(ID))), TEXT(""));
 
 		if (Table == nullptr) //¸Ç¸ö
-		{
 			return nullptr;
-		}
 
 		UItemEquipment* Item = NewObject<UItemEquipment>();
 

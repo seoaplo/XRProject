@@ -23,7 +23,7 @@ class UHealthBarWidget;
 UENUM()
 enum class EEquipmentsType : uint8
 {
-	BODY,
+	BODY = 0,
 	HANDS,
 	LEGS,
 	WEAPON,
@@ -37,6 +37,35 @@ enum class EPartsType : uint8
 	NUDEHAND,
 	NUDELEG,
 };
+USTRUCT(BlueprintType)
+struct FComboSocket
+{
+	GENERATED_USTRUCT_BODY()
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FXCombo1;
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FXCombo2;
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FXCombo3;
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FXCombo4;
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FXGaiaCrush;
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FxBottom;
+
+	FComboSocket()
+	{
+		FXCombo1	= "FXCombo1";
+		FXCombo2	= "FXCombo2";
+		FXCombo3	= "FXCombo3";
+		FXCombo4	= "FXCombo4";
+		FXGaiaCrush = "FXGaiaCrush";
+		FxBottom	= "FxBottom";
+	}
+};
+
 
 USTRUCT(BlueprintType)
 struct FEquipment
@@ -86,11 +115,8 @@ public:
 	const int32 kCameraWheelMinLimit = 150.0f;
 
 public:
-
-
 	UPROPERTY()
 		class  UAISenseConfig_Damage* AISenseDamage;
-
 
 	UPROPERTY(EditInstanceOnly, Category = "Variable")
 		float RotateSpeed;
@@ -114,13 +140,13 @@ private:
 		class USkeletalMeshComponent* FaceComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Parts")
 		class USkeletalMeshComponent* HairComponent;
-	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
+	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> AnimInstance;
-	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
+	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleAnimInstance;
-	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
+	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> RemoteAnimInstance;
-	UPROPERTY(EditInstanceOnly, Category = "C_AnimInstance")
+	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FVector ScaleVector;
@@ -136,7 +162,18 @@ private:
 		UAIPerceptionStimuliSourceComponent* PlayerAIPerceptionStimul;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FCameraShakeInfo ShakeInfo;
-
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* SwordTrailNormal;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* SwordTrailFinal;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		FComboSocket ComboParticleSocketName;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* BerserkBuffStart;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* BerserkBuffLoop;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		TArray<UParticleSystemComponent*> ParticleArray;
 
 public:
 	UPROPERTY(EditAnywhere)
@@ -233,6 +270,7 @@ public:
 	bool GetbIsAttack();
 	bool GetbSavedCombo();
 	int32 GetComboCount();
+	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
 	/*Test Function*/
 	void TestPlay();
@@ -245,6 +283,7 @@ public:
 
 	FVector2D GetNormalCapsuleSize();
 	FVector2D GetRollingCapsuleSize();
+	FComboSocket GetComboSocket();
 	
 	UFUNCTION()
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,

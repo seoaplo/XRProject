@@ -37,6 +37,30 @@ bool UPlayerSkill::ConditionCheck(APlayerCharacter * Character)
 	return false;
 }
 
+bool UPlayerSkill::CooldownCheck(APlayerCharacter * Character, UPlayerSkill * Skill)
+{
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(Skill->SkillID);
+	if (Ret != -1) //쿨다운리스트에 해당 스킬이 있음. 즉 쿨다운이 돌고있거나, 이미 다 돌고 clear된 노드가 있는 상황
+	{
+		bool IsEnable = GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetIsEnable();
+		if (IsEnable == false)
+		{
+			XRLOG(Warning, TEXT("Skill CoolTime Still Remain %f"), GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetRemainCoolTime());
+			return false;
+		}
+		else //enable = true
+		{
+			GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
+		}
+	}
+	else //쿨다운리스트에 해당 스킬이 없음. 한번도 스킬을 사용한 적이 없음
+	{
+		GI->GetPlayerSkillManager()->AddSkillToCooldownList(Skill, true);
+	}
+	return true;
+}
+
 USkill_GaiaCrush::USkill_GaiaCrush()
 {
 
@@ -59,31 +83,15 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 		OwnerPlayer = Character;
 
 	
-	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead())
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying())
 		return;
 
-	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
-	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(SkillID);
-	if (Ret != -1) //쿨다운리스트에 해당 스킬이 있음. 즉 쿨다운이 돌고있거나, 이미 다 돌고 clear된 노드가 있는 상황
+	if (!ConditionCheck(Character))
 	{
-		
-		GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetIsEnable();
-		bool IsEnable = GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetIsEnable();
-		if (IsEnable == false)
-		{
-			XRLOG(Warning, TEXT("Skill CoolTime Still Remain %f"), GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetRemainCoolTime());
-			return;
-		}
-		else //enable = true
-		{
-			GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
-		}
+		OwnerPlayer->SetbIsSkillPlaying(false);
+		OwnerPlayer->SetbIsSkillMove(false);
+		return;
 	}
-	else //쿨다운리스트에 해당 스킬이 없음. 한번도 스킬을 사용한 적이 없음
-	{
-		GI->GetPlayerSkillManager()->AddSkillToCooldownList(this, true);
-	}
-
 
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
 		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("GaiaTargetCheck"));
@@ -105,18 +113,9 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	}
 
 
-
 	if (!MyAnimInst)
 		check(false);
 	
-	if (!ConditionCheck(Character))
-	{
-		OwnerPlayer->SetbIsSkillPlaying(false);
-		OwnerPlayer->SetbIsSkillMove(false);
-		return;
-	}
-
-
 	
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
@@ -182,13 +181,17 @@ bool USkill_GaiaCrush::End(APlayerCharacter* Character)
 	
 	if (OwnerPlayer->bIsSprint)
 		OwnerPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
-	
+
 	return true;
 }
 bool USkill_GaiaCrush::ConditionCheck(APlayerCharacter * Character)
 {
+	if (!CooldownCheck(Character, this))
+		return false;
+
 	if (Character->PlayerStatComp->GetCurrentStamina() >= GetRequireStamina())
 	{ 
+		
 		return true;
 	}
 	return false;
@@ -247,3 +250,88 @@ float USkill_GaiaCrush::GetAffectRadius()
 {
 	return AffectRadius;
 }
+
+
+USkill_Berserk::USkill_Berserk()
+{
+
+
+}
+
+USkill_Berserk::~USkill_Berserk()
+{
+
+
+}
+
+void USkill_Berserk::Play(APlayerCharacter * Character)
+{
+	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
+		OwnerPlayer = Character;
+
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying())
+		return;
+	
+	if (!ConditionCheck(Character))
+	{
+		OwnerPlayer->SetbIsSkillPlaying(false);
+		return;
+	}
+
+	if (!Character->MyAnimInstance->Delegate_BerserkEnd.IsBound())
+		Character->MyAnimInstance->Delegate_BerserkEnd.BindUFunction(this, FName("End"));
+	
+	OwnerPlayer->SetbIsSkillPlaying(true);
+
+	UPlayerCharacterAnimInstance* MyAnimInst = Character->MyAnimInstance;
+
+	/*Attack 취소처리*/
+	if (OwnerPlayer->GetbIsAttack())
+	{
+		OwnerPlayer->SetbIsAttack(false);
+		OwnerPlayer->SetComboCount(0);
+		OwnerPlayer->SetbSavedCombo(false);
+		OwnerPlayer->EndMoveAttack();
+	}
+
+	if (!MyAnimInst)
+		check(false);
+
+	FString BerserkStr = "Berserk";
+
+	MyAnimInst->PlaySkillMontage();
+	MyAnimInst->JumpToSkillMonatgeSection(BerserkStr);
+
+}
+
+bool USkill_Berserk::End(APlayerCharacter * Character)
+{
+	OwnerPlayer->SetbIsSkillPlaying(false);
+
+	if (OwnerPlayer->bIsSprint)
+		OwnerPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
+	out << 102;
+	out << Character->GetActorLocation();
+	out << Character->GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+	return true;
+}
+
+bool USkill_Berserk::ConditionCheck(APlayerCharacter * Character)
+{
+	if (!CooldownCheck(Character, this))
+		return false; 
+
+
+	if (Character->PlayerStatComp->GetCurrentStamina() >= GetRequireStamina())
+	{
+		CooldownCheck(Character, this);
+		return true;
+	}
+	return false;
+}
+

@@ -8,7 +8,6 @@
 #include "IngameGameMode.h"
 #include "InventoryWidget.h"
 #include "CharacterInfoWidget.h"
-#include "QuickBar.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -179,14 +178,10 @@ void UXRGameInstance::ReadQuickSlot(InputStream & input)
 {
 	for (int i = 0; i < 10; i++)
 	{
-		QuickBar::GetInstance().Data[i].Type = input.ReadInt8();
-		if (QuickBar::GetInstance().Data[i].Type)
+		int Type = input.ReadInt8();
+		if (Type)
 		{
-			QuickBar::GetInstance().Data[i].ID = input.ReadInt32();
-		}
-		else
-		{
-			QuickBar::GetInstance().Data[i].ID = -1;
+			int ID = input.ReadInt32();
 		}
 	}
 }

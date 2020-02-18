@@ -47,6 +47,7 @@ public:
 	virtual void Play(APlayerCharacter* Character);
 	virtual bool End(APlayerCharacter* Character);
 	virtual bool ConditionCheck(APlayerCharacter* Character);
+	virtual bool CooldownCheck(APlayerCharacter* Character, UPlayerSkill* Skill);
 public:
 	void SetID(int32 ID) { SkillID = ID; }
 	void SetSkillName(FString SkillName) { this->SkillName = SkillName; }
@@ -114,11 +115,32 @@ public:
 	float GetAffectRadius();
 };
 
+UCLASS()
+class XRPROJECT_API USkill_Berserk : public UPlayerSkill
+{
+	GENERATED_BODY()
+
+public:
+	USkill_Berserk();
+	~USkill_Berserk();
+
+
+public:
+	UFUNCTION()
+		virtual void Play(APlayerCharacter* Character) override;
+	UFUNCTION()
+		virtual bool End(APlayerCharacter* Character) override;
+	UFUNCTION()
+		virtual bool ConditionCheck(APlayerCharacter* Character) override;
+
+};
+
 
 USTRUCT(BlueprintType)
 struct FPlayerSkillResources : public FTableRowBase
 {
 	GENERATED_BODY()
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "C_SkillRes")
 		FString SkillName;
