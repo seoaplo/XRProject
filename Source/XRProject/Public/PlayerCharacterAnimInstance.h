@@ -99,6 +99,12 @@ public:
 		void AnimNotify_GaiaEnd();
 	UFUNCTION()
 		void AnimNotify_BerserkEnd();
+	UFUNCTION()
+		void AnimNotify_NormalTrail();
+	UFUNCTION()
+		void AnimNotify_FinalTrail();
+	UFUNCTION()
+		void AnimNotify_BerserkEffon();
 
 	void PlayAttackMontage();
 	void PlaySkillMontage();

@@ -119,8 +119,17 @@ APlayerCharacter::APlayerCharacter()
 		SWORDTRAIL_FINAL
 		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrailFianl.P_PlayerSwordTrailFianl'"));
 
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		BERSERK_EFFECT_START
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferStart.P_BufferStart'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		BERSERK_EFFECT_LOOP
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
+
 	check(SWORDTRAIL_NORMAL.Succeeded());
 	check(SWORDTRAIL_FINAL.Succeeded());
+	check(BERSERK_EFFECT_START.Succeeded());
+	check(BERSERK_EFFECT_LOOP.Succeeded());
 
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
@@ -169,13 +178,31 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTagLocation = FVector(0.0f, 0.0f, 90.0f);
 
-	SwordTrailNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ST1"));
-	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ST2"));
+	SwordTrailNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailNormal"));
+	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailFinal"));
+	BerserkBuffStart = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkStart"));
+	BerserkBuffLoop = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkLoop"));
 	SwordTrailNormal->bAutoActivate = false;
 	SwordTrailFinal->bAutoActivate = false;
 
+
 	SwordTrailNormal->SetTemplate(SWORDTRAIL_NORMAL.Object);
 	SwordTrailFinal->SetTemplate(SWORDTRAIL_FINAL.Object);
+	BerserkBuffStart->SetTemplate(BERSERK_EFFECT_START.Object);
+	BerserkBuffLoop->SetTemplate(BERSERK_EFFECT_LOOP.Object);
+	BerserkBuffStart->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
+		ComboParticleSocketName.FxBottom);
+	BerserkBuffLoop->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
+		ComboParticleSocketName.FxBottom);
+
+	BerserkBuffStart->bAutoActivate = false;
+	BerserkBuffLoop->bAutoActivate = false;
+
+	ParticleArray.Add(SwordTrailNormal);
+	ParticleArray.Add(SwordTrailFinal);
+	ParticleArray.Add(BerserkBuffStart);
+	ParticleArray.Add(BerserkBuffLoop);
+
 
 	ComboCount = 1;
 	CurrentAttackID = -1;
@@ -353,7 +380,7 @@ void APlayerCharacter::MoveForward(float Value)
 void APlayerCharacter::MoveRight(float Value)
 {
 	RightValue = Value;
-
+	
 	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying)
 		return;
 
@@ -1251,4 +1278,23 @@ void APlayerCharacter::SetComboCount(int32 NextCount)
 int32 APlayerCharacter::GetComboCount()
 {
 	return ComboCount;
+}
+
+UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString FindStr)
+{
+	for (UParticleSystemComponent* Comp : ParticleArray)
+	{
+		if (Comp->GetName() == FindStr)
+		{
+			return Comp;
+		}
+	}
+
+	check(false);
+	return nullptr;
+}
+
+FComboSocket APlayerCharacter::GetComboSocket()
+{
+	return ComboParticleSocketName;
 }

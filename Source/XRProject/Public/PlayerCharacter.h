@@ -52,6 +52,8 @@ public:
 		FName FXCombo4;
 	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
 		FName FXGaiaCrush;
+	UPROPERTY(EditDefaultsOnly, Category = "C_SocketName")
+		FName FxBottom;
 
 	FComboSocket()
 	{
@@ -60,6 +62,7 @@ public:
 		FXCombo3	= "FXCombo3";
 		FXCombo4	= "FXCombo4";
 		FXGaiaCrush = "FXGaiaCrush";
+		FxBottom	= "FxBottom";
 	}
 };
 
@@ -165,6 +168,12 @@ private:
 		UParticleSystemComponent* SwordTrailFinal;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		FComboSocket ComboParticleSocketName;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* BerserkBuffStart;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* BerserkBuffLoop;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		TArray<UParticleSystemComponent*> ParticleArray;
 
 public:
 	UPROPERTY(EditAnywhere)
@@ -261,6 +270,7 @@ public:
 	bool GetbIsAttack();
 	bool GetbSavedCombo();
 	int32 GetComboCount();
+	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
 	/*Test Function*/
 	void TestPlay();
