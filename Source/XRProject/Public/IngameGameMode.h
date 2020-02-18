@@ -28,7 +28,6 @@ public:
 		TSubclassOf<UInGameMainWidget> MainWidget;
 	UPROPERTY()
 		UInGameMainWidget* CurrentWidget;
-
 public:
 
 
@@ -40,6 +39,8 @@ public:
 	void SpawnRemotePlayer();
 	void DeleteRemotePlayer();
 
+	void NotifiyStartLevel(class InputStream& input);
+	void NotifiyLoadComplete();
 	// widget data from server
 	void NotifyMatchResult(class InputStream& input);
 	void NotifyMatchCanceled(class InputStream& input);

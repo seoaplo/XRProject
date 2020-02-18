@@ -37,6 +37,7 @@ public:
 	bool Init();
 	bool Clear();
 
+	bool IsDungeon() { if ((LevelID % 100) > 0) return true; else return false;}
 	// ∏ ø° ¿‘¿Â
 	void ReadMapDataFromServer(InputStream& Input);
 	void ReadPlayerFromServer(InputStream& Input);
