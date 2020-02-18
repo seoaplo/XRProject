@@ -76,7 +76,7 @@ void ANonePlayerCharacter::Tick(float DeltaTime)
 					if (followstatus == EPathFollowingStatus::Type::Moving)
 					{
 						SendAction(1000, GetActorLocation(), GetActorRotation());
-						XRLOG(Warning, TEXT("%s Is Moving, %s "), *GetName(), *GetActorLocation().ToString());
+						//XRLOG(Warning, TEXT("%s Is Moving, %s "), *GetName(), *GetActorLocation().ToString());
 					}
 				}
 			}
@@ -327,7 +327,7 @@ void ANonePlayerCharacter::SendAction(int32 ActionID, FVector Location, FRotator
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
 
-	XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+	//XRLOG(Warning, TEXT("Send to MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 }
 
 void ANonePlayerCharacter::SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor)

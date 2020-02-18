@@ -35,6 +35,8 @@ enum class ENetworkCSOpcode : uint16_t
 	
 	kNotifiyLoadComplete = 1012,
 
+	kNotifiyLoadComplete = 1012,
+
 	kRequestCharacterWait = 1020,
 	kRequestCharacterSprint = 1021,
 	kRequestChangeZone = 1022,
@@ -80,6 +82,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyMatchResult = 1012,
 	kNotifyMatchCanceled = 1013,
 	kNotifyChat = 1014,
+
 	kNotifiyStartLevel = 1015,
 
 	kNotifyCharacterWait = 1020,
@@ -91,4 +94,5 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyStatChange = 1024,
 	kNotifyDungeonReward = 1025,
 	kNotifyMultiPlayerEquipChange = 1026,
+	kNotifyBuffEnd = 1027,
 };

@@ -211,3 +211,69 @@ void UPlayerCharacterAnimInstance::AnimNotify_GaiaEnd()
 		check(false);
 	MyCharacter->SetbIsSkillPlaying(false);
 }
+
+void UPlayerCharacterAnimInstance::AnimNotify_BerserkEnd()
+{
+	if (IsValid(MyCharacter))
+	{
+		if (Delegate_BerserkEnd.IsBound())
+			Delegate_BerserkEnd.Execute(MyCharacter);
+	}
+	else
+		check(false);
+
+	MyCharacter->SetbIsSkillPlaying(false);
+	UParticleSystemComponent* Comp = MyCharacter->GetParticleComponentByName(TEXT("BerserkLoop"));
+	Comp->SetActive(true);
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_NormalTrail()
+{
+	int32 ComboCount = MyCharacter->GetComboCount();
+	UParticleSystemComponent* Comp;
+
+	FName aaa("FxBottom");
+
+	switch (ComboCount)
+	{
+		case 1:
+			Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
+			Comp->SetActive(false);
+			Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent, 
+				FAttachmentTransformRules::KeepRelativeTransform , MyCharacter->GetComboSocket().FXCombo1);
+			Comp->SetActive(true);
+			break;
+		case 2:
+			Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
+			Comp->SetActive(false);
+			Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent,
+				FAttachmentTransformRules::KeepRelativeTransform, MyCharacter->GetComboSocket().FXCombo2);
+			Comp->SetActive(true);
+			break;
+		case 3:
+			Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
+			Comp->SetActive(false);
+			Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent,
+				FAttachmentTransformRules::KeepRelativeTransform, MyCharacter->GetComboSocket().FXCombo3);
+			Comp->SetActive(true);
+			break;
+	}
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_FinalTrail()
+{
+	const int32 FinalCombo = 4;
+	UParticleSystemComponent* Comp;
+	Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailFinal"));
+	Comp->SetActive(false);
+	Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent,
+		FAttachmentTransformRules::KeepRelativeTransform, MyCharacter->GetComboSocket().FXCombo4);
+	Comp->SetActive(true);
+}
+
+
+void UPlayerCharacterAnimInstance::AnimNotify_BerserkEffon()
+{
+	UParticleSystemComponent* Comp = MyCharacter->GetParticleComponentByName(TEXT("BerserkStart"));
+	Comp->SetActive(true);
+}

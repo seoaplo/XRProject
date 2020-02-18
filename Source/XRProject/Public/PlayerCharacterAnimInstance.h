@@ -14,6 +14,7 @@ DECLARE_DELEGATE(FCheckCharacterAttackMoveStart)
 DECLARE_DELEGATE(FCheckCharacterAttackMoveEnd)
 DECLARE_DELEGATE_OneParam(FGaiaCrushEnd, APlayerCharacter*)
 DECLARE_DELEGATE_OneParam(FGaiaCrushProcessEnd, APlayerCharacter*)
+DECLARE_DELEGATE_OneParam(FBerserkEnd, APlayerCharacter*)
 
 
 
@@ -33,8 +34,9 @@ public:
 	FCheckNextComboValid Delegate_CheckNextCombo;
 	FCheckCharacterAttackMoveStart Delegate_CharacterAttackMoveStart;
 	FCheckCharacterAttackMoveEnd Delegate_CharacterAttackMoveEnd;
-	FGaiaCrushEnd Delegate_GaiaCrushEnd;
-	FGaiaCrushProcessEnd Delegate_GaiaCrushProcessEnd;
+	FGaiaCrushEnd			Delegate_GaiaCrushEnd;
+	FGaiaCrushProcessEnd	Delegate_GaiaCrushProcessEnd;
+	FBerserkEnd				Delegate_BerserkEnd;
 public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		UAnimMontage* AttackMontage;
@@ -95,6 +97,14 @@ public:
 		void AnimNotify_GaiaHit();
 	UFUNCTION()
 		void AnimNotify_GaiaEnd();
+	UFUNCTION()
+		void AnimNotify_BerserkEnd();
+	UFUNCTION()
+		void AnimNotify_NormalTrail();
+	UFUNCTION()
+		void AnimNotify_FinalTrail();
+	UFUNCTION()
+		void AnimNotify_BerserkEffon();
 
 	void PlayAttackMontage();
 	void PlaySkillMontage();
