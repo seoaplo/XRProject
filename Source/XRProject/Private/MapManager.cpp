@@ -5,13 +5,22 @@
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 #include "BossCharacter.h"
+#include "WidgetBlueprint.h"
 
 UMapManager::UMapManager()
 {
-	MapList.Add(100, TEXT("LEVEL_Village"));
-	MapList.Add(111, TEXT("LEVEL_Zone_1"));
-	MapList.Add(112, TEXT("LEVEL_Zone_2"));
-	MapList.Add(113, TEXT("LEVLE_Boss"));
+	MapList.Add(100, 
+		LevelPathData(FName(TEXT("LEVEL_Village")),
+			wstring(L"World'/Game/Resources/Map/Village/LEVEL/LEVEL_Village.LEVEL_Village'")));
+	MapList.Add(111,
+		LevelPathData(FName(TEXT("LEVEL_Zone_1")), 
+			wstring(L"World'/Game/Resources/Map/Zone/Level/LEVEL_Zone_1.LEVEL_Zone_1'")));
+	MapList.Add(112,
+		LevelPathData(FName(TEXT("LEVEL_Zone_2")),
+			wstring(L"World'/Game/Resources/Map/Zone/Level/LEVEL_Zone_2.LEVEL_Zone_2'")));
+	MapList.Add(113,
+		LevelPathData(FName(TEXT("LEVLE_Boss")), 
+			wstring(L"World'/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss.LEVLE_Boss'")));
 }
 bool UMapManager::Init()
 {
@@ -20,7 +29,7 @@ bool UMapManager::Init()
 
 	Spawn_Character.Unbind();
 	Delete_Character.Unbind();
-
+	PreWorld = nullptr;
 	return true;
 }
 bool UMapManager::Clear()
@@ -263,13 +272,45 @@ bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
 bool UMapManager::OpenMap(UWorld* World)
 {
 	if (World == nullptr) return false;
-	FName* LevelName = MapList.Find(LevelID);
-	if (LevelName == nullptr) return false;
-	UGameplayStatics::OpenLevel(World, *LevelName);
+	PreWorld = World;
 
+	LevelPathData* LevelPath = MapList.Find(LevelID);
+	if (LevelPath == nullptr) return false;
+
+
+	FStringClassReference MyWidgetClassRef(TEXT("/Game/Resources/UI/Blueprint/Widget/LoadingBar/BP_LoadingBarWidget.BP_LoadingBarWidget_C"));
+	UClass* MyWidgetClass = MyWidgetClassRef.TryLoadClass<UUserWidget>();
+	if (MyWidgetClass == nullptr) return false;
+	
+	ULoadingBarWidget * BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
+	if (BP_LoadingWidget == nullptr) return false;
+
+	
+
+	BP_LoadingWidget->AddToViewport();
+
+	float Percent = 0.0f;
+	auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
+	if (gInst)
+	{
+		FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
+
+		FStreamableDelegate resultcallback;
+		resultcallback.BindLambda([path, this, World, LevelPath, BP_LoadingWidget]()
+		{
+			TSoftObjectPtr<ULevel> LoadedMap(path);
+			XRLOG(Warning, TEXT("Map ASync Load Complete"));
+
+			BP_LoadingWidget->ApplyPercentage(1.0f);
+			UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
+		});
+		gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
+
+		Percent = Percent < 0.9f ? (Percent + 0.01f) : 0.9f;
+		BP_LoadingWidget->ApplyPercentage(Percent);
+	}
 	return true;
 }
-
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
@@ -355,10 +396,6 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 
 					UClass* GeneratedBP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *BPPath.ToString()));
 
-					//TSoftClassPtr<ABossCharacter> LoadedBP(BPPath);
-					//actor = World->SpawnActor
-					//(LoadedBP.Get()->StaticClass(), &CurrentData.Location, &CurrentData.Rotator, param);
-				
 					actor = World->SpawnActor<ABossCharacter>(GeneratedBP, CurrentData.Location, CurrentData.Rotator,param);
 				} 
 		}
@@ -377,8 +414,6 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 				Monster->Destroy();
 				continue;
 			}
-			//if (Monster->PlayerStatComp == nullptr) return false;
-			//Monster->PlayerStatComp->GetStatDataFromServer(Input);
 			Monster->NpcLoadStart(CurrentData.MonsterID);
 			Monster->ObjectID = CurrentData.ObjectID;
 			MonsterList.Add(CurrentData.ObjectID, Monster);
@@ -387,6 +422,7 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 	MonsterDataList.clear();
 	return true;
 }
+
 
 bool UMapManager::RemotePlayerSpawn(UWorld* world)
 {
