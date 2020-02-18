@@ -35,8 +35,6 @@ enum class ENetworkCSOpcode : uint16_t
 	
 	kNotifiyLoadComplete = 1012,
 
-	kNotifiyLoadComplete = 1012,
-
 	kRequestCharacterWait = 1020,
 	kRequestCharacterSprint = 1021,
 	kRequestChangeZone = 1022,

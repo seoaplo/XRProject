@@ -43,7 +43,7 @@ int UQuickSlot::GetCount()
 
 float UQuickSlot::GetMaxCoolDown()
 {
-	if (IsEmpty() || !bIsSkill)
+	if (!IsEmpty() && bIsSkill)
 	{
 		UPlayerSkill* PlayerSkill = Cast<UPlayerSkill>(TargetObject);
 		return PlayerSkill->GetCoolTime();
