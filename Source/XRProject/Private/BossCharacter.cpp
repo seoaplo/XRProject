@@ -105,7 +105,6 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 			}
 		}
 	}
-
 }
 
 void ABossCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
