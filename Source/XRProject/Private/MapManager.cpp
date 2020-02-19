@@ -320,11 +320,10 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 	{
 		FActorSpawnParameters Param;
 		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		FVector spawnPoint = CurrentData.Location;
-		spawnPoint.Z += 1000;
+
 		AActor* actor =
 			World->SpawnActor
-			(APlayerCharacter::StaticClass(), &spawnPoint, &CurrentData.Rotator, Param);
+			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
 		
 		if (actor == nullptr) return false;
  		
