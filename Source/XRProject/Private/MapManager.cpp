@@ -9,6 +9,7 @@
 
 UMapManager::UMapManager()
 {
+
 	MapList.Add(100, 
 		LevelPathData(FName(TEXT("LEVEL_Village")),
 			wstring(L"World'/Game/Resources/Map/Village/LEVEL/LEVEL_Village.LEVEL_Village'")));
@@ -21,6 +22,7 @@ UMapManager::UMapManager()
 	MapList.Add(113,
 		LevelPathData(FName(TEXT("LEVLE_Boss")), 
 			wstring(L"World'/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss.LEVLE_Boss'")));
+
 }
 bool UMapManager::Init()
 {
@@ -318,12 +320,14 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 	{
 		FActorSpawnParameters Param;
 		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
 		AActor* actor =
 			World->SpawnActor
 			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
 		
 		if (actor == nullptr) return false;
  		
+		XRLOG(Warning, TEXT("%s"), *actor->GetActorLocation().ToString());
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 
 		UXRGameInstance* GI = Cast<UXRGameInstance>(Player->GetWorld()->GetGameInstance());

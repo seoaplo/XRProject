@@ -122,6 +122,8 @@ void ABaseCharacter::SetSkelResource(int32 SkeletalID, int32 AnimBPID)
 	ResultCallback.BindLambda([AssetPath, this]()
 	{
 		TSoftObjectPtr<USkeletalMesh> LoadedMesh(AssetPath);
+
+
 		GetMesh()->SetSkeletalMesh(LoadedMesh.Get());
 		XRLOG(Warning, TEXT("MeshLoadComplete"));
 		//SetCharacterLoadState(ECharacterLoadState::READY);

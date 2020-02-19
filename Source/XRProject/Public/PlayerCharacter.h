@@ -133,7 +133,7 @@ private:
 		class UCapsuleComponent* HitCapsule;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class UWidgetComponent* NameTag;
-	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
+	UPROPERTY(EditInstanceOnly, Category = "C_Camera", Meta = (AllowPrivateAccess = true))
 		class UCameraComponent* CameraComponent;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		class USpringArmComponent* SpringArmComponent;
