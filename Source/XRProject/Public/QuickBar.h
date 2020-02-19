@@ -9,12 +9,28 @@ const int kQuickBarSize = 10;
 #include "InputStream.h"
 #include "CoreMinimal.h"
 #include "QuickSlot.h"
+#include "CustomSingleton.h"
 #include "Blueprint/UserWidget.h"
 #include "QuickBar.generated.h"
 
-/**
- * 
- */
+struct QuickSlotData
+{
+	int8 Type;
+	int32 ID;
+};
+
+class QuickBar : public CustomSingleton<QuickBar>
+{
+public:
+	friend class CustomSingleton<QuickBar>;
+private:
+	QuickBar() {};
+public:
+	~QuickBar() {};
+public:
+	QuickSlotData Data[10];
+};
+
 UCLASS()
 class XRPROJECT_API UQuickBar : public UUserWidget
 {
@@ -22,9 +38,15 @@ class XRPROJECT_API UQuickBar : public UUserWidget
 public:
 	UQuickBar(const FObjectInitializer& ObjectInitializer);
 public:
+	static UQuickBar* QuickBarInstance;
+	static UQuickBar* GetInstance() { return QuickBarInstance; };
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void SetInstance() { QuickBarInstance = this; };
+	UFUNCTION(BlueprintCallable, Category = "MG_Function")
+		void ClearInstance() { QuickBarInstance = nullptr; };
 	std::vector<UQuickSlot*> list;
 public:
-	void SetQuickSlot(InputStream& input);
+	void SetQuickSlot();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void AddQuickSlot(UQuickSlot* QuickSlot);
 };

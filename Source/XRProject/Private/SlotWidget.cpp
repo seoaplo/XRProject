@@ -26,7 +26,7 @@ void USlotWidget::GetIcon()
 {
 	UXRGameInstance* XRGI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
 	if (!XRGI) return;
-	XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+	XRGI->ItemManager->GetIcon(Icon, SlotObject->GetIconID());
 }
 
 void USlotWidget::SetSlotObject()
@@ -39,7 +39,7 @@ void USlotWidget::SetSlotObject()
 		if (GetMapMgr().GetPlayer())	SlotObject = GetMapMgr().GetPlayer()->GetEquippedItem((EEquipmentsType)Index);
 		if (!IsEmpty())
 		{
-			XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+			XRGI->ItemManager->GetIcon(Icon, SlotObject->GetIconID());
 		}
 	}
 	else
@@ -47,7 +47,7 @@ void USlotWidget::SetSlotObject()
 		SlotObject = Inventory::GetInstance().GetItem(Index);
 		if (!IsEmpty())
 		{
-			XRGI->ItemManager->GetIcon(this, SlotObject->GetIconID());
+			XRGI->ItemManager->GetIcon(Icon, SlotObject->GetIconID());
 		}
 	}
 	Update();
