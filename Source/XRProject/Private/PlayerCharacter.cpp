@@ -3,7 +3,6 @@
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
 #include "WidgetTree.h"
-#include "XRGameInstance.h"
 #include "Animation/AnimBlueprint.h"
 #include "HealthBarWidget.h"
 #include "AccountManager.h"
@@ -13,6 +12,7 @@
 #include "Perception/AISenseConfig_Damage.h"
 #include "HealthBarWidget.h"
 #include "XRPlayerController.h"
+#include "XRGameInstance.h"
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
@@ -121,7 +121,7 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_START
-		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferStart.P_BufferStart'"));
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffStart.P_BuffStart'"));
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_LOOP
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
@@ -149,7 +149,7 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.HandsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
-	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Equipments.WeaponComponent->SetCollisionProfileName("PlayerWeapon");
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -568,9 +568,9 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	}
 }
 
-float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	//Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
 	XRLOG(Warning, TEXT("Player SetHP  : %f"), Damage);
 	ANonePlayerCharacter* NPC = nullptr;
@@ -593,9 +593,19 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 	if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
 		MyAnimInstance->PlayHitMontage();
-		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
-		ComboCount = 1;
-		bSavedCombo = false;
+
+		if(DamageEvent.bIntensity == true)
+		{
+			MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
+			ComboCount = 1;
+			bSavedCombo = false;
+		}
+		else
+		{
+			MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
+			ComboCount = 1;
+			bSavedCombo = false;
+		}
 	}
 	else
 		bIsHit = false;
@@ -659,7 +669,7 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
 
 }
 
@@ -914,6 +924,10 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		bSavedCombo = false;
 		ComboCount = 1;
 		Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		if(bIsSprint)
+			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
 	}
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
@@ -982,6 +996,7 @@ void APlayerCharacter::StartMoveAttack()
 {
 	bIsAttackMoving = true;
 	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 void APlayerCharacter::EndMoveAttack()
 {
@@ -995,6 +1010,8 @@ void APlayerCharacter::EndMoveAttack()
 	out << GetActorRotation();
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
+
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
@@ -1017,20 +1034,48 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
+
 	if (Cast<APlayerController>(GetController()))
 	{
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
 		if (NPC)
 		{
-			///수정자 조재진///
-			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
-			//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
-			/// 오프라인 공격 테스트용도 지워도 무상관///////
-
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
 				if (FlagNpc == NPC)
 					return;
+			}
+
+			FCollisionQueryParams Params(NAME_None, false, this);
+			TArray<FHitResult> HitResult;
+			FVector SwordBoxSize = FVector(15.0f, 15.0f, 72.0f);
+
+			GetWorld()->SweepMultiByChannel(HitResult, Equipments.WeaponComponent->GetSocketLocation("SwordStart"),
+				Equipments.WeaponComponent->GetSocketLocation("SwordEnd"), FQuat::Identity, ECollisionChannel::ECC_GameTraceChannel2,
+				FCollisionShape::MakeSphere(72.0f), Params);
+
+
+			FVector MiniBox = FVector(3.f, 3.f, 3.f);
+
+			for (FHitResult& Rst : HitResult)
+			{
+				//USkeletalMeshComponent* SkComp = Cast<USkeletalMeshComponent>(Rst.GetComponent());
+				UCapsuleComponent* CapComp = Cast<UCapsuleComponent>(Rst.GetComponent());
+
+				if (CapComp)
+				{
+					FVector TraceVec = Rst.TraceEnd - Rst.TraceStart;
+					FVector TestCenter = (Rst.TraceStart  +
+						Rst.TraceEnd) / 2;
+					FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVec).ToQuat();
+					float HalfHeight = (Rst.TraceEnd - Rst.TraceStart).Size() / 2;
+
+					FVector HitLocation = Rst.Location;
+					DrawDebugBox(GetWorld(), Rst.TraceStart, MiniBox, FColor::Red, false, 3.0f);
+					DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
+					DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
+					DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
+				}
 			}
 
 			int64 EnemyID = NPC->ObjectID;

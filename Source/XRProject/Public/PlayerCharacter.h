@@ -18,6 +18,7 @@ class ANonePlayerCharacter;
 class UXRGameInstance;
 class UXRPlayerController;
 class UHealthBarWidget;
+struct FXRDamageEvent;
 
 
 UENUM()
@@ -278,8 +279,8 @@ public:
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);
 
-	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
-		class AActor* DamageCauser) override;
+	float TakeDamage(float Damage, FXRDamageEvent& DamageEvent, class AController* EventInstigator,
+		class AActor* DamageCauser);
 
 	FVector2D GetNormalCapsuleSize();
 	FVector2D GetRollingCapsuleSize();

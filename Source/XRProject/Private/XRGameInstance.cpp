@@ -338,7 +338,9 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int64 AttackedID = input.ReadInt64();
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
+	
 	//bool AttackIntensity = input.ReadBool();
+	bool AttackIntensity = false;
 
 	if (AttackerType == 1)
 	{
@@ -346,14 +348,14 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
 		
 		//데미지 강격/약격 나누기 위한 잔재
-		//XRDamageEvent MonsterDamageEvent;
+		FXRDamageEvent MonsterDamageEvent;
 		//MonsterDamageEvent.ID = AttackActionID;
-		//MonsterDamageEvent.Intensity = AttackIntensity;
+		MonsterDamageEvent.bIntensity = AttackIntensity;
 
 		if (AttackerMonster)
 		{
 			if (AttackedCharacter == MapManager->GetPlayer())
-				AttackedCharacter->TakeDamage(AttackSetHp, FDamageEvent(), AttackerMonster->GetController(), AttackerMonster);
+				AttackedCharacter->TakeDamage(AttackSetHp, MonsterDamageEvent, AttackerMonster->GetController(), AttackerMonster);
 			else
 			{
 				//if(MonsterDamageEvent)

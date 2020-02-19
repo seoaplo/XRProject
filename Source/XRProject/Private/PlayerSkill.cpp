@@ -54,10 +54,6 @@ bool UPlayerSkill::CooldownCheck(APlayerCharacter * Character, UPlayerSkill * Sk
 			GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
 		}
 	}
-	else //쿨다운리스트에 해당 스킬이 없음. 한번도 스킬을 사용한 적이 없음
-	{
-		GI->GetPlayerSkillManager()->AddSkillToCooldownList(Skill, true);
-	}
 	return true;
 }
 
