@@ -33,8 +33,9 @@ void AIngameGameMode::BeginPlay()
 	}
 
 	GetMapMgr().PlayerListSpawn(GetWorld());
-	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
 	CurrentWidget->CharacterInfo->SetSlotInfo();
 
@@ -47,6 +48,8 @@ void AIngameGameMode::BeginPlay()
 		this, &AIngameGameMode::NotifyMatchCanceled);
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyDungeonReward)->BindUObject(
 		this, &AIngameGameMode::NotifyDungeonReward);
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifiyStartLevel)->BindUObject(
+		this, &AIngameGameMode::NotifiyStartLevel);
 
 	if (CurrentWidget->MiniMap != nullptr)
 	{
@@ -70,7 +73,14 @@ void AIngameGameMode::BeginPlay()
 
 	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-	
+	if (GetMapMgr().IsDungeon())
+	{
+		NotifiyLoadComplete();
+	}
+	else
+	{
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	}
 }
 
 
@@ -109,4 +119,20 @@ void AIngameGameMode::NotifyDungeonReward(class InputStream& input)
 {
 	if (CurrentWidget == nullptr) return;
 	CurrentWidget->CreateDungeonResultWidget(input);
+}
+
+void AIngameGameMode::NotifiyStartLevel(class InputStream& input)
+{
+	XRLOG(Warning, TEXT("NotifiyStartLevel"));
+	GetMapMgr().MonsterListSpawn(GetWorld());
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+}
+void AIngameGameMode::NotifiyLoadComplete()
+{
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kNotifiyLoadComplete);
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
+	XRLOG(Warning, TEXT("NotifiyLoadComplete"));
 }

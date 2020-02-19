@@ -101,6 +101,8 @@ private:
 	void CharacterDead(class InputStream& input);
 	void CharacterStatChange(class InputStream& input);
 	void CharacterRolling(class InputStream& input);
+	void CharacterEquipChange(class InputStream& input);
+	void CharacterBuffEnd(class InputStream& input);
 	void UpdateInventory(class InputStream& input);
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);
@@ -128,7 +130,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
 		int32 ID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
-		bool Intensity; //강격이면 true, 약격이면 false
+		int32 Intensity; //노격 0 약격 1 강격 2
 };
 
 #define GetNetMgr UNetworkManager::GetInstance

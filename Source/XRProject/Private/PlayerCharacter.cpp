@@ -51,7 +51,6 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
-
 	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
 	CapsuleSize = FVector2D(90.0f, 34.0f);
 	RollingHitCapsuleSize = FVector2D(45.0f, 34.0f);
@@ -96,8 +95,6 @@ APlayerCharacter::APlayerCharacter()
 
 	CameraComponent->bUsePawnControlRotation = false;
 
-
-
 	FName HairSocket("HairSocket");
 	FName FaceSocket("FaceSocket");
 	FName WeaponSocket("WeaponSocket");
@@ -114,6 +111,25 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		FIRSTBODYMESH
 		(TEXT("SkeletalMesh'/Game/Resources/Character/PlayerCharacter/Mesh/Body/SK_Character_human_male_body_common.SK_Character_human_male_body_common'"));
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SWORDTRAIL_NORMAL
+		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrail.P_PlayerSwordTrail'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SWORDTRAIL_FINAL
+		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrailFianl.P_PlayerSwordTrailFianl'"));
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		BERSERK_EFFECT_START
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferStart.P_BufferStart'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		BERSERK_EFFECT_LOOP
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
+
+	check(SWORDTRAIL_NORMAL.Succeeded());
+	check(SWORDTRAIL_FINAL.Succeeded());
+	check(BERSERK_EFFECT_START.Succeeded());
+	check(BERSERK_EFFECT_LOOP.Succeeded());
 
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
@@ -162,6 +178,32 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTagLocation = FVector(0.0f, 0.0f, 90.0f);
 
+	SwordTrailNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailNormal"));
+	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailFinal"));
+	BerserkBuffStart = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkStart"));
+	BerserkBuffLoop = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkLoop"));
+	SwordTrailNormal->bAutoActivate = false;
+	SwordTrailFinal->bAutoActivate = false;
+
+
+	SwordTrailNormal->SetTemplate(SWORDTRAIL_NORMAL.Object);
+	SwordTrailFinal->SetTemplate(SWORDTRAIL_FINAL.Object);
+	BerserkBuffStart->SetTemplate(BERSERK_EFFECT_START.Object);
+	BerserkBuffLoop->SetTemplate(BERSERK_EFFECT_LOOP.Object);
+	BerserkBuffStart->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
+		ComboParticleSocketName.FxBottom);
+	BerserkBuffLoop->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
+		ComboParticleSocketName.FxBottom);
+
+	BerserkBuffStart->bAutoActivate = false;
+	BerserkBuffLoop->bAutoActivate = false;
+
+	ParticleArray.Add(SwordTrailNormal);
+	ParticleArray.Add(SwordTrailFinal);
+	ParticleArray.Add(BerserkBuffStart);
+	ParticleArray.Add(BerserkBuffLoop);
+
+
 	ComboCount = 1;
 	CurrentAttackID = -1;
 	bIsMove = false;
@@ -184,9 +226,6 @@ APlayerCharacter::APlayerCharacter()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
-
-	//FCharacterSizeInfo aa;
-	//aa = FindCharacterSizeFromDataTable(1);
 
 	PlayerAIPerceptionStimul = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("AIPerceptionStimulSource"));
 	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
@@ -280,6 +319,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::SprintEnd);
 	PlayerInputComponent->BindAction("ShowCursor", IE_Pressed, this, &APlayerCharacter::ToggleMouseCursor);
 	PlayerInputComponent->BindAction("TEST", IE_Pressed, this, &APlayerCharacter::TestPlay);
+	PlayerInputComponent->BindAction("WheelUp", IE_Pressed, this, &APlayerCharacter::WheelUp);
+	PlayerInputComponent->BindAction("WheelDown", IE_Pressed, this, &APlayerCharacter::WheelDown);
 
 }
 
@@ -313,15 +354,8 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 
 	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
-
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3020001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3120001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3220001, GetWorld(), this);
-	CurGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3300001, GetWorld(), this);
-
 	ChangePartsById(EPartsType::HAIR, 110);
 	ChangePartsById(EPartsType::FACE, 120);
-
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -346,7 +380,7 @@ void APlayerCharacter::MoveForward(float Value)
 void APlayerCharacter::MoveRight(float Value)
 {
 	RightValue = Value;
-
+	
 	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying)
 		return;
 
@@ -397,6 +431,13 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 
 		CurGameInstance->GetXRAssetMgr()->ASyncLoadAssetFromPath(ETCAssetPath, ETCAssetLoadDelegate);
 
+		if (Type == EPartsType::NUDEBODY)
+			Equipments.BodyItem = nullptr;
+		else if (Type == EPartsType::NUDEHAND)
+			Equipments.HandsItem = nullptr;
+		else if (Type == EPartsType::NUDELEG)
+			Equipments.LegsItem = nullptr;
+
 	}
 
 
@@ -413,16 +454,23 @@ void APlayerCharacter::ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh)
 
 	switch (EquipItem->DefaultInfo.Type)
 	{
-	case 0: { Types = EEquipmentsType::BODY; break; }
-	case 1: { Types = EEquipmentsType::HANDS; break; }
-	case 2: { Types = EEquipmentsType::LEGS; break; }
+		case 0: { Types = EEquipmentsType::BODY; break; }
+		case 1: { Types = EEquipmentsType::HANDS; break; }
+		case 2: { Types = EEquipmentsType::LEGS; break; }
 	}
+
+	USkeletalMesh* LegMesh = Equipments.LegsComponent->SkeletalMesh;
+	USkeletalMesh* HandMesh = Equipments.HandsComponent->SkeletalMesh;
 
 	switch (Types)
 	{
 	case EEquipmentsType::BODY:
 		Equipments.BodyItem = EquipItem;
-		Equipments.BodyComponent->SetSkeletalMesh(SkMesh);
+		Equipments.BodyComponent->SetSkeletalMesh(SkMesh); 
+		Equipments.LegsComponent->SetSkeletalMesh(nullptr);
+		Equipments.LegsComponent->SetSkeletalMesh(LegMesh);
+		Equipments.HandsComponent->SetSkeletalMesh(nullptr);
+		Equipments.HandsComponent->SetSkeletalMesh(HandMesh);
 		break;
 	case EEquipmentsType::HANDS:
 		Equipments.HandsItem = EquipItem;
@@ -487,6 +535,10 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(PartAsset);
 
+
+	USkeletalMesh* LegMesh = Equipments.LegsComponent->SkeletalMesh;
+	USkeletalMesh* HandMesh = Equipments.HandsComponent->SkeletalMesh;
+
 	if (Type == EPartsType::HAIR)
 	{
 		HairComponent->SetSkeletalMesh(LoadedMesh.Get());
@@ -499,6 +551,10 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	{
 		Equipments.BodyItem = nullptr;
 		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get());
+		Equipments.LegsComponent->SetSkeletalMesh(nullptr);
+		Equipments.LegsComponent->SetSkeletalMesh(LegMesh);
+		Equipments.HandsComponent->SetSkeletalMesh(nullptr);
+		Equipments.HandsComponent->SetSkeletalMesh(HandMesh);
 	}
 	else if (Type == EPartsType::NUDEHAND)
 	{
@@ -526,27 +582,30 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 	if (NPC == nullptr)
 		check(false);
 
-	PlayerStatComp->SetCurrentHP(Damage);
+	if (bIsSkillPlaying)
+		return -1.0f;
 
-	if (bIsTestMode == false)
-		UHealthBarWidget::GetInatance()->ApplyHp(this->PlayerStatComp->GetCurrentHP());
+	PlayerStatComp->SetCurrentHP(Damage);
+		
 
 	bIsHit = true;
 
-	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false && !bIsSkillPlaying)
+
+	if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
-		if (MyShake)
-		{
-			auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
-			Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
-		}
 	}
 	else
 		bIsHit = false;
+
+	if (MyShake)
+	{
+		auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+		Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
+	}
 
 
 	/*동작 취소 처리*/
@@ -574,6 +633,9 @@ void APlayerCharacter::Attack()
 	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit || bIsSkillPlaying)
 		return;
 
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
+		return;
+
 
 	AttackOverlapList.clear(); //Overlap list 초기화
 
@@ -586,7 +648,7 @@ void APlayerCharacter::Attack()
 		MyAnimInstance->PlayAttackMontage();
 
 		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
 		out << ComboCount;
 		out << GetActorLocation();
 		out << GetActorRotation();
@@ -604,8 +666,9 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
-
 	if (bIsSkillPlaying)
+		return;
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 	//후딜레이 동작에서 구르는지 체크
 	if (bIsAttack)
@@ -625,7 +688,6 @@ void APlayerCharacter::Roll()
 
 	if (bIsOverallRollAnimPlaying)
 		return;
-
 
 	bool bArrowKeyNotPressed = false;
 
@@ -656,7 +718,7 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
-	if (bIsOverallRollAnimPlaying)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying)
 		return;
 
 	bIsSprint = true;
@@ -801,6 +863,7 @@ void APlayerCharacter::TestInitialize()
 	PlayerStatComp->SetLevel(1);
 	PlayerStatComp->SetGender(0);
 	PlayerStatComp->SetSTR(10);
+	PlayerStatComp->SetSTR(10);
 	PlayerStatComp->SetDEX(11);
 	PlayerStatComp->SetINT(12);
 	PlayerStatComp->SetCurrentStamina(100);
@@ -810,10 +873,8 @@ void APlayerCharacter::TestInitialize()
 
 
 	UPlayerSkillManager* SkillManager = MyGameInstance->GetPlayerSkillManager();
-	SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
-		SkillManager->CreateSkillFromID(101), true);
-	SkillManager->AddSkill(SkillManager->SkillListForPlalyer,
-		SkillManager->CreateSkillFromID(102), true);
+	SkillManager->AddSkill(SkillManager->CreateSkillFromID(101), true);
+	SkillManager->AddSkill(SkillManager->CreateSkillFromID(102), true);
 
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
@@ -859,7 +920,7 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	{
 		bIsHit = false;
 	}
-	else if (MyAnimInstance->RollMontage)
+	else if (MyAnimInstance->RollMontage == Montage)
 	{
 		bIsOverallRollAnimPlaying = false;
 
@@ -908,7 +969,7 @@ void APlayerCharacter::ContinueCombo()
 
 
 		OutputStream out;
-		out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
+		out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
 		out << ComboCount;
 		out << GetActorLocation();
 		out << GetActorRotation();
@@ -944,6 +1005,9 @@ void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType T
 
 void APlayerCharacter::OnDead()
 {
+	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
+		return;
+
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
 
@@ -1087,25 +1151,18 @@ bool APlayerCharacter::GetbIsSkillPlaying()
 	return bIsSkillPlaying;
 }
 
+bool APlayerCharacter::GetbIsDead()
+{
+	return bIsCharacterDead;
+}
+
 void APlayerCharacter::TestPlay()
 {
-	int32 aaa = PlayerStatComp->GetMaxExp();
-	FString Fstr = "GaiaCrush";
+	FString Fstr = "Berserk";
 	UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
 		FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
 
-	if(!bIsSkillPlaying)
-		Skill->Play(this);
-
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterAttack);
-	out << 101;
-	out << GetActorLocation();
-	out << GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
-	CurrentAttackID = ComboCount;
-
+	Skill->Play(this);
 }
 
 UItemEquipment* APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
@@ -1137,6 +1194,7 @@ void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Ite
 	const int32 kMalePrimaryLeg = 150;
 	const int32 kMalePrimaryWeapon = 3300001;
 	auto GameInstance = Cast<UXRGameInstance>(GetGameInstance());
+
 	if (Item == nullptr)
 	{
 		if (Type == EEquipmentsType::BODY)
@@ -1153,8 +1211,6 @@ void APlayerCharacter::SetEquippedItem(EEquipmentsType Type, UItemEquipment* Ite
 	}
 	else
 		GameInstance->ItemManager->BuildItem(Item, GetWorld(), this);
-
-
 
 }
 
@@ -1178,4 +1234,68 @@ void APlayerCharacter::ToggleMouseCursor()
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 	}
 
+}
+
+void APlayerCharacter::WheelUp()
+{
+	XRLOG(Warning, TEXT("WheelUp"));
+	float len = FMath::Max(SpringArmComponent->TargetArmLength - kCameraWheelSpeed, static_cast<float>(kCameraWheelMinLimit));
+	SpringArmComponent->TargetArmLength = len;
+}
+
+void APlayerCharacter::WheelDown()
+{
+	XRLOG(Warning, TEXT("WheelDown"));
+	float len = FMath::Min(SpringArmComponent->TargetArmLength + kCameraWheelSpeed, static_cast<float>(kCameraWheelMaxLimit));
+	SpringArmComponent->TargetArmLength = len;
+}
+
+
+void APlayerCharacter::SetbIsAttack(bool b)
+{
+	bIsAttack = b;
+}
+
+void APlayerCharacter::SetbSavedCombo(bool b)
+{
+	bSavedCombo = b;
+}
+
+bool APlayerCharacter::GetbIsAttack()
+{
+	return bIsAttack;
+}
+
+bool APlayerCharacter::GetbSavedCombo()
+{
+	return bSavedCombo;
+}
+
+void APlayerCharacter::SetComboCount(int32 NextCount)
+{
+	ComboCount = NextCount;
+}
+
+int32 APlayerCharacter::GetComboCount()
+{
+	return ComboCount;
+}
+
+UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString FindStr)
+{
+	for (UParticleSystemComponent* Comp : ParticleArray)
+	{
+		if (Comp->GetName() == FindStr)
+		{
+			return Comp;
+		}
+	}
+
+	check(false);
+	return nullptr;
+}
+
+FComboSocket APlayerCharacter::GetComboSocket()
+{
+	return ComboParticleSocketName;
 }

@@ -17,9 +17,18 @@
 /**
  * 작성자 : 서승석
  */
-
-
 DECLARE_DELEGATE(CharacterDataProcess)
+
+struct LevelPathData
+{
+	FName LevelName;
+	wstring LevelPath;
+	LevelPathData(FName Name, wstring Path)
+	{
+		LevelName = Name;
+		LevelPath = Path;
+	}
+};
 
 UCLASS()
 class XRPROJECT_API UMapManager : public UObject
@@ -37,6 +46,7 @@ public:
 	bool Init();
 	bool Clear();
 
+	bool IsDungeon() { if ((LevelID % 100) > 0) return true; else return false;}
 	// 맵에 입장
 	void ReadMapDataFromServer(InputStream& Input);
 	void ReadPlayerFromServer(InputStream& Input);
@@ -56,7 +66,6 @@ public:
 	bool OpenMap(UWorld* World);
 	bool PlayerListSpawn(UWorld* world);
 	bool MonsterListSpawn(UWorld* world);
-	//bool TriggerListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
 	bool PossessPlayer(UWorld* World);
 	// 포탈 관련 함수
@@ -74,6 +83,11 @@ private:
 	UPROPERTY()
 	APlayerCharacter* PlayerCharacter;
 
+	UPROPERTY()
+		UWorld* PreWorld;
+	//UPROPERTY()
+	//UWorld* World;
+
 	int32_t LevelID;
 	int64_t PlayerID;
 
@@ -82,5 +96,5 @@ private:
 
 	TMap<int64_t, APlayerCharacter*> CharacterList;
 	TMap<int64_t, ANonePlayerCharacter*> MonsterList;
-	TMap<int32_t, FName> MapList;
+	TMap<int32_t, LevelPathData> MapList;
 };

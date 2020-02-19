@@ -31,6 +31,8 @@ const float UCharacterStatComponent::GetCurrentHP() const { return Current_HP; }
 	 {
 		 OnHPZero.Broadcast();
 	 }
+
+	 XRLOG(Warning, TEXT("HP Set %f"), Current_HP);
 	 OnStatChange.Broadcast();
  }
 
