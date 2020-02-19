@@ -118,6 +118,8 @@ void UPlayerCharacterAnimInstance::AnimNotify_HitMotionEnd()
 {
 	MyCharacter->bIsHit = false;
 	bIsHit = false;
+	MyCharacter->GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+	MyCharacter->GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
 void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingEnd()
@@ -276,4 +278,28 @@ void UPlayerCharacterAnimInstance::AnimNotify_BerserkEffon()
 {
 	UParticleSystemComponent* Comp = MyCharacter->GetParticleComponentByName(TEXT("BerserkStart"));
 	Comp->SetActive(true);
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_InvisibleOn()
+{
+	if (IsValid(MyCharacter))
+	{
+		MyCharacter->SetbIsInvisible(true);
+	}
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_InvisibleOff()
+{
+	if (IsValid(MyCharacter))
+	{
+		MyCharacter->SetbIsInvisible(false);
+	}
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_KnockBackMoveEnd()
+{
+	if (IsValid(MyCharacter))
+	{
+		MyCharacter->SetbIsKnockBackMoving(false);
+	}
 }

@@ -10,7 +10,7 @@
 
 UPlayerSkill::UPlayerSkill()
 {
-
+	
 }
 
 UPlayerSkill::~UPlayerSkill()

@@ -24,8 +24,6 @@ void UXRGameInstance::Init()
 	PlayerSkillManager = NewObject<UPlayerSkillManager>();
 	PlayerSkillManager->SetGameInstance(this);
 
-
-
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
 		this, &UXRGameInstance::HandleEnterZone);
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kSpawnCharacter)->BindUObject(
@@ -241,7 +239,7 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
 		{
-			aicon->MoveToLocation(Location, 2, false, false);
+			aicon->MoveToLocation(Location, 2, false, true);
 		}
 	}
 }
@@ -346,7 +344,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	float AttackSetHp = input.ReadFloat32();
 	
 	//bool AttackIntensity = input.ReadBool();
-	bool AttackIntensity = false;
+	bool AttackIntensity = true;
 
 	if (AttackerType == 1)
 	{
@@ -364,8 +362,22 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 				AttackedCharacter->TakeDamage(AttackSetHp, MonsterDamageEvent, AttackerMonster->GetController(), AttackerMonster);
 			else
 			{
-				//if(MonsterDamageEvent)
-				AttackedCharacter->MyAnimInstance->PlayHitMontage();
+				if (AttackIntensity)
+				{
+					AttackedCharacter->MyAnimInstance->PlayHitMontage();
+					AttackedCharacter->MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
+					FVector VecToTarget = AttackerMonster->GetActorLocation() - AttackedCharacter->GetActorLocation();
+					FRotator AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+					AttackedCharacter->SetActorRotation(AgainstMonster);
+					VecToTarget = -VecToTarget;
+					AttackedCharacter->SetKnockBackVector(VecToTarget);
+					AttackedCharacter->SetbIsKnockBackMoving(true);
+				}
+				else
+				{
+					AttackedCharacter->MyAnimInstance->PlayHitMontage();
+					AttackedCharacter->MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
+				}
 			}
 		}
 

@@ -18,6 +18,7 @@
 
 APlayerCharacter::APlayerCharacter()
 {
+	
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -124,7 +125,7 @@ APlayerCharacter::APlayerCharacter()
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffStart.P_BuffStart'"));
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_LOOP
-		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferLoop.P_BufferLoop'"));
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
 
 	check(SWORDTRAIL_NORMAL.Succeeded());
 	check(SWORDTRAIL_FINAL.Succeeded());
@@ -220,6 +221,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsMouseShow = false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
+	KnockBackVector = FVector(0.0f, 0.0f, 0.0f);
 
 	MyShake = UPlayerCameraShake::StaticClass();
 	TestID = 2;
@@ -295,6 +297,11 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
+	if(bIsKnockBackMoving)
+	{
+		FVector vVec = KnockBackVector;
+		AddMovementInput(vVec, 1.0f, false);
+	}
 
 	if (bIsAttackMoving)
 	{
@@ -572,6 +579,16 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 {
 	//Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
+	//FName CurrentHitName = MyAnimInstance->Montage_GetCurrentSection(MyAnimInstance->HitMontage);
+	//if (CurrentHitName == NAME_None) //bIsHit시엔 Hit를 적용받지 않음(
+	//	return -1.0f;
+
+	if (GetbIsInvisible())
+	{
+		XRLOG(Warning, TEXT("Now Invisible, Hit Ignored."));
+		return -1.0f;
+	}
+	
 	XRLOG(Warning, TEXT("Player SetHP  : %f"), Damage);
 	ANonePlayerCharacter* NPC = nullptr;
 	if (DamageCauser != nullptr)
@@ -586,37 +603,47 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		return -1.0f;
 
 	PlayerStatComp->SetCurrentHP(Damage);
-		
-
 	bIsHit = true;
 
-
-	if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
+	if (DamageEvent.bIntensity == true)
 	{
 		MyAnimInstance->PlayHitMontage();
+		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
+		ComboCount = 1;
+		bSavedCombo = false;
+		SetbIsSkillMove(false);
+		SetbIsSkillPlaying(false);
+		SetbIsInvisible(false);
+		SetbIsKnockBackMoving(true);
+		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
+		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+		
+		FVector VecToTarget = NPC->GetActorLocation() - GetActorLocation();
+		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
-		if(DamageEvent.bIntensity == true)
-		{
-			MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
-			ComboCount = 1;
-			bSavedCombo = false;
-		}
-		else
-		{
-			MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
-			ComboCount = 1;
-			bSavedCombo = false;
-		}
+		AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+		SetActorRotation(AgainstMonster);
+		KnockBackVector = -VecToTarget;
+
 	}
-	else
+	else if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
+	{
+		MyAnimInstance->PlayHitMontage();
+		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
+		ComboCount = 1;
+		bSavedCombo = false;
+	}
+	else //공격 중, 스킬 중...
+	{
 		bIsHit = false;
+	}
+
 
 	if (MyShake)
 	{
 		auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
 		Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
 	}
-
 
 	/*동작 취소 처리*/
 	bIsSprint = false;
@@ -676,8 +703,6 @@ void APlayerCharacter::Attack()
 
 void APlayerCharacter::Roll()
 {
-	if (bIsSkillPlaying)
-		return;
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 	//후딜레이 동작에서 구르는지 체크
@@ -694,9 +719,10 @@ void APlayerCharacter::Roll()
 		}
 
 		bIsAttackMoving = false;
+		bIsAttack = false;
 	}
 
-	if (bIsOverallRollAnimPlaying)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
 		return;
 
 	bool bArrowKeyNotPressed = false;
@@ -715,6 +741,7 @@ void APlayerCharacter::Roll()
 	bIsOverallRollAnimPlaying = true;
 	MyAnimInstance->PlayRollMontage();
 	SetRollingCapsuleMode();
+	
 	if (Cast<APlayerController>(GetController()))
 	{
 		OutputStream out;
@@ -728,7 +755,7 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
-	if (bIsOverallRollAnimPlaying || bIsSkillPlaying)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
 		return;
 
 	bIsSprint = true;
@@ -933,6 +960,9 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
 		bIsHit = false;
+
+		if (bIsSprint)
+			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	}
 	else if (MyAnimInstance->RollMontage == Montage)
 	{
@@ -1134,7 +1164,7 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
 
 	/*속도 설정*/
-	GetCharacterMovement()->MaxAcceleration = kNormalMovementAcceleration;
+	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
@@ -1301,6 +1331,11 @@ void APlayerCharacter::SetbIsAttack(bool b)
 	bIsAttack = b;
 }
 
+void APlayerCharacter::SetbIsInvisible(bool b)
+{
+	bIsInvisible = b;
+}
+
 void APlayerCharacter::SetbSavedCombo(bool b)
 {
 	bSavedCombo = b;
@@ -1319,6 +1354,11 @@ bool APlayerCharacter::GetbSavedCombo()
 void APlayerCharacter::SetComboCount(int32 NextCount)
 {
 	ComboCount = NextCount;
+}
+
+void APlayerCharacter::SetKnockBackVector(FVector & Vec)
+{
+	KnockBackVector = Vec;
 }
 
 int32 APlayerCharacter::GetComboCount()
@@ -1343,4 +1383,19 @@ UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString 
 FComboSocket APlayerCharacter::GetComboSocket()
 {
 	return ComboParticleSocketName;
+}
+
+void APlayerCharacter::SetbIsKnockBackMoving(bool b)
+{
+	bIsKnockBackMoving = b;
+}
+
+bool APlayerCharacter::GetbIsKnockBackMoving()
+{
+	return bIsKnockBackMoving;
+}
+
+bool APlayerCharacter::GetbIsInvisible()
+{
+	return bIsInvisible;
 }

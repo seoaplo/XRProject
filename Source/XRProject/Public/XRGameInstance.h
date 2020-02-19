@@ -17,6 +17,7 @@ const float kMaxMovementAcceleration = 8192.0f;
 const float kNormalMovementAcceleration = 2048.0f;
 const float kRollingMovementSpeed = 800.0f;
 const float kAttackMovementSpeed = 250.0f;
+const float kKnockBackSpeed = 1200.0f;
 
 enum class StatBit : int64_t {
 	kHP = 0x0000000000000001,
