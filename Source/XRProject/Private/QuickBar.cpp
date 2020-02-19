@@ -1,36 +1,35 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "QuickBar.h"
+#include "XRGameInstance.h"
+#include "NetworkManager.h"
+#include "PlayerSkillManager.h"
+
+UQuickBar* UQuickBar::QuickBarInstance = nullptr;
 
 UQuickBar::UQuickBar(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
 }
 
-void UQuickBar::SetQuickSlot(InputStream & input)
+void UQuickBar::SetQuickSlot()
 {
 	for (int i = 0; i < kQuickBarSize; i++)
 	{
-		int32 SlotNum;
-		int8 Type;
-		input >> SlotNum;
-		input >> Type;
-		switch (Type)
+		UXRGameInstance* XRGI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+		switch (QuickBar::GetInstance().Data->Type)
 		{
 		case 0:
 			break;
 		case 1:
 		{
-			int32 ID;
-			input >> ID;
-			list[SlotNum]->SetSkill(nullptr); // 스킬 생성한 객체를 주는 걸로
+			UPlayerSkill* Skill = XRGI->GetPlayerSkillManager()->FindSkillFromList(XRGI->GetPlayerSkillManager()->SkillListForPlalyer, QuickBar::GetInstance().Data->ID);
+			list[i]->TargetObject = Skill;
+			list[i]->bIsSkill = true;
 			break;
 		}
 		case 2:
 		{
-			int32 ID;
-			input >> ID;
-			list[SlotNum]->SetItem(nullptr); // 스킬 생성한 객체를 주는 걸로
+			UItem* Item = XRGI->ItemManager->GetItemFromId(EItemType::CONSUMPTION, QuickBar::GetInstance().Data->ID).GetValue();
+			list[i]->TargetObject = Item; // 스킬 생성한 객체를 주는 걸로
+			list[i]->bIsSkill = false;
 			break;
 		}
 		default:

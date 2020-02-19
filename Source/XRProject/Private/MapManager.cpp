@@ -338,7 +338,8 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			{
 				UPlayerSkillManager* SkillManager = GI->GetPlayerSkillManager();
 				SkillManager->AddSkill(SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
-				GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer, 
+
+				GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
 					CharacterSkillIDList[ii]), false);
 			}
 

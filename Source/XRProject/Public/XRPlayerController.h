@@ -53,4 +53,14 @@ private:
 	void OpenOptionWindow();
 	void FocusChattingWindow();
 
+	void QuickSlotAction0();
+	void QuickSlotAction1();
+	void QuickSlotAction2();
+	void QuickSlotAction3();
+	void QuickSlotAction4();
+	void QuickSlotAction5();
+	void QuickSlotAction6();
+	void QuickSlotAction7();
+	void QuickSlotAction8();
+	void QuickSlotAction9();
 };

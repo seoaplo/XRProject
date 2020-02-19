@@ -121,7 +121,6 @@ void ACharacterSelectSceneGameMode::BeginPlay()
 {
 	// 캐선창에 돌아오는 경우도 생각하여 채팅리스트 초기화
 	ChatingManager::GetInstance().ChatList.clear();
-	// 인스턴스에서 로비서버의 IP, port를 중계하는 방식으로 바꾸기 & 옵코드 유효한 옵코드로 변경
 
 	CurrentWidget = CreateWidget<UCharacterSelectWidget>(GetWorld(), LoginWidget);
 	if (CurrentWidget != nullptr)
