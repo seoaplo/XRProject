@@ -370,7 +370,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
 
-			//XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+			XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 			if (ActionID < 1000)
 			{
 
@@ -384,7 +384,6 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 				if (npcAnim)
 				{
 					npcAnim->Montage_Play(npcAnim->NpcAttackMontage[ActionID]);
-			
 				}
 			}
 			else if (ActionID == 1000)

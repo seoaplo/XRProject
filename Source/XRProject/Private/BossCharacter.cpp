@@ -82,7 +82,7 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 					bInBattle = true;
 				}
 			}
-			else if (ActionID >= 3000)
+			else if (ActionID >= 3000 && ActionID < 4000)
 			{
 				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID));
 				AttackOverlapList.Reset();
@@ -94,6 +94,14 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 				{
 					npcAnim->Montage_Play(BossAttackList[SkillID].AttackAction);
 				}
+			}
+			else if (ActionID >= 4000)
+			{
+				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID));
+				FTransform spawnTransform;
+				spawnTransform.SetLocation(Location);
+				spawnTransform.SetRotation(Rotator.Quaternion());
+				RemoteSpawnActorQue.Add(spawnTransform);
 			}
 		}
 	}

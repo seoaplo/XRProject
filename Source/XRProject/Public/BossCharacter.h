@@ -53,6 +53,10 @@ public:
 		TArray<FBossSkill> BossAttackList;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<int> ReadySkillList;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<FTransform> RemoteSpawnActorQue;
+
+
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		int32 CurrentUseSkill;

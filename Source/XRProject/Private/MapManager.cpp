@@ -8,7 +8,7 @@
 
 UMapManager::UMapManager()
 {
-	MapList.Add(100, TEXT("LEVEL_Village"));
+	MapList.Add(100, TEXT("Level_Village"));
 	MapList.Add(111, TEXT("LEVEL_Zone_1"));
 	MapList.Add(112, TEXT("LEVEL_Zone_2"));
 	MapList.Add(113, TEXT("LEVLE_Boss"));
@@ -266,7 +266,15 @@ bool UMapManager::OpenMap(UWorld* World)
 	FName* LevelName = MapList.Find(LevelID);
 	if (LevelName == nullptr) return false;
 
+
+
+
+
+
 	UGameplayStatics::OpenLevel(World, *LevelName);
+
+	//FLatentActionInfo laten;
+	//UGameplayStatics::LoadStreamLevel(World, *LevelName->ToString(), true, false, laten);
 
 
 	return true;
@@ -279,12 +287,15 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 	{
 		FActorSpawnParameters Param;
 		Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		FVector spawnPoint = CurrentData.Location;
+		spawnPoint.Z += 1000;
 		AActor* actor =
 			World->SpawnActor
-			(APlayerCharacter::StaticClass(), &CurrentData.Location, &CurrentData.Rotator, Param);
+			(APlayerCharacter::StaticClass(), &spawnPoint, &CurrentData.Rotator, Param);
 		
 		if (actor == nullptr) return false;
  		
+		XRLOG(Warning, TEXT("%s"), *actor->GetActorLocation().ToString());
 		APlayerCharacter* Player = Cast<APlayerCharacter>(actor); 
 
 		UXRGameInstance* GI = Cast<UXRGameInstance>(Player->GetWorld()->GetGameInstance());

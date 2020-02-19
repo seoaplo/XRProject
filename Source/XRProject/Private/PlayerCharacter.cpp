@@ -533,7 +533,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 
 	bIsHit = true;
 
-	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false)
+	if (MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) == false && !bIsSkillPlaying)
 	{
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
