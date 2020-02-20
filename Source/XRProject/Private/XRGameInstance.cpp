@@ -68,6 +68,8 @@ void UXRGameInstance::Init()
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyBuffEnd)->BindUObject(
 		this, &UXRGameInstance::CharacterBuffEnd);
 	
+	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyDeleteRemotePlayer)->BindUObject(
+		this, &UXRGameInstance::NotifyDeleteRemotePlayer);
 
 }
 
@@ -406,7 +408,13 @@ void UXRGameInstance::NotifyChat(class InputStream& input)
 	input >> ChatString;
 	ChatingManager::GetInstance().ReceiveChat(Type, ChatString);
 }
+void UXRGameInstance::NotifyDeleteRemotePlayer(class InputStream& input)
+{
+	int64_t ObjectID;
+	input >> ObjectID;
 
+	MapManager->DeleteRemotePlayer(ObjectID);
+}
 void UXRGameInstance::CharacterWait(InputStream& input)
 {
 	int64 TargetID = input.ReadInt64();

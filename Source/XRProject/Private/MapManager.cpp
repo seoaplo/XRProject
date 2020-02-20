@@ -12,16 +12,18 @@ UMapManager::UMapManager()
 
 	MapList.Add(100, 
 		LevelPathData(FName(TEXT("LEVEL_Village")),
-			wstring(L"World'/Game/Resources/Map/Village/LEVEL/LEVEL_Village.LEVEL_Village'")));
+			FString(L"/Game/Resources/Map/Village/LEVEL/LEVEL_Village")));
 	MapList.Add(111,
 		LevelPathData(FName(TEXT("LEVEL_Zone_1")), 
-			wstring(L"World'/Game/Resources/Map/Zone/Level/LEVEL_Zone_1.LEVEL_Zone_1'")));
+			FString(L"Game/Resources/Map/Zone/Level/LEVEL_Zone_1")));
 	MapList.Add(112,
 		LevelPathData(FName(TEXT("LEVEL_Zone_2")),
-			wstring(L"World'/Game/Resources/Map/Zone/Level/LEVEL_Zone_2.LEVEL_Zone_2'")));
+			FString(L"Game/Resources/Map/Zone/Level/LEVEL_Zone_2")));
 	MapList.Add(113,
 		LevelPathData(FName(TEXT("LEVLE_Boss")), 
-			wstring(L"World'/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss.LEVLE_Boss'")));
+			FString(L"Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss")));
+
+	LoadLevelComplete.BindUObject(this, &UMapManager::LoadLevelCompleteFunc);
 
 }
 bool UMapManager::Init()
@@ -291,25 +293,39 @@ bool UMapManager::OpenMap(UWorld* World)
 	BP_LoadingWidget->AddToViewport();
 	LoadingPercent = 0.0f;
 
-	ULoadingBarWidget* LoadingWidgetLamda = BP_LoadingWidget;
-	auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
-	if (gInst)
-	{
-		FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
 
-		FStreamableDelegate resultcallback;
-		resultcallback.BindLambda([path, this, World, LevelPath, LoadingWidgetLamda]()
-		{
-			TSoftObjectPtr<ULevel> LoadedMap(path);
-			XRLOG(Warning, TEXT("Map ASync Load Complete"));
-
-			BP_LoadingWidget->ApplyPercentage(1.0f);
-			UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
-		});
-		gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
-	}
-	LoadingWidgetLamda = nullptr;
+	LoadPackageAsync(LevelPath->LevelPath, LoadLevelComplete);
+	//ULoadingBarWidget* LoadingWidgetLamda = BP_LoadingWidget;
+	//auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
+	//if (gInst)
+	//{
+	//	FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
+	//
+	//	FStreamableDelegate resultcallback;
+	//	resultcallback.BindLambda([path, this, World, LevelPath, LoadingWidgetLamda]()
+	//	{
+	//		TSoftObjectPtr<ULevel> LoadedMap(path);
+	//		XRLOG(Warning, TEXT("Map ASync Load Complete"));
+	//
+	//		BP_LoadingWidget->ApplyPercentage(1.0f);
+	//		UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
+	//	});
+	//	gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
+	//}
+	//LoadingWidgetLamda = nullptr;
 	return true;
+}
+
+void UMapManager::LoadLevelCompleteFunc(const FName & LevelName, UPackage * LoadPackege, EAsyncLoadingResult::Type LoadingResult)
+{
+	if (PreWorld == nullptr) return;
+	if (BP_LoadingWidget)
+	{
+		LoadingPercent = 1.0f;
+		BP_LoadingWidget->ApplyPercentage(LoadingPercent);
+	}
+
+	UGameplayStatics::OpenLevel(PreWorld, LevelName);
 }
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {

@@ -39,8 +39,8 @@ public:
 	void SpawnRemotePlayer();
 	void DeleteRemotePlayer(int64_t ObjectID);
 
-	void NotifiyStartLevel(class InputStream& input);
-	void NotifiyLoadComplete();
+	void NotifyStartLevel(class InputStream& input);
+	void NotifyLoadComplete();
 	// widget data from server
 	void NotifyMatchResult(class InputStream& input);
 	void NotifyMatchCanceled(class InputStream& input);
