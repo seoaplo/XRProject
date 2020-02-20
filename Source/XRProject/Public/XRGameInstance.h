@@ -67,10 +67,6 @@ public:
 		UItemManager* ItemManager;
 
 	UPlayerSkillManager* GetPlayerSkillManager() { return PlayerSkillManager; }
-	
-
-public:
-
 
 private:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))

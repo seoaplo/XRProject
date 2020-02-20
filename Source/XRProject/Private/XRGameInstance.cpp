@@ -227,7 +227,6 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 		XRLOG(Warning, TEXT("Player not found"));
 		return;
 	}
-	
 
 	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
 	if (aicon == nullptr)
