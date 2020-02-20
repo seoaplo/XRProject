@@ -121,10 +121,10 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_START
-		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferStart.P_BufferStart'"));
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffStart.P_BuffStart'"));
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_LOOP
-		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferLoop.P_BufferLoop'"));
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
 
 	check(SWORDTRAIL_NORMAL.Succeeded());
 	check(SWORDTRAIL_FINAL.Succeeded());

@@ -95,6 +95,7 @@ float UQuickSlot::GetCurCoolDown()
 	{
 		UXRGameInstance* XRGI = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
 		int CoolTimeID = XRGI->GetPlayerSkillManager()->FindSkillFromCooldownList(ID);
+		if (CoolTimeID == -1) return 0;
 		return XRGI->GetPlayerSkillManager()->CoolDownList[CoolTimeID]->GetRemainCoolTime();
 	}
 	else
@@ -134,7 +135,7 @@ void UQuickSlot::DropIn(UUserWidget * Target)
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kApplyQuickSlot);
 		out << (int32_t)SlotIndex;
-		out << (int8_t)1;
+		out << (int8_t)2;
 		out << (int32_t)ID;
 		out.CompletePacketBuild();
 		UNetworkManager::GetInstance().SendPacket(out);
@@ -149,7 +150,7 @@ void UQuickSlot::DropIn(UUserWidget * Target)
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kApplyQuickSlot);
 		out << (int32_t)SlotIndex;
-		out << (int8_t)2;
+		out << (int8_t)1;
 		out << (int32_t)ID;
 		out.CompletePacketBuild();
 		UNetworkManager::GetInstance().SendPacket(out);
