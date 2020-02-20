@@ -15,13 +15,13 @@ UMapManager::UMapManager()
 			FString(L"/Game/Resources/Map/Village/LEVEL/LEVEL_Village")));
 	MapList.Add(111,
 		LevelPathData(FName(TEXT("LEVEL_Zone_1")), 
-			FString(L"Game/Resources/Map/Zone/Level/LEVEL_Zone_1")));
+			FString(L"/Game/Resources/Map/Zone/Level/LEVEL_Zone_1")));
 	MapList.Add(112,
 		LevelPathData(FName(TEXT("LEVEL_Zone_2")),
-			FString(L"Game/Resources/Map/Zone/Level/LEVEL_Zone_2")));
+			FString(L"/Game/Resources/Map/Zone/Level/LEVEL_Zone_2")));
 	MapList.Add(113,
 		LevelPathData(FName(TEXT("LEVLE_Boss")), 
-			FString(L"Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss")));
+			FString(L"/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss")));
 
 	LoadLevelComplete.BindUObject(this, &UMapManager::LoadLevelCompleteFunc);
 
