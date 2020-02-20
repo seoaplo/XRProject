@@ -84,6 +84,7 @@ void UXRGameInstance::LobbytoGame()
 {
 	std::string Ip = AccountManager::GetInstance().GetInGameIP();
 	int16 Port = AccountManager::GetInstance().GetInGamePort();
+	//UGameplayStatics::OpenLevel(GetWorld(), FName("IngameLevel"));
 	GetNetMgr().Connect(Ip.c_str(), Port, std::bind(&UXRGameInstance::SendConfirmRequest, this));
 }
 void UXRGameInstance::SendConfirmRequest()

@@ -124,7 +124,7 @@ APlayerCharacter::APlayerCharacter()
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferStart.P_BufferStart'"));
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_LOOP
-		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BufferLoop.P_BufferLoop'"));
 
 	check(SWORDTRAIL_NORMAL.Succeeded());
 	check(SWORDTRAIL_FINAL.Succeeded());
@@ -589,6 +589,7 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		
 
 	bIsHit = true;
+
 
 	if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{

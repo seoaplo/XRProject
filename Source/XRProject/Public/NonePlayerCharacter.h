@@ -180,13 +180,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 		class UAISenseConfig_Hearing* HearingConfig;
 
-
-
-
-
-
-
-
 	float SumSec = 0.f;
 
 };

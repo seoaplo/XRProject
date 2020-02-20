@@ -33,8 +33,9 @@ void AIngameGameMode::BeginPlay()
 	}
 
 	GetMapMgr().PlayerListSpawn(GetWorld());
-	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
 	CurrentWidget->CharacterInfo->SetSlotInfo();
 
@@ -85,6 +86,10 @@ void AIngameGameMode::BeginPlay()
 	{
 		NotifiyLoadComplete();
 	}
+	else
+	{
+		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	}
 }
 
 
@@ -128,6 +133,8 @@ void AIngameGameMode::NotifyDungeonReward(class InputStream& input)
 void AIngameGameMode::NotifiyStartLevel(class InputStream& input)
 {
 	XRLOG(Warning, TEXT("NotifiyStartLevel"));
+	GetMapMgr().MonsterListSpawn(GetWorld());
+	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
 }
 void AIngameGameMode::NotifiyLoadComplete()
 {
