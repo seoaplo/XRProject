@@ -5,6 +5,7 @@
 #include "Item.h"
 #include "Inventory.h"
 #include "Image.h"
+#include "TextBlock.h"
 #include "Blueprint/UserWidget.h"
 #include "QuickSlot.generated.h"
 
@@ -15,10 +16,13 @@ class XRPROJECT_API UQuickSlot : public UUserWidget
 public:
 	UQuickSlot(const FObjectInitializer& ObjectInitializer);
 public:
+	int SlotIndex;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
 		UImage* Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
 		UObject* TargetObject;
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "C_Widget")
+		UTextBlock* KeyName;
 	bool bIsSkill;
 	int ID;
 public:

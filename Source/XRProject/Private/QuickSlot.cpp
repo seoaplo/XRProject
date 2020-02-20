@@ -5,10 +5,12 @@
 #include "XRGameInstance.h"
 #include "PlayerSkillManager.h"
 #include "SkillCoolDown.h"
+#include "NetworkManager.h"
 
 UQuickSlot::UQuickSlot(const FObjectInitializer& ObjectInitializer) : UUserWidget(ObjectInitializer)
 {
 	bIsSkill = false;
+	SlotIndex = -1;
 	ID = 0;
 }
 
@@ -104,6 +106,14 @@ float UQuickSlot::GetCurCoolDown()
 void UQuickSlot::ClearSlot()
 {
 	ID = 0;
+
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kApplyQuickSlot);
+	out << (int32_t)SlotIndex;
+	out << (int8_t)0;
+	out.CompletePacketBuild();
+	UNetworkManager::GetInstance().SendPacket(out);
+
 	Update();
 }
 
@@ -120,6 +130,14 @@ void UQuickSlot::DropIn(UUserWidget * Target)
 		SetIcon();
 		ID = Item->GetID();
 		bIsSkill = false;
+
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kApplyQuickSlot);
+		out << (int32_t)SlotIndex;
+		out << (int8_t)1;
+		out << (int32_t)ID;
+		out.CompletePacketBuild();
+		UNetworkManager::GetInstance().SendPacket(out);
 	}
 	else if (SkillWidget)
 	{
@@ -127,5 +145,13 @@ void UQuickSlot::DropIn(UUserWidget * Target)
 		SetIcon();
 		ID = SkillWidget->TargetSkill->GetID();
 		bIsSkill = true;
+
+		OutputStream out;
+		out.WriteOpcode(ENetworkCSOpcode::kApplyQuickSlot);
+		out << (int32_t)SlotIndex;
+		out << (int8_t)2;
+		out << (int32_t)ID;
+		out.CompletePacketBuild();
+		UNetworkManager::GetInstance().SendPacket(out);
 	}
 }

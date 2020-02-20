@@ -47,7 +47,7 @@ void AIngameGameMode::BeginPlay()
 		this, &AIngameGameMode::NotifyMatchCanceled);
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyDungeonReward)->BindUObject(
 		this, &AIngameGameMode::NotifyDungeonReward);
-	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifiyStartLevel)->BindUObject(
+	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStartLevel)->BindUObject(
 		this, &AIngameGameMode::NotifiyStartLevel);
 
 	if (CurrentWidget->MiniMap != nullptr)

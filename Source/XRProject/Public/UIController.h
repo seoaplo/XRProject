@@ -16,10 +16,7 @@ class XRPROJECT_API AUIController : public APlayerController
 public:
 	AUIController();
 public:
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		void Test_SendChat(FText const& Chat);
-	UFUNCTION(BlueprintCallable, Category = "C_Function")
-		void Test_HP(int hp);
+	virtual void BeginPlay() override;
 	UFUNCTION(BlueprintCallable, Category = "C_Function")
 		void SendBoxFocusOrSend();
 };

@@ -1,5 +1,6 @@
 ﻿#include "KeyMappingWidget.h"
 #include "WidgetTree.h"
+#include "QuickBar.h"
 
 void UKeyMappingWidget::Init()
 {
@@ -8,6 +9,7 @@ void UKeyMappingWidget::Init()
 	{
 		if (AxisList[i].AxisName == FName(L"Turn")) continue;
 		if (AxisList[i].AxisName == FName(L"LookUp")) continue;
+
 		UKeyMappingSlotWidget* NewSlot = CreateWidget<UKeyMappingSlotWidget>(GetWorld(), SlotClass);
 		if (NewSlot)
 		{
@@ -25,6 +27,9 @@ void UKeyMappingWidget::Init()
 	for (int i = 0; i < KeyList.Num(); i++)
 	{
 		if (KeyList[i].ActionName == FName(L"Attack")) continue;
+		if (KeyList[i].ActionName == FName(L"WheelUp")) continue;
+		if (KeyList[i].ActionName == FName(L"WheelDown")) continue;
+		if (KeyList[i].ActionName == FName(L"FocusChattingWindow")) continue;
 		UKeyMappingSlotWidget* NewSlot = CreateWidget<UKeyMappingSlotWidget>(GetWorld(), SlotClass);
 		if (NewSlot)
 		{
@@ -47,9 +52,10 @@ FName UKeyMappingWidget::GetHangleName(FName EnglishName, float Scale)
 	if (EnglishName == FName(L"Sprint")) return FName(L"달리기");
 	if (EnglishName == FName(L"Roll")) return FName(L"구르기");
 	if (EnglishName == FName(L"ShowCursor")) return FName(L"마우스 보이기");
-	if (EnglishName == FName(L"OpenInventory")) return FName(L"가방 열기");
-	if (EnglishName == FName(L"OpenCharacterInfo")) return FName(L"캐릭터창 열기");
-	if (EnglishName == FName(L"OpenPartyMatching")) return FName(L"던전 매칭창 열기");
+	if (EnglishName == FName(L"OpenInventory")) return FName(L"가방");
+	if (EnglishName == FName(L"OpenCharacterInfo")) return FName(L"캐릭터창");
+	if (EnglishName == FName(L"OpenPartyMatching")) return FName(L"던전 매칭창");
+	if (EnglishName == FName(L"OptionWindow")) return FName(L"옵션창");
 	if (EnglishName == FName(L"QuickSlotNum1")) return FName(L"1번 퀵슬롯");
 	if (EnglishName == FName(L"QuickSlotNum2")) return FName(L"2번 퀵슬롯");
 	if (EnglishName == FName(L"QuickSlotNum3")) return FName(L"3번 퀵슬롯");
@@ -74,6 +80,17 @@ void UKeyMappingWidget::ChangeKeyAction(UKeyMappingSlotWidget* Target, FKey Key,
 
 		const FInputActionKeyMapping NewKeyMap(Target->ActionName, Key, IsShift, IsCtrl, IsAlt);
 		UInputSettings::GetInputSettings()->AddActionMapping(NewKeyMap, true);
+
+		if (Target->ActionName == FName(L"QuickSlotNum1")) UQuickBar::GetInstance()->RefreshKeyName(0);
+		if (Target->ActionName == FName(L"QuickSlotNum2")) UQuickBar::GetInstance()->RefreshKeyName(1);
+		if (Target->ActionName == FName(L"QuickSlotNum3")) UQuickBar::GetInstance()->RefreshKeyName(2);
+		if (Target->ActionName == FName(L"QuickSlotNum4")) UQuickBar::GetInstance()->RefreshKeyName(3);
+		if (Target->ActionName == FName(L"QuickSlotNum5")) UQuickBar::GetInstance()->RefreshKeyName(4);
+		if (Target->ActionName == FName(L"QuickSlotNum6")) UQuickBar::GetInstance()->RefreshKeyName(5);
+		if (Target->ActionName == FName(L"QuickSlotNum7")) UQuickBar::GetInstance()->RefreshKeyName(6);
+		if (Target->ActionName == FName(L"QuickSlotNum8")) UQuickBar::GetInstance()->RefreshKeyName(7);
+		if (Target->ActionName == FName(L"QuickSlotNum9")) UQuickBar::GetInstance()->RefreshKeyName(8);
+		if (Target->ActionName == FName(L"QuickSlotNum10")) UQuickBar::GetInstance()->RefreshKeyName(9);
 	}
 	else
 	{
