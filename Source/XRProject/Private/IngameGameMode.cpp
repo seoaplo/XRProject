@@ -40,7 +40,6 @@ void AIngameGameMode::BeginPlay()
 	CurrentWidget->CharacterInfo->SetSlotInfo();
 
 	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
-	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchResult)->BindUObject(
 		this, &AIngameGameMode::NotifyMatchResult);
@@ -97,6 +96,7 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
 	GetNetMgr().Update();
+	GetMapMgr().Tick(deltatime);
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -108,9 +108,9 @@ void AIngameGameMode::SpawnRemotePlayer()
 {
 	GetMapMgr().RemotePlayerSpawn(GetWorld());
 }
-void AIngameGameMode::DeleteRemotePlayer()
+void AIngameGameMode::DeleteRemotePlayer(int64_t ObjectID)
 {
-	GetMapMgr().DeleteRemotePlayer(GetWorld());
+	GetMapMgr().DeleteRemotePlayer(ObjectID);
 }
 
 void AIngameGameMode::NotifyMatchResult(class InputStream& input)

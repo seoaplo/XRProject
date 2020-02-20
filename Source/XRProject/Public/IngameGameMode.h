@@ -37,7 +37,7 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 	void SpawnRemotePlayer();
-	void DeleteRemotePlayer();
+	void DeleteRemotePlayer(int64_t ObjectID);
 
 	void NotifiyStartLevel(class InputStream& input);
 	void NotifiyLoadComplete();

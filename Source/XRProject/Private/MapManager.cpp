@@ -30,8 +30,8 @@ bool UMapManager::Init()
 	LevelID = -1;
 
 	Spawn_Character.Unbind();
-	Delete_Character.Unbind();
 	PreWorld = nullptr;
+	BP_LoadingWidget = nullptr;
 	return true;
 }
 bool UMapManager::Clear()
@@ -54,9 +54,16 @@ bool UMapManager::Clear()
 	return true;
 }
 
+bool UMapManager::Tick(float DeltaTime)
+{
+	if (BP_LoadingWidget)
+	{
+		LoadingPercent = LoadingPercent < 0.9f ? (LoadingPercent + 0.01f) : 0.9f;
+		BP_LoadingWidget->ApplyPercentage(LoadingPercent);
+	}
+	return true;
+}
 // ∏ ø° ¿‘¿Â
-
-
 void UMapManager::ReadMapDataFromServer(InputStream& Input)
 {
 	int32_t characterlistsize = 0;
@@ -203,12 +210,6 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	PlayerID = CurrentData.ObjectID;
 
 }
-bool UMapManager::ReadPlayerDeleteFromServer(InputStream& Input)
-{
-	Delete_Character.ExecuteIfBound();
-	return true;
-}
-
 APlayerCharacter* UMapManager::FindPlayer(int64_t objectid)
 {
 	APlayerCharacter* FindedPlayer = CharacterList.FindRef(objectid);
@@ -284,21 +285,20 @@ bool UMapManager::OpenMap(UWorld* World)
 	UClass* MyWidgetClass = MyWidgetClassRef.TryLoadClass<UUserWidget>();
 	if (MyWidgetClass == nullptr) return false;
 	
-	ULoadingBarWidget * BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
+	BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
 	if (BP_LoadingWidget == nullptr) return false;
 
-	
-
 	BP_LoadingWidget->AddToViewport();
+	LoadingPercent = 0.0f;
 
-	float Percent = 0.0f;
+	ULoadingBarWidget* LoadingWidgetLamda = BP_LoadingWidget;
 	auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
 	if (gInst)
 	{
 		FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
 
 		FStreamableDelegate resultcallback;
-		resultcallback.BindLambda([path, this, World, LevelPath, BP_LoadingWidget]()
+		resultcallback.BindLambda([path, this, World, LevelPath, LoadingWidgetLamda]()
 		{
 			TSoftObjectPtr<ULevel> LoadedMap(path);
 			XRLOG(Warning, TEXT("Map ASync Load Complete"));
@@ -307,10 +307,8 @@ bool UMapManager::OpenMap(UWorld* World)
 			UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
 		});
 		gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
-
-		Percent = Percent < 0.9f ? (Percent + 0.01f) : 0.9f;
-		BP_LoadingWidget->ApplyPercentage(Percent);
 	}
+	LoadingWidgetLamda = nullptr;
 	return true;
 }
 bool UMapManager::PlayerListSpawn(UWorld* World)
@@ -435,8 +433,15 @@ bool UMapManager::RemotePlayerSpawn(UWorld* world)
 {
 	return PlayerListSpawn(world);
 }
-bool UMapManager::DeleteRemotePlayer(UWorld* World)
+bool UMapManager::DeleteRemotePlayer(int64_t ObjectID)
 {
+	APlayerCharacter* DeletePlayer = CharacterList.FindAndRemoveChecked(ObjectID);
+	if (DeletePlayer == nullptr) return true;
+
+	if (DeletePlayer->Destroy())
+	{
+		return true;
+	}
 	return false;
 }
 void UMapManager::PotalInPlayer(AActor* OtherCharacter)
