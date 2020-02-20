@@ -227,7 +227,7 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 		XRLOG(Warning, TEXT("Player not found"));
 		return;
 	}
-
+	
 
 	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
 	if (aicon == nullptr)
@@ -344,6 +344,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	float AttackSetHp = input.ReadFloat32();
 	
 	//bool AttackIntensity = input.ReadBool();
+	/*TEST CODE*/
 	bool AttackIntensity = true;
 
 	if (AttackerType == 1)

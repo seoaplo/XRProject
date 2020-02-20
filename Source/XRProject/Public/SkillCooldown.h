@@ -8,7 +8,7 @@
 
 class UXRGameInstance;
 
-const float kCoolDownDecreaseFrequency = 1.0f;
+const float kCoolDownDecreaseFrequency = 0.1f;
 
 /**
  * 

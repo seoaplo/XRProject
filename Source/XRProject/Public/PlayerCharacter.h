@@ -152,6 +152,8 @@ private:
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FVector ScaleVector;
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
+		FRotator AttackEffectRot;
 	UPROPERTY(EditInstanceOnly, Category = "C_COLLISION")
 		FVector2D CapsuleSize;
 	UPROPERTY(EditInstanceOnly, Category = "C_COLLLISION")
@@ -174,6 +176,10 @@ private:
 		UParticleSystemComponent* BerserkBuffStart;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		UParticleSystemComponent* BerserkBuffLoop;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* AttackEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* BloodEffect;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		TArray<UParticleSystemComponent*> ParticleArray;
 	UPROPERTY(EditDefaultsOnly, Category = "C_KnockBack")
@@ -211,6 +217,7 @@ public:
 	bool bIsSkillMove;
 	bool bIsSkillPlaying;
 	bool bIsKnockBackMoving;
+	bool bIsMoveLocked;
 	bool bIsInvisible;
 
 	/*TEST*/
@@ -270,6 +277,10 @@ public:
 	void SetbSavedCombo(bool b);
 	void SetComboCount(int32 NextCombo);
 	void SetKnockBackVector(FVector& Vec);
+	void ForceAttackStop();
+	void ForceRollStop();
+	void ForceSkillStop();
+	void LockCharacterMove(bool Lock);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();

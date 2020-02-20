@@ -61,14 +61,14 @@ APlayerCharacter::APlayerCharacter()
 
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
 	HitCapsule->SetVisibility(true);
-	HitCapsule->bHiddenInGame = false;
+	HitCapsule->bHiddenInGame = true;
 	HitCapsule->SetCapsuleHalfHeight(CapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(CapsuleSize.Y);
 	HitCapsule->SetGenerateOverlapEvents(true);
 	HitCapsule->SetCollisionProfileName("Player");
 
 	GetCapsuleComponent()->SetVisibility(true);
-	GetCapsuleComponent()->bHiddenInGame = false;
+	GetCapsuleComponent()->bHiddenInGame = true;
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 
 
@@ -119,6 +119,12 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		SWORDTRAIL_FINAL
 		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrailFianl.P_PlayerSwordTrailFianl'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		BLOOD_EFFECT
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/Blood_cloud_large.Blood_cloud_large'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		ATTACK_EFFECT
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_SwordReact_2.P_SwordReAct_2'"));
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_START
@@ -127,10 +133,12 @@ APlayerCharacter::APlayerCharacter()
 		BERSERK_EFFECT_LOOP
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
 
-	check(SWORDTRAIL_NORMAL.Succeeded());
-	check(SWORDTRAIL_FINAL.Succeeded());
-	check(BERSERK_EFFECT_START.Succeeded());
-	check(BERSERK_EFFECT_LOOP.Succeeded());
+	//check(SWORDTRAIL_NORMAL.Succeeded());
+	//check(SWORDTRAIL_FINAL.Succeeded());
+	//check(BERSERK_EFFECT_START.Succeeded());
+	//check(BERSERK_EFFECT_LOOP.Succeeded());
+	//check(BLOOD_EFFECT.Succeeded());
+	//check(ATTACK_EFFECT.Succeeded());
 
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
@@ -183,14 +191,17 @@ APlayerCharacter::APlayerCharacter()
 	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailFinal"));
 	BerserkBuffStart = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkStart"));
 	BerserkBuffLoop = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkLoop"));
+	AttackEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect"));
+	BloodEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BloodEffect"));
 	SwordTrailNormal->bAutoActivate = false;
 	SwordTrailFinal->bAutoActivate = false;
-
 
 	SwordTrailNormal->SetTemplate(SWORDTRAIL_NORMAL.Object);
 	SwordTrailFinal->SetTemplate(SWORDTRAIL_FINAL.Object);
 	BerserkBuffStart->SetTemplate(BERSERK_EFFECT_START.Object);
 	BerserkBuffLoop->SetTemplate(BERSERK_EFFECT_LOOP.Object);
+	AttackEffect->SetTemplate(ATTACK_EFFECT.Object);
+	BloodEffect->SetTemplate(BLOOD_EFFECT.Object);
 	BerserkBuffStart->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
 		ComboParticleSocketName.FxBottom);
 	BerserkBuffLoop->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
@@ -203,7 +214,8 @@ APlayerCharacter::APlayerCharacter()
 	ParticleArray.Add(SwordTrailFinal);
 	ParticleArray.Add(BerserkBuffStart);
 	ParticleArray.Add(BerserkBuffLoop);
-
+	ParticleArray.Add(AttackEffect);
+	ParticleArray.Add(BloodEffect);
 
 	ComboCount = 1;
 	CurrentAttackID = -1;
@@ -219,6 +231,8 @@ APlayerCharacter::APlayerCharacter()
 	bInitialized = false;
 	bIsTestMode = false;
 	bIsMouseShow = false;
+	bIsMoveLocked = false;
+	bIsInvisible = false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
 	KnockBackVector = FVector(0.0f, 0.0f, 0.0f);
@@ -233,6 +247,10 @@ APlayerCharacter::APlayerCharacter()
 	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(AISenseDamage->GetSenseImplementation());
+
+
+	/*TEST CODE*/
+	AttackEffectRot = FRotator(0.0f, 0.0f, 0.0f);
 
 }
 
@@ -294,7 +312,7 @@ void APlayerCharacter::Tick(float deltatime)
 	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
-
+	
 	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
 	if(bIsKnockBackMoving)
@@ -368,7 +386,7 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::MoveForward(float Value)
 {
 	ForwardValue = Value;
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsMoveLocked)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -388,7 +406,7 @@ void APlayerCharacter::MoveRight(float Value)
 {
 	RightValue = Value;
 	
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsMoveLocked)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -604,27 +622,30 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 
 	PlayerStatComp->SetCurrentHP(Damage);
 	bIsHit = true;
-
+	
+	
 	if (DamageEvent.bIntensity == true)
 	{
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
-		SetbIsSkillMove(false);
-		SetbIsSkillPlaying(false);
 		SetbIsInvisible(false);
 		SetbIsKnockBackMoving(true);
+		ForceSkillStop();
+		ForceAttackStop();
+		ForceRollStop();
+		
 		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
 		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 		
 		FVector VecToTarget = NPC->GetActorLocation() - GetActorLocation();
 		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
-		AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+		AgainstMonster = FRotator(0.0f, (FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+		//AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
 		SetActorRotation(AgainstMonster);
 		KnockBackVector = -VecToTarget;
-
 	}
 	else if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
@@ -673,9 +694,6 @@ void APlayerCharacter::Attack()
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 
-
-	AttackOverlapList.clear(); //Overlap list 초기화
-
 	//first
 	if (bIsAttack == false)
 	{
@@ -697,7 +715,7 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-	
+	AttackOverlapList.clear(); //Overlap list 초기화
 
 }
 
@@ -1019,7 +1037,6 @@ void APlayerCharacter::ContinueCombo()
 		out << GetActorRotation();
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
-
 	}
 }
 
@@ -1064,8 +1081,6 @@ void APlayerCharacter::OnDead()
 void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
-
 	if (Cast<APlayerController>(GetController()))
 	{
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
@@ -1073,7 +1088,7 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 		{
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
-				if (FlagNpc == NPC)
+				if (FlagNpc->GetName() == NPC->GetName())
 					return;
 			}
 
@@ -1085,12 +1100,10 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 				Equipments.WeaponComponent->GetSocketLocation("SwordEnd"), FQuat::Identity, ECollisionChannel::ECC_GameTraceChannel2,
 				FCollisionShape::MakeSphere(72.0f), Params);
 
-
 			FVector MiniBox = FVector(3.f, 3.f, 3.f);
 
 			for (FHitResult& Rst : HitResult)
 			{
-				//USkeletalMeshComponent* SkComp = Cast<USkeletalMeshComponent>(Rst.GetComponent());
 				UCapsuleComponent* CapComp = Cast<UCapsuleComponent>(Rst.GetComponent());
 
 				if (CapComp)
@@ -1106,6 +1119,15 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 					DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
 					DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
 					DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
+
+					FRotator SlashRot = FRotator(90.0f, 90.0f, 90.0f);
+					FRotator BloodRot = FRotator(-90.0f, 0.0f, 0.0f);
+
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect->Template, HitLocation,
+						SlashRot, true);
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect->Template, HitLocation,
+						BloodRot, true);
+
 				}
 			}
 
@@ -1233,11 +1255,18 @@ bool APlayerCharacter::GetbIsDead()
 
 void APlayerCharacter::TestPlay()
 {
-	FString Fstr = "Berserk";
-	UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
-		FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
+	//FString Fstr = "Berserk";
+	//UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
+	//	FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
 
-	Skill->Play(this);
+	//Skill->Play(this);
+
+	FRotator SlashRot = FRotator(90.0f, 90.0f, 90.0f);
+
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect->Template, GetActorLocation(),
+		SlashRot, true);
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect->Template, GetActorLocation(),
+		AttackEffectRot, true);
 }
 
 UItemEquipment* APlayerCharacter::GetEquippedItem(EEquipmentsType Type)
@@ -1359,6 +1388,35 @@ void APlayerCharacter::SetComboCount(int32 NextCount)
 void APlayerCharacter::SetKnockBackVector(FVector & Vec)
 {
 	KnockBackVector = Vec;
+}
+
+void APlayerCharacter::ForceAttackStop()
+{
+	bIsAttack = false;
+	bIsAttackMoving = false;
+	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->AttackMontage);
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
+
+void APlayerCharacter::ForceRollStop()
+{
+	bIsRolling = false;
+	bIsOverallRollAnimPlaying = false;
+	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->RollMontage);
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
+
+void APlayerCharacter::ForceSkillStop()
+{
+	bIsSkillMove = false;
+	bIsSkillPlaying = false;
+	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->SkillMontage);
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
+
+void APlayerCharacter::LockCharacterMove(bool Lock)
+{
+	bIsMoveLocked = Lock;
 }
 
 int32 APlayerCharacter::GetComboCount()
