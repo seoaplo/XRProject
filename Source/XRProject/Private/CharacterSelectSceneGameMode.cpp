@@ -114,7 +114,7 @@ ACharacterSelectSceneGameMode::ACharacterSelectSceneGameMode()
 
 	BeforeSlotNumber = 0;
 
-
+	
 }
 
 void ACharacterSelectSceneGameMode::BeginPlay()
@@ -171,6 +171,7 @@ void ACharacterSelectSceneGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	GetNetMgr().Update();
+	GetMapMgr().Tick(DeltaSeconds);
 }
 
 void ACharacterSelectSceneGameMode::ChangeSelectedCharacter(int64 SlotNumber)

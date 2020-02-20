@@ -32,8 +32,8 @@ enum class ENetworkCSOpcode : uint16_t
 
 	kMonsterHitCharacter = 1010,
 	kSendChatRequest = 1011,
+	kNotifyLoadComplete = 1012,
 
-	kNotifiyLoadComplete = 1012,
 
 	kRequestCharacterWait = 1020,
 	kRequestCharacterSprint = 1021,
@@ -82,6 +82,7 @@ enum class ENetworkSCOpcode : uint16_t
 	kNotifyMatchCanceled = 1013,
 	kNotifyChat = 1014,
 	kNotifyStartLevel = 1015,
+	kNotifyDeleteRemotePlayer = 1016,
 
 	kNotifyCharacterWait = 1020,
 	kNotifyCharacterSprint = 1021,

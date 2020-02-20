@@ -3,7 +3,6 @@
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
 #include "WidgetTree.h"
-#include "XRGameInstance.h"
 #include "Animation/AnimBlueprint.h"
 #include "HealthBarWidget.h"
 #include "AccountManager.h"
@@ -13,11 +12,13 @@
 #include "Perception/AISenseConfig_Damage.h"
 #include "HealthBarWidget.h"
 #include "XRPlayerController.h"
+#include "XRGameInstance.h"
 #include "NonePlayerCharacter.h"
 #include "NickNameWidget.h"
 
 APlayerCharacter::APlayerCharacter()
 {
+	
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -149,7 +150,7 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.HandsComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
-	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Equipments.WeaponComponent->SetCollisionProfileName("PlayerWeapon");
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -220,6 +221,7 @@ APlayerCharacter::APlayerCharacter()
 	bIsMouseShow = false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
+	KnockBackVector = FVector(0.0f, 0.0f, 0.0f);
 
 	MyShake = UPlayerCameraShake::StaticClass();
 	TestID = 2;
@@ -295,6 +297,11 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
+	if(bIsKnockBackMoving)
+	{
+		FVector vVec = KnockBackVector;
+		AddMovementInput(vVec, 1.0f, false);
+	}
 
 	if (bIsAttackMoving)
 	{
@@ -568,10 +575,20 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	}
 }
 
-float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	//Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
+	//FName CurrentHitName = MyAnimInstance->Montage_GetCurrentSection(MyAnimInstance->HitMontage);
+	//if (CurrentHitName == NAME_None) //bIsHit시엔 Hit를 적용받지 않음(
+	//	return -1.0f;
+
+	if (GetbIsInvisible())
+	{
+		XRLOG(Warning, TEXT("Now Invisible, Hit Ignored."));
+		return -1.0f;
+	}
+	
 	XRLOG(Warning, TEXT("Player SetHP  : %f"), Damage);
 	ANonePlayerCharacter* NPC = nullptr;
 	if (DamageCauser != nullptr)
@@ -586,27 +603,47 @@ float APlayerCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent
 		return -1.0f;
 
 	PlayerStatComp->SetCurrentHP(Damage);
-		
-
 	bIsHit = true;
 
+	if (DamageEvent.bIntensity == true)
+	{
+		MyAnimInstance->PlayHitMontage();
+		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
+		ComboCount = 1;
+		bSavedCombo = false;
+		SetbIsSkillMove(false);
+		SetbIsSkillPlaying(false);
+		SetbIsInvisible(false);
+		SetbIsKnockBackMoving(true);
+		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
+		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+		
+		FVector VecToTarget = NPC->GetActorLocation() - GetActorLocation();
+		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
-	if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
+		AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+		SetActorRotation(AgainstMonster);
+		KnockBackVector = -VecToTarget;
+
+	}
+	else if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
 	}
-	else
+	else //공격 중, 스킬 중...
+	{
 		bIsHit = false;
+	}
+
 
 	if (MyShake)
 	{
 		auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
 		Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
 	}
-
 
 	/*동작 취소 처리*/
 	bIsSprint = false;
@@ -660,14 +697,12 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
 
 }
 
 void APlayerCharacter::Roll()
 {
-	if (bIsSkillPlaying)
-		return;
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 	//후딜레이 동작에서 구르는지 체크
@@ -684,9 +719,10 @@ void APlayerCharacter::Roll()
 		}
 
 		bIsAttackMoving = false;
+		bIsAttack = false;
 	}
 
-	if (bIsOverallRollAnimPlaying)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
 		return;
 
 	bool bArrowKeyNotPressed = false;
@@ -705,6 +741,7 @@ void APlayerCharacter::Roll()
 	bIsOverallRollAnimPlaying = true;
 	MyAnimInstance->PlayRollMontage();
 	SetRollingCapsuleMode();
+	
 	if (Cast<APlayerController>(GetController()))
 	{
 		OutputStream out;
@@ -718,7 +755,7 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
-	if (bIsOverallRollAnimPlaying || bIsSkillPlaying)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
 		return;
 
 	bIsSprint = true;
@@ -915,10 +952,17 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		bSavedCombo = false;
 		ComboCount = 1;
 		Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		if(bIsSprint)
+			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
+
 	}
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
 		bIsHit = false;
+
+		if (bIsSprint)
+			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 	}
 	else if (MyAnimInstance->RollMontage == Montage)
 	{
@@ -983,6 +1027,7 @@ void APlayerCharacter::StartMoveAttack()
 {
 	bIsAttackMoving = true;
 	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 void APlayerCharacter::EndMoveAttack()
 {
@@ -996,6 +1041,8 @@ void APlayerCharacter::EndMoveAttack()
 	out << GetActorRotation();
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
+
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)
@@ -1018,20 +1065,48 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 
+
 	if (Cast<APlayerController>(GetController()))
 	{
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
 		if (NPC)
 		{
-			///수정자 조재진///
-			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
-			//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
-			/// 오프라인 공격 테스트용도 지워도 무상관///////
-
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
 				if (FlagNpc == NPC)
 					return;
+			}
+
+			FCollisionQueryParams Params(NAME_None, false, this);
+			TArray<FHitResult> HitResult;
+			FVector SwordBoxSize = FVector(15.0f, 15.0f, 72.0f);
+
+			GetWorld()->SweepMultiByChannel(HitResult, Equipments.WeaponComponent->GetSocketLocation("SwordStart"),
+				Equipments.WeaponComponent->GetSocketLocation("SwordEnd"), FQuat::Identity, ECollisionChannel::ECC_GameTraceChannel2,
+				FCollisionShape::MakeSphere(72.0f), Params);
+
+
+			FVector MiniBox = FVector(3.f, 3.f, 3.f);
+
+			for (FHitResult& Rst : HitResult)
+			{
+				//USkeletalMeshComponent* SkComp = Cast<USkeletalMeshComponent>(Rst.GetComponent());
+				UCapsuleComponent* CapComp = Cast<UCapsuleComponent>(Rst.GetComponent());
+
+				if (CapComp)
+				{
+					FVector TraceVec = Rst.TraceEnd - Rst.TraceStart;
+					FVector TestCenter = (Rst.TraceStart  +
+						Rst.TraceEnd) / 2;
+					FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVec).ToQuat();
+					float HalfHeight = (Rst.TraceEnd - Rst.TraceStart).Size() / 2;
+
+					FVector HitLocation = Rst.Location;
+					DrawDebugBox(GetWorld(), Rst.TraceStart, MiniBox, FColor::Red, false, 3.0f);
+					DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
+					DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
+					DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
+				}
 			}
 
 			int64 EnemyID = NPC->ObjectID;
@@ -1089,7 +1164,7 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
 
 	/*속도 설정*/
-	GetCharacterMovement()->MaxAcceleration = kNormalMovementAcceleration;
+	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
@@ -1256,6 +1331,11 @@ void APlayerCharacter::SetbIsAttack(bool b)
 	bIsAttack = b;
 }
 
+void APlayerCharacter::SetbIsInvisible(bool b)
+{
+	bIsInvisible = b;
+}
+
 void APlayerCharacter::SetbSavedCombo(bool b)
 {
 	bSavedCombo = b;
@@ -1274,6 +1354,11 @@ bool APlayerCharacter::GetbSavedCombo()
 void APlayerCharacter::SetComboCount(int32 NextCount)
 {
 	ComboCount = NextCount;
+}
+
+void APlayerCharacter::SetKnockBackVector(FVector & Vec)
+{
+	KnockBackVector = Vec;
 }
 
 int32 APlayerCharacter::GetComboCount()
@@ -1298,4 +1383,19 @@ UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString 
 FComboSocket APlayerCharacter::GetComboSocket()
 {
 	return ComboParticleSocketName;
+}
+
+void APlayerCharacter::SetbIsKnockBackMoving(bool b)
+{
+	bIsKnockBackMoving = b;
+}
+
+bool APlayerCharacter::GetbIsKnockBackMoving()
+{
+	return bIsKnockBackMoving;
+}
+
+bool APlayerCharacter::GetbIsInvisible()
+{
+	return bIsInvisible;
 }

@@ -31,16 +31,11 @@ void AIngameGameMode::BeginPlay()
 	{
 		CurrentWidget->AddToViewport();
 	}
-
-	GetMapMgr().PlayerListSpawn(GetWorld());
-	GetMapMgr().PossessPlayer(GetWorld());
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
 	CurrentWidget->CharacterInfo->SetSlotInfo();
 
 	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
-	GetMapMgr().Delete_Character.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchResult)->BindUObject(
 		this, &AIngameGameMode::NotifyMatchResult);
@@ -49,7 +44,7 @@ void AIngameGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyDungeonReward)->BindUObject(
 		this, &AIngameGameMode::NotifyDungeonReward);
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStartLevel)->BindUObject(
-		this, &AIngameGameMode::NotifiyStartLevel);
+		this, &AIngameGameMode::NotifyStartLevel);
 
 	if (CurrentWidget->MiniMap != nullptr)
 	{
@@ -79,16 +74,14 @@ void AIngameGameMode::BeginPlay()
 	int32 SizeX = 0;
 	int32 SizeY = 0;
 	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
-
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 	if (GetMapMgr().IsDungeon())
 	{
-		NotifiyLoadComplete();
+		NotifyLoadComplete();
 	}
 	else
 	{
-		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+		GetMapMgr().PlayerListSpawn(GetWorld());
+		GetMapMgr().PossessPlayer(GetWorld());
 	}
 }
 
@@ -97,6 +90,7 @@ void AIngameGameMode::Tick(float deltatime)
 {
 	Super::Tick(deltatime);
 	GetNetMgr().Update();
+	GetMapMgr().Tick(deltatime);
 }
 
 void AIngameGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -108,9 +102,9 @@ void AIngameGameMode::SpawnRemotePlayer()
 {
 	GetMapMgr().RemotePlayerSpawn(GetWorld());
 }
-void AIngameGameMode::DeleteRemotePlayer()
+void AIngameGameMode::DeleteRemotePlayer(int64_t ObjectID)
 {
-	GetMapMgr().DeleteRemotePlayer(GetWorld());
+	GetMapMgr().DeleteRemotePlayer(ObjectID);
 }
 
 void AIngameGameMode::NotifyMatchResult(class InputStream& input)
@@ -130,18 +124,19 @@ void AIngameGameMode::NotifyDungeonReward(class InputStream& input)
 	CurrentWidget->CreateDungeonResultWidget(input);
 }
 
-void AIngameGameMode::NotifiyStartLevel(class InputStream& input)
+void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 {
-	XRLOG(Warning, TEXT("NotifiyStartLevel"));
+	XRLOG(Warning, TEXT("NotifyStartLevel"));
 	GetMapMgr().MonsterListSpawn(GetWorld());
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	GetMapMgr().PlayerListSpawn(GetWorld());
+	GetMapMgr().PossessPlayer(GetWorld());
 }
-void AIngameGameMode::NotifiyLoadComplete()
+void AIngameGameMode::NotifyLoadComplete()
 {
 	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kNotifiyLoadComplete);
+	out.WriteOpcode(ENetworkCSOpcode::kNotifyLoadComplete);
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
 
-	XRLOG(Warning, TEXT("NotifiyLoadComplete"));
+	XRLOG(Warning, TEXT("NotifyLoadComplete"));
 }

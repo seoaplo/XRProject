@@ -105,6 +105,13 @@ public:
 		void AnimNotify_FinalTrail();
 	UFUNCTION()
 		void AnimNotify_BerserkEffon();
+	UFUNCTION()
+		void AnimNotify_InvisibleOn();
+	UFUNCTION()
+		void AnimNotify_InvisibleOff();
+	UFUNCTION()
+		void AnimNotify_KnockBackMoveEnd();
+
 
 	void PlayAttackMontage();
 	void PlaySkillMontage();

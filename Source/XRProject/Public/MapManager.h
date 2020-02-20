@@ -17,13 +17,15 @@
 /**
  * 작성자 : 서승석
  */
+class ULoadingBarWidget;
+
 DECLARE_DELEGATE(CharacterDataProcess)
 
 struct LevelPathData
 {
 	FName LevelName;
-	wstring LevelPath;
-	LevelPathData(FName Name, wstring Path)
+	FString LevelPath;
+	LevelPathData(FName Name, FString Path)
 	{
 		LevelName = Name;
 		LevelPath = Path;
@@ -45,6 +47,7 @@ public:
 public:
 	bool Init();
 	bool Clear();
+	bool Tick(float DeltaTime);
 
 	bool IsDungeon() { if ((LevelID % 100) > 0) return true; else return false;}
 	// 맵에 입장
@@ -53,7 +56,6 @@ public:
 	void ReadPossesPlayerFromServer(InputStream& Input);
 	void ReadMosnterFromServer(InputStream& Input);
 	bool ReadPlayerSpawnFromServer(InputStream& Input);
-	bool ReadPlayerDeleteFromServer(InputStream& Input);
 
 	// 서버로 데이터 송신
 	void SendChangeZoneFromClient();
@@ -68,15 +70,16 @@ public:
 	bool MonsterListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
 	bool PossessPlayer(UWorld* World);
+	void LoadLevelCompleteFunc(const FName & LevelName, UPackage * LoadPackege, EAsyncLoadingResult::Type LoadingResult);
 	// 포탈 관련 함수
 	void PotalInPlayer(AActor* OtherCharacter);
 	// 삭제
-	bool DeleteRemotePlayer(UWorld* World);
+	bool DeleteRemotePlayer(int64_t ObjectID);
 
 	void InputExpData(class InputStream& input); //EXP 받을방법이 없어서 임의로 만든 클래스.
 public:
 	CharacterDataProcess Spawn_Character;
-	CharacterDataProcess Delete_Character;
+	FLoadPackageAsyncDelegate LoadLevelComplete;
 	TArray<int> CharacterSkillIDList; //캐릭터 스킬 리스트 받아놓는곳
 
 private:
@@ -85,12 +88,12 @@ private:
 
 	UPROPERTY()
 		UWorld* PreWorld;
-	//UPROPERTY()
-	//UWorld* World;
+	UPROPERTY()
+		ULoadingBarWidget* BP_LoadingWidget;
 
 	int32_t LevelID;
 	int64_t PlayerID;
-
+	float	LoadingPercent;
 	std::vector<CharacterData> CharacterDataList;
 	std::vector<MonsterData> MonsterDataList;
 
