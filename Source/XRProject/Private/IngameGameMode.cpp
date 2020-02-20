@@ -31,10 +31,6 @@ void AIngameGameMode::BeginPlay()
 	{
 		CurrentWidget->AddToViewport();
 	}
-
-	GetMapMgr().PlayerListSpawn(GetWorld());
-	GetMapMgr().PossessPlayer(GetWorld());
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeUIOnly());
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
 	CurrentWidget->CharacterInfo->SetSlotInfo();
@@ -78,16 +74,14 @@ void AIngameGameMode::BeginPlay()
 	int32 SizeX = 0;
 	int32 SizeY = 0;
 	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
-
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 	if (GetMapMgr().IsDungeon())
 	{
 		NotifyLoadComplete();
 	}
 	else
 	{
-		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+		GetMapMgr().PlayerListSpawn(GetWorld());
+		GetMapMgr().PossessPlayer(GetWorld());
 	}
 }
 
@@ -134,7 +128,8 @@ void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 {
 	XRLOG(Warning, TEXT("NotifyStartLevel"));
 	GetMapMgr().MonsterListSpawn(GetWorld());
-	GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameOnly());
+	GetMapMgr().PlayerListSpawn(GetWorld());
+	GetMapMgr().PossessPlayer(GetWorld());
 }
 void AIngameGameMode::NotifyLoadComplete()
 {
