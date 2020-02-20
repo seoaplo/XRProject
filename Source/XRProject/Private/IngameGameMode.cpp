@@ -25,16 +25,6 @@ void AIngameGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	PrimaryActorTick.bCanEverTick = true;
-	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
-	if (CurrentWidget != nullptr)
-	{
-		CurrentWidget->AddToViewport();
-	}
-	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-
-	CurrentWidget->CharacterInfo->SetSlotInfo();
-
 	GetMapMgr().Spawn_Character.BindUObject(this, &AIngameGameMode::SpawnRemotePlayer);
 
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyMatchResult)->BindUObject(
@@ -46,42 +36,54 @@ void AIngameGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStartLevel)->BindUObject(
 		this, &AIngameGameMode::NotifyStartLevel);
 
-	if (CurrentWidget->MiniMap != nullptr)
-	{
-		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
-		CurrentMiniMap.ListClear();
-		CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
-		CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
-		for (auto& Character : GetMapMgr().GetCharacterList())
-		{
-			CurrentMiniMap.AddActorList(Character.Value, static_cast<int>(EMiniMapObjectType::EParty));
-		}
-		for (auto& Monster : GetMapMgr().GetMonsterList())
-		{
-			CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
-		}
-	}
-
-	if (CurrentWidget->SkillWindow)
-	{
-		CurrentWidget->SkillWindow->CreateSkillList();
-	}
-	if (CurrentWidget->QuickBar)
-	{
-		CurrentWidget->QuickBar->SetQuickSlot();
-	}
-
-	int32 SizeX = 0;
-	int32 SizeY = 0;
-	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
 	if (GetMapMgr().IsDungeon())
 	{
 		NotifyLoadComplete();
 	}
 	else
 	{
+
+		CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
+		if (CurrentWidget != nullptr)
+		{
+			CurrentWidget->AddToViewport();
+		}
+
 		GetMapMgr().PlayerListSpawn(GetWorld());
 		GetMapMgr().PossessPlayer(GetWorld());
+
+		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+
+		CurrentWidget->CharacterInfo->SetSlotInfo();
+
+		if (CurrentWidget->MiniMap != nullptr)
+		{
+			UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+			CurrentMiniMap.ListClear();
+			CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
+			CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
+			for (auto& Character : GetMapMgr().GetCharacterList())
+			{
+				CurrentMiniMap.AddActorList(Character.Value, static_cast<int>(EMiniMapObjectType::EParty));
+			}
+			for (auto& Monster : GetMapMgr().GetMonsterList())
+			{
+				CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
+			}
+		}
+
+		if (CurrentWidget->SkillWindow)
+		{
+			CurrentWidget->SkillWindow->CreateSkillList();
+		}
+		if (CurrentWidget->QuickBar)
+		{
+			CurrentWidget->QuickBar->SetQuickSlot();
+		}
+
+		int32 SizeX = 0;
+		int32 SizeY = 0;
+		GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
 	}
 }
 
@@ -126,10 +128,51 @@ void AIngameGameMode::NotifyDungeonReward(class InputStream& input)
 
 void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 {
+	CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
+	if (CurrentWidget != nullptr)
+	{
+		CurrentWidget->AddToViewport();
+	}
+
+	PrimaryActorTick.bCanEverTick = true;
+
 	XRLOG(Warning, TEXT("NotifyStartLevel"));
 	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PlayerListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
+
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+
+	CurrentWidget->CharacterInfo->SetSlotInfo();
+
+	if (CurrentWidget->MiniMap != nullptr)
+	{
+		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+		CurrentMiniMap.ListClear();
+		CurrentMiniMap.SetMapID(GetMapMgr().GetMapID());
+		CurrentMiniMap.SetMyCharacter(GetMapMgr().GetPlayer());
+		for (auto& Character : GetMapMgr().GetCharacterList())
+		{
+			CurrentMiniMap.AddActorList(Character.Value, static_cast<int>(EMiniMapObjectType::EParty));
+		}
+		for (auto& Monster : GetMapMgr().GetMonsterList())
+		{
+			CurrentMiniMap.AddActorList(Monster.Value, static_cast<int>(EMiniMapObjectType::EEnemy));
+		}
+	}
+
+	if (CurrentWidget->SkillWindow)
+	{
+		CurrentWidget->SkillWindow->CreateSkillList();
+	}
+	if (CurrentWidget->QuickBar)
+	{
+		CurrentWidget->QuickBar->SetQuickSlot();
+	}
+
+	int32 SizeX = 0;
+	int32 SizeY = 0;
+	GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
 }
 void AIngameGameMode::NotifyLoadComplete()
 {

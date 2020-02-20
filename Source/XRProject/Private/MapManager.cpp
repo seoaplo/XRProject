@@ -60,7 +60,7 @@ bool UMapManager::Tick(float DeltaTime)
 {
 	if (BP_LoadingWidget)
 	{
-		LoadingPercent = LoadingPercent < 0.9f ? (LoadingPercent + 0.01f) : 0.9f;
+		LoadingPercent = LoadingPercent < 1.0f ? (LoadingPercent + 0.01f) : 1.0f;
 		BP_LoadingWidget->ApplyPercentage(LoadingPercent);
 	}
 	return true;
@@ -291,10 +291,10 @@ bool UMapManager::OpenMap(UWorld* World)
 	if (BP_LoadingWidget == nullptr) return false;
 
 	BP_LoadingWidget->AddToViewport();
-	LoadingPercent = 0.0f;
+	LoadingPercent = 1.0f;
 
-
-	LoadPackageAsync(LevelPath->LevelPath, LoadLevelComplete);
+	UGameplayStatics::OpenLevel(PreWorld, LevelPath->LevelName);
+	//LoadPackageAsync(LevelPath->LevelPath, LoadLevelComplete);
 	//ULoadingBarWidget* LoadingWidgetLamda = BP_LoadingWidget;
 	//auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
 	//if (gInst)
