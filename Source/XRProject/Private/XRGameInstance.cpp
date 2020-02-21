@@ -280,7 +280,7 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 	int32 MotionID = input.ReadInt32();
 	FVector TargetLocation = input.ReadFVector();
 	FRotator TargetRotation = input.ReadFRotator();
-
+	
 	APlayerCharacter* TargetPlayer = nullptr;
 	TargetPlayer = MapManager->FindPlayer(ObjectID);
 

@@ -21,33 +21,37 @@ APlayerCharacter::APlayerCharacter()
 	
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
-
+	
 	PlayerStatComp = CreateDefaultSubobject<UPlayerCharacterStatComponent>(TEXT("CharacterStat"));
 	PlayerStatComp->OnHPZero.AddDynamic(this, &APlayerCharacter::OnDead);
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
 
-	//static ConstructorHelpers::FClassFinder<UAnimInstance> FemaleAnimBP
-	//(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> FemaleAnimBP
+	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_F_PlayerCharacter.ABP_F_PlayerCharacter_C'"));
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_RemoteCharacter.ABP_RemoteCharacter_C'"));
-	TestVal = 0.0f;
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> RemoteFemaleAnimBP
+	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_F_RemoteCharacter.ABP_F_RemoteCharacter_C'"));
+	
 
 	NameTag = CreateDefaultSubobject<UWidgetComponent>(TEXT("WidgetComponent"));
 	NameTag->SetupAttachment(GetRootComponent());
 	NameTag->SetWidgetSpace(EWidgetSpace::Screen);
 
-	if (AnimBP.Succeeded())
-		AnimInstance = AnimBP.Class;
-	else
-		check(false);
 
-	if (RemoteAnimBP.Succeeded())
-		RemoteAnimInstance = AnimBP.Class;
-	else
-		check(false);
+	check(AnimBP.Succeeded());
+	check(RemoteAnimBP.Succeeded());
+	check(FemaleAnimBP.Succeeded());
+	check(RemoteFemaleAnimBP.Succeeded());
+
+	AnimInstance = AnimBP.Class;
+	RemoteAnimInstance = AnimBP.Class;
+	FemaleAnimInstance = FemaleAnimBP.Class;
+	FemaleRemoteAnimInstance = RemoteFemaleAnimBP.Class;
 
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -133,12 +137,23 @@ APlayerCharacter::APlayerCharacter()
 		BERSERK_EFFECT_LOOP
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
 
+	static ConstructorHelpers::FObjectFinder<UObject>
+		BLUR_MAT
+		(TEXT("MaterialInstanceConstant'/Game/Resources/Character/PlayerCharacter/Material/RadialBlur_Inst.RadialBlur_Inst'"));
+
+
 	//check(SWORDTRAIL_NORMAL.Succeeded());
 	//check(SWORDTRAIL_FINAL.Succeeded());
 	//check(BERSERK_EFFECT_START.Succeeded());
 	//check(BERSERK_EFFECT_LOOP.Succeeded());
 	//check(BLOOD_EFFECT.Succeeded());
 	//check(ATTACK_EFFECT.Succeeded());
+
+
+	BlurMaterial = Cast<UMaterialInstance>(BLUR_MAT.Object);
+	DynamicBlurMaterial = UMaterialInstanceDynamic::Create(BlurMaterial, CameraComponent);
+	CameraComponent->PostProcessSettings.AddBlendable(DynamicBlurMaterial, 1.0f);
+	
 
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
@@ -378,9 +393,8 @@ void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
 
-	CurGameInstance = Cast < UXRGameInstance >(GetGameInstance());
-	ChangePartsById(EPartsType::HAIR, 110);
-	ChangePartsById(EPartsType::FACE, 120);
+	//ChangePartsById(EPartsType::HAIR, 110);
+	//ChangePartsById(EPartsType::FACE, 120);
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -787,12 +801,14 @@ void APlayerCharacter::Sprint()
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
 	}
+	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 3.5f);
 }
 
 void APlayerCharacter::SprintEnd()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 	bIsSprint = false;
+	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
 }
 
 void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data)
@@ -824,9 +840,9 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 	PlayerStatComp->SetCurrentStamina(Data.Current_Stamina);
 
 	if (PlayerStatComp->GetGender() == 0)
-		bIsMale = true;
+		this->bIsMale = true;
 	else
-		bIsMale = false;
+		this->bIsMale = false;
 
 	if (bIsPlayerCharacter)
 	{
@@ -851,6 +867,18 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 
 		MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
 	}
+		
+
+	if (bIsMale)
+	{
+		ChangePartsById(EPartsType::HAIR, 110);
+		ChangePartsById(EPartsType::FACE, 120);
+	}
+	else
+	{
+		ChangePartsById(EPartsType::HAIR, 210);
+		ChangePartsById(EPartsType::FACE, 220);
+	}
 
 	MyAnimInstance->SetOwnerCharacter(this);
 
@@ -863,21 +891,41 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 			const int32 kMalePrimaryBody = 130;
 			const int32 kMalePrimaryHand = 140;
 			const int32 kMalePrimaryLeg = 150;
-			const int32 kMalePrimaryWeapon = 3300001;
+			const int32 kFemalePrimaryBody = 230;
+			const int32 kFemalePrimaryHand = 240;
+			const int32 kFemalePrimaryLeg = 250;
+			const int32 kPrimaryWeapon = 3300001;
+
+			int32 CurrentPrimaryBody;
+			int32 CurrentPrimaryHand;
+			int32 CurrentPrimaryLeg;
+
+			if (bIsMale)
+			{
+				CurrentPrimaryBody = kMalePrimaryBody;
+				CurrentPrimaryHand = kMalePrimaryHand;
+				CurrentPrimaryLeg = kMalePrimaryLeg;
+			}
+			else
+			{
+				CurrentPrimaryBody = kFemalePrimaryBody;
+				CurrentPrimaryHand = kFemalePrimaryHand;
+				CurrentPrimaryLeg = kFemalePrimaryLeg;
+			}
 
 			switch (ii)
 			{
 			case 0:
-				ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+				ChangePartsById(EPartsType::NUDEBODY, CurrentPrimaryBody);
 				break;
 			case 1:
-				ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+				ChangePartsById(EPartsType::NUDEHAND, CurrentPrimaryHand);
 				break;
 			case 2:
-				ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+				ChangePartsById(EPartsType::NUDELEG, CurrentPrimaryLeg);
 				break;
 			case 3:
-				MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+				MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kPrimaryWeapon,
 					MyGameInstance->GetWorld(), this);
 				break;
 			}

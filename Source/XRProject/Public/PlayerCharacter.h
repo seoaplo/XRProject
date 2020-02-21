@@ -184,7 +184,10 @@ private:
 		TArray<UParticleSystemComponent*> ParticleArray;
 	UPROPERTY(EditDefaultsOnly, Category = "C_KnockBack")
 		FVector KnockBackVector;
-
+	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
+		UMaterialInstance* BlurMaterial;
+	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
+		UMaterialInstanceDynamic* DynamicBlurMaterial;
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;

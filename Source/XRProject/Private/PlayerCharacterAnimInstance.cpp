@@ -16,9 +16,14 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	bIsHit = false;
 	bIsOverallRollAnimPlaying = false;
 	FemaleMontageList.Reserve(5);
-
+	MaleMontageList.Reserve(5);
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ATTACK_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/AttackMontage.AttackMontage'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		FEMALE_ATTACK_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleAttackMontage.FemaleAttackMontage'"));
+
+	MaleMontageList.Add()
+
 	if (ATTACK_MONTAGE.Succeeded())
 	{
 		AttackMontage = ATTACK_MONTAGE.Object;
@@ -26,6 +31,11 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ATTACK_MONTAGE_ONLYPLAY(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/AttackMontageOnlyPlay.AttackMontageOnlyPlay'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		FEMALE_ATTACK_MONTAGE_ONLYPLAY
+		(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleAttackMontageOnlyPlay.FemaleAttackMontageOnlyPlay'"));
+
+	
 	if (ATTACK_MONTAGE_ONLYPLAY.Succeeded())
 	{
 		AttackMontageOnlyPlay = ATTACK_MONTAGE_ONLYPLAY.Object;
@@ -33,6 +43,11 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		MOVE_MONTAGE_ONLYPLAY(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/MoveMontageOnlyPlay.MoveMontageOnlyPlay'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		FEMALE_MOVE_MONTAGE_ONLYPLAY
+		(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleMoveMontageOnlyPlay.FemaleMoveMontageOnlyPlay'"));
+
+
 	if (MOVE_MONTAGE_ONLYPLAY.Succeeded())
 	{
 		MoveMontageOnlyPlay = MOVE_MONTAGE_ONLYPLAY.Object;
@@ -40,17 +55,23 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		HIT_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/HitMontage.HitMontage'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		FEMALE_HIT_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleHitMontage.FemaleHitMontage'"));
 	if (HIT_MONTAGE.Succeeded())
 		HitMontage = HIT_MONTAGE.Object;
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ROLL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/RollMontage.RollMontage'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		FEMALE_ROLL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleRollMontage.FemaleRollMontage'"));
 	if (ROLL_MONTAGE.Succeeded())
 		RollMontage = ROLL_MONTAGE.Object;
 
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		SKILL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/SkillMontage.SkillMontage'"));
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>
+		FEMALE_SKILL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleSkillMontage.FemaleSkillMontage'"));
 	if (SKILL_MONTAGE.Succeeded())
 		SkillMontage = SKILL_MONTAGE.Object;
 
@@ -302,4 +323,9 @@ void UPlayerCharacterAnimInstance::AnimNotify_KnockBackMoveEnd()
 	{
 		MyCharacter->SetbIsKnockBackMoving(false);
 	}
+}
+
+void InitializeMontage(bool IsMale)
+{
+
 }
