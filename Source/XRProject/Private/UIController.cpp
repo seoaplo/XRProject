@@ -12,20 +12,19 @@ AUIController::AUIController()
 	//bEnableTouchOverEvents = true;
 }
 
-void AUIController::Test_SendChat(FText const& Chat)
+void AUIController::BeginPlay()
 {
-	std::wstring asd(*Chat.ToString());
-	std::string c_id(asd.begin(), asd.end());
-	ChatingManager::GetInstance().ReceiveChat(0, c_id);
-
-}
-
-void AUIController::Test_HP(int hp)
-{
-	UHealthBarWidget::GetInatance()->ApplyHp(hp);
+	Super::BeginPlay();
+	int32 SizeX = 0;
+	int32 SizeY = 0;
+	GetViewportSize(SizeX, SizeY);
+	SetMouseLocation(SizeX / 2, SizeY / 2);
+	SetInputMode(FInputModeGameAndUI());
+	bShowMouseCursor = true;
 }
 
 void AUIController::SendBoxFocusOrSend()
 {
 	UChatingWidget::ChatingWidgetInstance->SendBoxFocus(this);
 }
+

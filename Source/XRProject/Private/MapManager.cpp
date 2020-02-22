@@ -12,16 +12,18 @@ UMapManager::UMapManager()
 
 	MapList.Add(100, 
 		LevelPathData(FName(TEXT("LEVEL_Village")),
-			wstring(L"World'/Game/Resources/Map/Village/LEVEL/LEVEL_Village.LEVEL_Village'")));
+			FString(L"/Game/Resources/Map/Village/LEVEL/LEVEL_Village")));
 	MapList.Add(111,
 		LevelPathData(FName(TEXT("LEVEL_Zone_1")), 
-			wstring(L"World'/Game/Resources/Map/Zone/Level/LEVEL_Zone_1.LEVEL_Zone_1'")));
+			FString(L"/Game/Resources/Map/Zone/Level/LEVEL_Zone_1")));
 	MapList.Add(112,
 		LevelPathData(FName(TEXT("LEVEL_Zone_2")),
-			wstring(L"World'/Game/Resources/Map/Zone/Level/LEVEL_Zone_2.LEVEL_Zone_2'")));
+			FString(L"/Game/Resources/Map/Zone/Level/LEVEL_Zone_2")));
 	MapList.Add(113,
 		LevelPathData(FName(TEXT("LEVLE_Boss")), 
-			wstring(L"World'/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss.LEVLE_Boss'")));
+			FString(L"/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss")));
+
+	LoadLevelComplete.BindUObject(this, &UMapManager::LoadLevelCompleteFunc);
 
 }
 bool UMapManager::Init()
@@ -30,8 +32,8 @@ bool UMapManager::Init()
 	LevelID = -1;
 
 	Spawn_Character.Unbind();
-	Delete_Character.Unbind();
 	PreWorld = nullptr;
+	BP_LoadingWidget = nullptr;
 	return true;
 }
 bool UMapManager::Clear()
@@ -54,9 +56,16 @@ bool UMapManager::Clear()
 	return true;
 }
 
+bool UMapManager::Tick(float DeltaTime)
+{
+	if (BP_LoadingWidget)
+	{
+		LoadingPercent = LoadingPercent < 1.0f ? (LoadingPercent + 0.01f) : 1.0f;
+		BP_LoadingWidget->ApplyPercentage(LoadingPercent);
+	}
+	return true;
+}
 // ∏ ø° ¿‘¿Â
-
-
 void UMapManager::ReadMapDataFromServer(InputStream& Input)
 {
 	int32_t characterlistsize = 0;
@@ -203,12 +212,6 @@ void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 	PlayerID = CurrentData.ObjectID;
 
 }
-bool UMapManager::ReadPlayerDeleteFromServer(InputStream& Input)
-{
-	Delete_Character.ExecuteIfBound();
-	return true;
-}
-
 APlayerCharacter* UMapManager::FindPlayer(int64_t objectid)
 {
 	APlayerCharacter* FindedPlayer = CharacterList.FindRef(objectid);
@@ -284,34 +287,45 @@ bool UMapManager::OpenMap(UWorld* World)
 	UClass* MyWidgetClass = MyWidgetClassRef.TryLoadClass<UUserWidget>();
 	if (MyWidgetClass == nullptr) return false;
 	
-	ULoadingBarWidget * BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
+	BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
 	if (BP_LoadingWidget == nullptr) return false;
 
-	
-
 	BP_LoadingWidget->AddToViewport();
+	LoadingPercent = 1.0f;
 
-	float Percent = 0.0f;
-	auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
-	if (gInst)
-	{
-		FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
-
-		FStreamableDelegate resultcallback;
-		resultcallback.BindLambda([path, this, World, LevelPath, BP_LoadingWidget]()
-		{
-			TSoftObjectPtr<ULevel> LoadedMap(path);
-			XRLOG(Warning, TEXT("Map ASync Load Complete"));
-
-			BP_LoadingWidget->ApplyPercentage(1.0f);
-			UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
-		});
-		gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
-
-		Percent = Percent < 0.9f ? (Percent + 0.01f) : 0.9f;
-		BP_LoadingWidget->ApplyPercentage(Percent);
-	}
+	UGameplayStatics::OpenLevel(PreWorld, LevelPath->LevelName);
+	//LoadPackageAsync(LevelPath->LevelPath, LoadLevelComplete);
+	//ULoadingBarWidget* LoadingWidgetLamda = BP_LoadingWidget;
+	//auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
+	//if (gInst)
+	//{
+	//	FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
+	//
+	//	FStreamableDelegate resultcallback;
+	//	resultcallback.BindLambda([path, this, World, LevelPath, LoadingWidgetLamda]()
+	//	{
+	//		TSoftObjectPtr<ULevel> LoadedMap(path);
+	//		XRLOG(Warning, TEXT("Map ASync Load Complete"));
+	//
+	//		BP_LoadingWidget->ApplyPercentage(1.0f);
+	//		UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
+	//	});
+	//	gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
+	//}
+	//LoadingWidgetLamda = nullptr;
 	return true;
+}
+
+void UMapManager::LoadLevelCompleteFunc(const FName & LevelName, UPackage * LoadPackege, EAsyncLoadingResult::Type LoadingResult)
+{
+	if (PreWorld == nullptr) return;
+	if (BP_LoadingWidget)
+	{
+		LoadingPercent = 1.0f;
+		BP_LoadingWidget->ApplyPercentage(LoadingPercent);
+	}
+
+	UGameplayStatics::OpenLevel(PreWorld, LevelName);
 }
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {
@@ -342,6 +356,7 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			{
 				UPlayerSkillManager* SkillManager = GI->GetPlayerSkillManager();
 				SkillManager->AddSkill(SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
+
 				GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
 					CharacterSkillIDList[ii]), false);
 			}
@@ -434,8 +449,15 @@ bool UMapManager::RemotePlayerSpawn(UWorld* world)
 {
 	return PlayerListSpawn(world);
 }
-bool UMapManager::DeleteRemotePlayer(UWorld* World)
+bool UMapManager::DeleteRemotePlayer(int64_t ObjectID)
 {
+	APlayerCharacter* DeletePlayer = CharacterList.FindAndRemoveChecked(ObjectID);
+	if (DeletePlayer == nullptr) return true;
+
+	if (DeletePlayer->Destroy())
+	{
+		return true;
+	}
 	return false;
 }
 void UMapManager::PotalInPlayer(AActor* OtherCharacter)

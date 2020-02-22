@@ -18,6 +18,7 @@ class ANonePlayerCharacter;
 class UXRGameInstance;
 class UXRPlayerController;
 class UHealthBarWidget;
+struct FXRDamageEvent;
 
 
 UENUM()
@@ -114,6 +115,7 @@ public:
 	const int32 kCameraWheelMaxLimit = 550.0f;
 	const int32 kCameraWheelMinLimit = 150.0f;
 
+
 public:
 	UPROPERTY()
 		class  UAISenseConfig_Damage* AISenseDamage;
@@ -174,6 +176,8 @@ private:
 		UParticleSystemComponent* BerserkBuffLoop;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		TArray<UParticleSystemComponent*> ParticleArray;
+	UPROPERTY(EditDefaultsOnly, Category = "C_KnockBack")
+		FVector KnockBackVector;
 
 public:
 	UPROPERTY(EditAnywhere)
@@ -206,6 +210,8 @@ public:
 	bool bIsHit;
 	bool bIsSkillMove;
 	bool bIsSkillPlaying;
+	bool bIsKnockBackMoving;
+	bool bIsInvisible;
 
 	/*TEST*/
 private:
@@ -258,9 +264,12 @@ public:
 	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
 	void SetbIsSkillMove(bool b);
 	void SetbIsSkillPlaying(bool b);
+	void SetbIsKnockBackMoving(bool b);
 	void SetbIsAttack(bool b);
+	void SetbIsInvisible(bool b);
 	void SetbSavedCombo(bool b);
 	void SetComboCount(int32 NextCombo);
+	void SetKnockBackVector(FVector& Vec);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
@@ -269,6 +278,8 @@ public:
 	bool GetbIsDead();
 	bool GetbIsAttack();
 	bool GetbSavedCombo();
+	bool GetbIsKnockBackMoving();
+	bool GetbIsInvisible();
 	int32 GetComboCount();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
@@ -278,8 +289,8 @@ public:
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);
 
-	float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator,
-		class AActor* DamageCauser) override;
+	float TakeDamage(float Damage, FXRDamageEvent& DamageEvent, class AController* EventInstigator,
+		class AActor* DamageCauser);
 
 	FVector2D GetNormalCapsuleSize();
 	FVector2D GetRollingCapsuleSize();

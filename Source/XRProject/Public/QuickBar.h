@@ -46,6 +46,8 @@ public:
 		void ClearInstance() { QuickBarInstance = nullptr; };
 	std::vector<UQuickSlot*> list;
 public:
+	FName GetKeyName(FName OriginName);
+	void RefreshKeyName(int Index);
 	void SetQuickSlot();
 	UFUNCTION(BlueprintCallable, Category = "MG_Function")
 		void AddQuickSlot(UQuickSlot* QuickSlot);
