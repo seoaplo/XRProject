@@ -230,7 +230,6 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 		return;
 	}
 
-
 	AAIController*  aicon = Cast<AAIController>(TargetPlayer->GetController());
 	if (aicon == nullptr)
 	{
@@ -241,7 +240,29 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
 		{
-			aicon->MoveToLocation(Location, 2, false, true);
+
+
+			//위치 싱크 강제조정(텔레포트)
+			FVector Length = TargetPlayer->GetActorLocation() - Location;
+			if (Length.Size() >= kMaxLocationFailLength && TargetPlayer->GetLocationSyncFailCount() <= kMaxLocationFailCount)
+			{
+				TargetPlayer->AddLocationSyncFailCount();
+				TargetPlayer->SetActorLocation(Location);
+				FVector OriginLoc = TargetPlayer->GetActorLocation();
+				XRLOG(Warning, TEXT("Location Modified %f %f %f to %f %f %f "), OriginLoc.X, OriginLoc.Y, OriginLoc.Z,
+					Location.X, Location.Y, Location.Z);
+				XRLOG(Warning, TEXT("Current Count = %d"), TargetPlayer->GetLocationSyncFailCount());
+			}
+
+			if (TargetPlayer->GetLocationSyncFailCount() > kMaxLocationFailCount 
+				&& TargetPlayer->GetbIsPathFinding() == false)
+			{
+				TargetPlayer->SetbIsPathFinding(true);
+				XRLOG(Warning, TEXT("PathFinding On"));
+			}
+
+
+			aicon->MoveToLocation(Location, 2, false, TargetPlayer->GetbIsPathFinding());
 		}
 	}
 }
@@ -281,7 +302,7 @@ void UXRGameInstance::UpdateCharacterMotion(InputStream & input)
 	int32 MotionID = input.ReadInt32();
 	FVector TargetLocation = input.ReadFVector();
 	FRotator TargetRotation = input.ReadFRotator();
-
+	
 	APlayerCharacter* TargetPlayer = nullptr;
 	TargetPlayer = MapManager->FindPlayer(ObjectID);
 
@@ -345,7 +366,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
 	
-	//bool AttackIntensity = input.ReadBool();
+	/*TEST CODE*/
 	bool AttackIntensity = true;
 
 	if (AttackerType == 1)
@@ -353,16 +374,20 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 		ANonePlayerCharacter* AttackerMonster = MapManager->FindMonster(AttackerID);
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
 		
-		//데미지 강격/약격 나누기 위한 잔재
+		//몬스터 스킬테이블 들어갈 곳
+		/*FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
+			FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));*/
+
+		//데미지 강격/약격
 		FXRDamageEvent MonsterDamageEvent;
-		//MonsterDamageEvent.ID = AttackActionID;
+		MonsterDamageEvent.ID = AttackActionID;
 		MonsterDamageEvent.bIntensity = AttackIntensity;
 
 		if (AttackerMonster)
 		{
 			if (AttackedCharacter == MapManager->GetPlayer())
 				AttackedCharacter->TakeDamage(AttackSetHp, MonsterDamageEvent, AttackerMonster->GetController(), AttackerMonster);
-			else
+			else //Remote
 			{
 				if (AttackIntensity)
 				{

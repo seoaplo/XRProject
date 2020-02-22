@@ -9,7 +9,6 @@ USkillCooldown::USkillCooldown()
 	SkillID = -1;
 	CurrentCoolTime = 0.0f;
 	IsEnable = true;
-	CoolTimeDecreaseSpeed = 1.0f;
 }
 
 USkillCooldown::~USkillCooldown()
@@ -33,7 +32,7 @@ void USkillCooldown::SetTimer()
 
 void USkillCooldown::RepeatingFunc()
 {
-	CurrentCoolTime -= CoolTimeDecreaseSpeed;
+	CurrentCoolTime -= kCoolDownDecreaseFrequency;
 	//ÄðÅ¸ÀÓ Äü½½·Ô UIÀü¼Û
 	if (CurrentCoolTime <= 0.0f)
 	{
