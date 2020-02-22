@@ -23,18 +23,9 @@ void UBTService_SelectTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	if (OwnerNpc && OwnerCon)
 	{
 		TArray < AActor*> OutActors;
-		OwnerCon->GetPerceptionComp()->GetKnownPerceivedActors(TSubclassOf<UAISense_Damage>(), OutActors);
-		for (int i = 0; i < OutActors.Num(); i++)
-		{
-			APlayerCharacter* DetectedPlayer = Cast<APlayerCharacter>(OutActors[i]);
-			if (DetectedPlayer)
-			{
-				XRLOG(Warning, TEXT("%s TakeDamage Perception Activate : %s"), *ControllingPawn->GetName(), *OutActors[i]->GetName());
-			}
-		}
-
-
 		OwnerCon->GetPerceptionComp()->GetKnownPerceivedActors(nullptr, OutActors);
+		APlayerCharacter* Target = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(OwnerCon->TargetKey));
+
 		for (int i = 0; i < OutActors.Num(); i++)
 		{
 			APlayerCharacter* DetectedPlayer = Cast<APlayerCharacter>(OutActors[i]);
@@ -42,29 +33,24 @@ void UBTService_SelectTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 			{
 				if (DetectedPlayer->GetCharacterLifeState() != ECharacterLifeState::DEAD)
 				{
-					APlayerCharacter* Target = Cast<APlayerCharacter>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(OwnerCon->TargetKey));
+
 					if (Target)
 					{
-						if (Target->GetDistanceTo(OwnerNpc) < OutActors[i]->GetDistanceTo(OwnerNpc))
+						if (Target->GetDistanceTo(OwnerNpc) > OutActors[i]->GetDistanceTo(OwnerNpc))
 						{
-							OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey, OutActors[i]);
-							return;
+							Target = DetectedPlayer;
+							OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey,Target);
 						}
 					}
-					OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey, OutActors[i]);
-					return;
-					
+					else
+					{
+						Target = DetectedPlayer;
+						OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey, Target);
+					}
 				}
 			}
 		}
-
-
-
-
-
-
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey, nullptr);
-		return;
+		OwnerComp.GetBlackboardComponent()->SetValueAsObject(OwnerCon->TargetKey, Target);
 		//아무것도 없을때 타겟 클리어
 	}
 }
