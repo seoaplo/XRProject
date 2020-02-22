@@ -139,6 +139,8 @@ public:
 
 	UPROPERTY()
 		class UDataTable* NPCDataTable;
+	UPROPERTY()
+		class UDataTable* NPCSkillDataTable;
 private:
 
 	TMap<uint32,TArray<struct FAssetData>> AssetDatas;

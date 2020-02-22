@@ -240,11 +240,9 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
 		{
-
-
 			//위치 싱크 강제조정(텔레포트)
 			FVector Length = TargetPlayer->GetActorLocation() - Location;
-			if (Length.Size() >= kMaxLocationFailLength && TargetPlayer->GetLocationSyncFailCount() <= kMaxLocationFailCount)
+			if (Length.Size() >= kMaxLocationFailLength)
 			{
 				TargetPlayer->AddLocationSyncFailCount();
 				TargetPlayer->SetActorLocation(Location);
@@ -254,15 +252,16 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 				XRLOG(Warning, TEXT("Current Count = %d"), TargetPlayer->GetLocationSyncFailCount());
 			}
 
-			if (TargetPlayer->GetLocationSyncFailCount() > kMaxLocationFailCount 
-				&& TargetPlayer->GetbIsPathFinding() == false)
-			{
-				TargetPlayer->SetbIsPathFinding(true);
-				XRLOG(Warning, TEXT("PathFinding On"));
-			}
+			//if (TargetPlayer->GetLocationSyncFailCount() > kMaxLocationFailCount 
+			//	&& TargetPlayer->GetbIsPathFinding() == false)
+			//{
+			//	TargetPlayer->SetbIsPathFinding(true);
+			//	XRLOG(Warning, TEXT("PathFinding On"));
+			//}
 
 
-			aicon->MoveToLocation(Location, 2, false, TargetPlayer->GetbIsPathFinding());
+			//aicon->MoveToLocation(Location, 2, false, TargetPlayer->GetbIsPathFinding());
+			aicon->MoveToLocation(Location, 2, false, false);
 		}
 	}
 }
@@ -365,9 +364,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int64 AttackedID = input.ReadInt64();
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
-	
-	/*TEST CODE*/
-	bool AttackIntensity = true;
+
 
 	if (AttackerType == 1)
 	{
@@ -375,13 +372,13 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
 		
 		//몬스터 스킬테이블 들어갈 곳
-		/*FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
-			FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));*/
+		FMonsterSkillTableRow* MonsterSkillResource = this->XRAssetManager->NPCSkillDataTable->
+			FindRow<FMonsterSkillTableRow>(*(FString::FromInt(AttackActionID)), TEXT("t"));
 
 		//데미지 강격/약격
 		FXRDamageEvent MonsterDamageEvent;
 		MonsterDamageEvent.ID = AttackActionID;
-		MonsterDamageEvent.bIntensity = AttackIntensity;
+		MonsterDamageEvent.bIntensity = MonsterSkillResource->IsKnockBack;
 
 		if (AttackerMonster)
 		{
@@ -389,7 +386,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 				AttackedCharacter->TakeDamage(AttackSetHp, MonsterDamageEvent, AttackerMonster->GetController(), AttackerMonster);
 			else //Remote
 			{
-				if (AttackIntensity)
+				if (MonsterSkillResource->IsKnockBack)
 				{
 					AttackedCharacter->MyAnimInstance->PlayHitMontage();
 					AttackedCharacter->MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
