@@ -74,7 +74,7 @@ int32 UPlayerSkillManager::FindSkillFromCooldownList(int32 ID)
 	{
 		if (CoolDownList[ii]->GetID() == ID)
 		{
-			XRLOG(Warning, TEXT("Skill CoolD Found, Index : %d"), ii);
+			//XRLOG(Warning, TEXT("Skill CoolD Found, Index : %d"), ii);
 			return ii;
 		}
 	}
