@@ -240,16 +240,26 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
 		{
+
+
 			//위치 싱크 강제조정(텔레포트)
 			FVector Length = TargetPlayer->GetActorLocation() - Location;
-			if (Length.Size() >= kMaxLocationFailLength)
+			if (Length.Size() >= kMaxLocationFailLength && TargetPlayer->GetLocationSyncFailCount() <= kMaxLocationFailCount)
 			{
 				TargetPlayer->AddLocationSyncFailCount();
 				TargetPlayer->SetActorLocation(Location);
+				FVector OriginLoc = TargetPlayer->GetActorLocation();
+				XRLOG(Warning, TEXT("Location Modified %f %f %f to %f %f %f "), OriginLoc.X, OriginLoc.Y, OriginLoc.Z,
+					Location.X, Location.Y, Location.Z);
+				XRLOG(Warning, TEXT("Current Count = %d"), TargetPlayer->GetLocationSyncFailCount());
 			}
 
-			if (TargetPlayer->GetLocationSyncFailCount() > kMaxLocationFailCount)
+			if (TargetPlayer->GetLocationSyncFailCount() > kMaxLocationFailCount 
+				&& TargetPlayer->GetbIsPathFinding() == false)
+			{
 				TargetPlayer->SetbIsPathFinding(true);
+				XRLOG(Warning, TEXT("PathFinding On"));
+			}
 
 
 			aicon->MoveToLocation(Location, 2, false, TargetPlayer->GetbIsPathFinding());
