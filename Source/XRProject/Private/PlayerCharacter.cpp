@@ -432,7 +432,7 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::MoveForward(float Value)
 {
 	ForwardValue = Value;
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsMoveLocked)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsKnockBackMoving ||bIsMoveLocked)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -452,7 +452,7 @@ void APlayerCharacter::MoveRight(float Value)
 {
 	RightValue = Value;
 	
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsMoveLocked)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsKnockBackMoving || bIsMoveLocked)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -1070,6 +1070,7 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		bSavedCombo = false;
 		ComboCount = 1;
 		Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
 
 		if(bIsSprint)
 			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
@@ -1145,6 +1146,7 @@ void APlayerCharacter::StartMoveAttack()
 	bIsAttackMoving = true;
 	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.WeaponComponent->SetGenerateOverlapEvents(true);
 }
 void APlayerCharacter::EndMoveAttack()
 {
@@ -1160,6 +1162,7 @@ void APlayerCharacter::EndMoveAttack()
 	GetNetMgr().SendPacket(out);
 
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
 }
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)

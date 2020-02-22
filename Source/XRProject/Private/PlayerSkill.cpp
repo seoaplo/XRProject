@@ -79,7 +79,8 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 		OwnerPlayer = Character;
 
 	
-	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying())
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying() || 
+		OwnerPlayer->bIsHit)
 		return;
 
 	if (!ConditionCheck(Character))
@@ -265,7 +266,8 @@ void USkill_Berserk::Play(APlayerCharacter * Character)
 	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
 
-	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying())
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying() || 
+		OwnerPlayer->bIsHit)
 		return;
 	
 	if (!ConditionCheck(Character))
