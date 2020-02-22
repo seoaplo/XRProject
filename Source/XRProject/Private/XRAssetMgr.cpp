@@ -32,6 +32,17 @@ UXRAssetMgr::UXRAssetMgr()
 		XRLOG(Error, TEXT("Can't Find NPCTable"));
 	}
 
+	static ConstructorHelpers::FObjectFinder<UDataTable> 
+		NPCSKILLTABLE(TEXT("DataTable'/Game/Resources/DataTable/MonsterSkillTable.MonsterSkillTable'"));
+	if (NPCDATATABLE.Succeeded())
+	{
+		XRLOG(Warning, TEXT("Finded NPCSkillTable"));
+		NPCSkillDataTable = NPCSKILLTABLE.Object;
+	}
+	else
+	{
+		XRLOG(Error, TEXT("Can't Find NPCSkillTable"));
+	}
 }
 
 bool UXRAssetMgr::ReadAssetDirectory(FString DirName, UClass* baseClass)

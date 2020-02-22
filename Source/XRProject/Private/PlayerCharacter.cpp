@@ -665,7 +665,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	bIsHit = true;
 	
 	
-	if (DamageEvent.bIntensity == 1)
+	if (DamageEvent.bIntensity == true)
 	{
 		SetbIsInvisible(true);  
 		ForceSkillStop();
@@ -1529,6 +1529,7 @@ void APlayerCharacter::ForceKnockbackStop()
 {
 	bIsKnockBackMoving = false;
 	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->HitMontage);
+	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
 void APlayerCharacter::LockCharacterMove(bool Lock)

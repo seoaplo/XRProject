@@ -365,9 +365,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int64 AttackedID = input.ReadInt64();
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
-	
-	/*TEST CODE*/
-	bool AttackIntensity = true;
+
 
 	if (AttackerType == 1)
 	{
@@ -375,13 +373,13 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
 		
 		//몬스터 스킬테이블 들어갈 곳
-		/*FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
-			FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));*/
+		FMonsterSkillTableRow* MonsterSkillResource = this->XRAssetManager->NPCSkillDataTable->
+			FindRow<FMonsterSkillTableRow>(*(FString::FromInt(AttackActionID)), TEXT("t"));
 
 		//데미지 강격/약격
 		FXRDamageEvent MonsterDamageEvent;
 		MonsterDamageEvent.ID = AttackActionID;
-		MonsterDamageEvent.bIntensity = AttackIntensity;
+		MonsterDamageEvent.bIntensity = MonsterSkillResource->IsKnockBack;
 
 		if (AttackerMonster)
 		{
@@ -389,7 +387,7 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 				AttackedCharacter->TakeDamage(AttackSetHp, MonsterDamageEvent, AttackerMonster->GetController(), AttackerMonster);
 			else //Remote
 			{
-				if (AttackIntensity)
+				if (MonsterSkillResource->IsKnockBack)
 				{
 					AttackedCharacter->MyAnimInstance->PlayHitMontage();
 					AttackedCharacter->MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));

@@ -130,7 +130,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
 		int32 ID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
-		int32 bIntensity; //노격 0 약격 1 강격 2
+		bool bIntensity; //노격 0 약격 1 강격 2
 };
 
 #define GetNetMgr UNetworkManager::GetInstance
