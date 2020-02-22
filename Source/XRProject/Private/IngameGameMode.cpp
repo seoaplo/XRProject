@@ -42,7 +42,7 @@ void AIngameGameMode::BeginPlay()
 	}
 	else
 	{
-
+		GetMapMgr().SetCompleteLoad(true);
 		CurrentWidget = CreateWidget<UInGameMainWidget>(GetWorld(), MainWidget);
 		if (CurrentWidget != nullptr)
 		{
@@ -135,6 +135,7 @@ void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 	}
 
 	PrimaryActorTick.bCanEverTick = true;
+	GetMapMgr().SetCompleteLoad(true);
 
 	XRLOG(Warning, TEXT("NotifyStartLevel"));
 	GetMapMgr().MonsterListSpawn(GetWorld());
