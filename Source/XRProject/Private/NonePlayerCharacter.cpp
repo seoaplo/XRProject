@@ -94,10 +94,9 @@ void ANonePlayerCharacter::PossessedBy(AController* Cntr)
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 700.f, 0.0f);
-	//GetCharacterMovement()->bOrientRotationToMovement = true;
-	//GetCharacterMovement()->bUseControllerDesiredRotation = false;// 캐릭터 움직임 보간
+	
 
-	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;// 캐릭터 움직임 보간
 
 
@@ -128,16 +127,33 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 			AggroList[DamageCauserPlayer] = damage;
 		}
 	}
+	auto aicon = Cast<AAIController>(GetController());
+	if (aicon)
+	{
+		aicon->StopMovement();
+	}
 	auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	if (npcAnim)
 	{
-		if (!npcAnim->IsAnyMontagePlaying())
+		if (npcAnim->IsAnyMontagePlaying())
 		{
-			auto aicon = Cast<AAIController>(GetController());
-			if (aicon)
+			if (npcAnim->Montage_IsPlaying(npcAnim->NpcTakeDamageMontage))
 			{
-				aicon->StopMovement();
 			}
+			else if (npcAnim->Montage_IsPlaying(npcAnim->GetDeadMontage()))
+			{
+			}
+			else
+			{
+				GetMesh()->SetGenerateOverlapEvents(false);
+				npcAnim->StopAllMontages(0.05f);
+				npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
+			}
+		}
+		else
+		{
+			GetMesh()->SetGenerateOverlapEvents(false);
+			npcAnim->StopAllMontages(0.05f);
 			npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
 		}
 	}
@@ -191,7 +207,16 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : READY")));
 		NpcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+		
+		for (int i = 0; i < NpcAnim->NpcAttackMontage.Num(); i++)
+		{
+			SetOnSkillQueue(i);
+		}
+
 		SetCharacterLifeState(ECharacterLifeState::ALIVE);
+
+
+
 
 		break;
 	}
@@ -226,6 +251,7 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 		AICon->StopAI();
 		if (npcAnim)
 		{
+			npcAnim->StopAllMontages(0.1f);
 			npcAnim->Montage_Play(npcAnim->GetDeadMontage());
 		}
 		else
@@ -244,6 +270,7 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 
 void ANonePlayerCharacter::OnDead()
 {
+
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 }
 
@@ -277,6 +304,7 @@ void ANonePlayerCharacter::GetNPCInfoFromTable(int32 NpcID)
 			GetMesh()->SetRelativeTransform(LocalTransForm.LocalTransform);
 			GetCapsuleComponent()->SetCapsuleHalfHeight(LocalTransForm.CapsuleHeight);
 			GetCapsuleComponent()->SetCapsuleRadius(LocalTransForm.CapsuleRad);
+			GetCharacterMovement()->MaxWalkSpeed = EnermyStatComponent->GetSpeed();
 		}
 	}
 
@@ -300,13 +328,15 @@ void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent,
 			auto FindListCharacter = AttackOverlapList.Find(castPlayerCharacter);
 			if (!AttackOverlapList.IsValidIndex(FindListCharacter))
 			{
+
+				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Black, TEXT("PlayerHit"));
 				AttackOverlapList.AddUnique(castPlayerCharacter);
 				XRLOG(Warning, TEXT("OverlapPlayer"));
 				OutputStream out;
 				out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
 				out << ObjectID;
 				out << castPlayerCharacter->ObjectID;
-				out << 1;
+				out << NpcAnim->NpcAttackMontage[CurrentAttackAction].SkilID;
 				out << GetActorLocation();
 				out << GetActorRotation();
 				out.CompletePacketBuild();
@@ -343,7 +373,7 @@ void ANonePlayerCharacter::SendDamage(int32 ActionID, FVector Location, FRotator
 				out.WriteOpcode(ENetworkCSOpcode::kMonsterHitCharacter);
 				out << ObjectID;
 				out << castPlayerCharacter->ObjectID;
-				out << 1;
+				out << NpcAnim->NpcAttackMontage[CurrentAttackAction].SkilID;
 				out << Location;
 				out << Rotator;
 				out.CompletePacketBuild();
@@ -383,7 +413,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (npcAnim)
 				{
-					npcAnim->Montage_Play(npcAnim->NpcAttackMontage[ActionID]);
+					npcAnim->Montage_Play(npcAnim->NpcAttackMontage[ActionID].AttackAction);
 				}
 			}
 			else if (ActionID == 1000)
@@ -414,3 +444,15 @@ void ANonePlayerCharacter::NpcTakeDamaged(float setHP, AController* EventInstiga
 }
 
 
+
+void ANonePlayerCharacter::SetOnSkillQueue(int32 index)
+{
+	auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
+	FTimerHandle handle;
+	GetWorld()->GetTimerManager().SetTimer(handle, FTimerDelegate::CreateLambda(
+		[this, index]()
+	{
+		ReadySkillList.AddUnique(index);
+	}
+	), npcAnim->NpcAttackMontage[index].CoolTime, false);
+}

@@ -22,13 +22,16 @@ void UNonePlayerCharacterAnimInstance::AnimNotify_AttackColliOn()
 {
 	XRLOG(Warning, TEXT("AttackColliOn"));
 	auto npcChar = Cast<ANonePlayerCharacter>(TryGetPawnOwner());
+	npcChar->GetMesh()->SetCollisionProfileName(TEXT("NPCMesh"));
 	npcChar->GetMesh()->SetGenerateOverlapEvents(true);
+
 }
 
 void UNonePlayerCharacterAnimInstance::AnimNotify_AttackColliOff()
 {
 	XRLOG(Warning, TEXT("AttackColliOff"));
 	auto npcChar = Cast<ANonePlayerCharacter>(TryGetPawnOwner());
+	npcChar->GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 	npcChar->GetMesh()->SetGenerateOverlapEvents(false);
 }
 

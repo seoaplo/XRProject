@@ -177,11 +177,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		UParticleSystemComponent* BerserkBuffLoop;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
-		UParticleSystemComponent* AttackEffect;
-	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		UParticleSystemComponent* BloodEffect;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		TArray<UParticleSystemComponent*> ParticleArray;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		TArray<UParticleSystemComponent*> AttackEffectList;
 	UPROPERTY(EditDefaultsOnly, Category = "C_KnockBack")
 		FVector KnockBackVector;
 	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
@@ -215,6 +215,7 @@ public:
 		bool bSavedCombo;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		int32 ComboCount;
+
 	
 	bool bIsMove;
 	bool bIsCharacterDead;
@@ -302,7 +303,7 @@ public:
 	bool GetbIsInvisible();
 	int32 GetComboCount();
 	int32 GetLocationSyncFailCount();
-	int32 GetbIsPathFinding();
+	bool GetbIsPathFinding();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
 	/*Test Function*/

@@ -126,9 +126,19 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BLOOD_EFFECT
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/Blood_cloud_large.Blood_cloud_large'"));
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
-		ATTACK_EFFECT
+		ATTACK_EFFECT_1
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_SwordReact_1.P_SwordReAct_1'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		ATTACK_EFFECT_2
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_SwordReact_2.P_SwordReAct_2'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		ATTACK_EFFECT_3
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_SwordReact_3.P_SwordReAct_3'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		ATTACK_EFFECT_4
+		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_SwordReact_4.P_SwordReAct_4'"));
 
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_START
@@ -136,6 +146,7 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BERSERK_EFFECT_LOOP
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/P_BuffLoop.P_BuffLoop'"));
+
 
 	static ConstructorHelpers::FObjectFinder<UObject>
 		BLUR_MAT
@@ -154,7 +165,6 @@ APlayerCharacter::APlayerCharacter()
 	DynamicBlurMaterial = UMaterialInstanceDynamic::Create(BlurMaterial, CameraComponent);
 	CameraComponent->PostProcessSettings.AddBlendable(DynamicBlurMaterial, 1.0f);
 	
-
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
@@ -206,7 +216,10 @@ APlayerCharacter::APlayerCharacter()
 	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailFinal"));
 	BerserkBuffStart = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkStart"));
 	BerserkBuffLoop = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkLoop"));
-	AttackEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect"));
+	UParticleSystemComponent* AttackEffect1 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect1"));
+	UParticleSystemComponent* AttackEffect2 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect2"));
+	UParticleSystemComponent* AttackEffect3 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect3"));
+	UParticleSystemComponent* AttackEffect4 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect4"));
 	BloodEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BloodEffect"));
 	SwordTrailNormal->bAutoActivate = false;
 	SwordTrailFinal->bAutoActivate = false;
@@ -215,8 +228,13 @@ APlayerCharacter::APlayerCharacter()
 	SwordTrailFinal->SetTemplate(SWORDTRAIL_FINAL.Object);
 	BerserkBuffStart->SetTemplate(BERSERK_EFFECT_START.Object);
 	BerserkBuffLoop->SetTemplate(BERSERK_EFFECT_LOOP.Object);
-	AttackEffect->SetTemplate(ATTACK_EFFECT.Object);
 	BloodEffect->SetTemplate(BLOOD_EFFECT.Object);
+
+	AttackEffect1->SetTemplate(ATTACK_EFFECT_1.Object);
+	AttackEffect2->SetTemplate(ATTACK_EFFECT_2.Object);
+	AttackEffect3->SetTemplate(ATTACK_EFFECT_3.Object);
+	AttackEffect4->SetTemplate(ATTACK_EFFECT_4.Object);
+
 	BerserkBuffStart->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
 		ComboParticleSocketName.FxBottom);
 	BerserkBuffLoop->AttachToComponent(Equipments.BodyComponent, FAttachmentTransformRules::KeepRelativeTransform,
@@ -229,8 +247,12 @@ APlayerCharacter::APlayerCharacter()
 	ParticleArray.Add(SwordTrailFinal);
 	ParticleArray.Add(BerserkBuffStart);
 	ParticleArray.Add(BerserkBuffLoop);
-	ParticleArray.Add(AttackEffect);
 	ParticleArray.Add(BloodEffect);
+
+	AttackEffectList.Add(AttackEffect1);
+	AttackEffectList.Add(AttackEffect2);
+	AttackEffectList.Add(AttackEffect3);
+	AttackEffectList.Add(AttackEffect4);
 
 	ComboCount = 1;
 	CurrentAttackID = -1;
@@ -620,9 +642,6 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 
 float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-
-
-
 	if (GetbIsInvisible())
 	{
 		XRLOG(Warning, TEXT("Now Invisible, Hit Ignored."));
@@ -648,11 +667,11 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	
 	if (DamageEvent.bIntensity == 1)
 	{
+		SetbIsInvisible(true);  
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
-		SetbIsInvisible(false);
 		SetbIsKnockBackMoving(true);
 		ForceSkillStop();
 		ForceAttackStop();
@@ -671,6 +690,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	}
 	else if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
+		SetbIsInvisible(true);
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
@@ -745,6 +765,9 @@ void APlayerCharacter::Roll()
 {
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
+		return;
+
 	//후딜레이 동작에서 구르는지 체크
 	if (bIsAttack)
 	{
@@ -761,9 +784,6 @@ void APlayerCharacter::Roll()
 		bIsAttackMoving = false;
 		bIsAttack = false;
 	}
-
-	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
-		return;
 
 	bool bArrowKeyNotPressed = false;
 
@@ -1157,11 +1177,17 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
 		if (NPC)
 		{
+
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
 				if (FlagNpc->GetName() == NPC->GetName())
 					return;
 			}
+			///수정자 조재진///
+//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
+			//NPC->TakeDamage(1.f, FDamageEvent(), GetController(), this);
+			/// 오프라인 공격 테스트용도 지워도 무상관///////
+
 
 			FCollisionQueryParams Params(NAME_None, false, this);
 			TArray<FHitResult> HitResult;
@@ -1190,11 +1216,13 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 					DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
 					DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
 					DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
+					
+					int32 CurrentEffectNum = GetComboCount() - 1;
 
 					FRotator SlashRot = FRotator(90.0f, 90.0f, 90.0f);
 					FRotator BloodRot = FRotator(-90.0f, 0.0f, 0.0f);
 
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect->Template, HitLocation,
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectList[CurrentEffectNum]->Template, HitLocation,
 						SlashRot, true);
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect->Template, HitLocation,
 						BloodRot, true);
@@ -1334,9 +1362,11 @@ void APlayerCharacter::TestPlay()
 
 	FRotator SlashRot = FRotator(90.0f, 90.0f, 90.0f);
 
+	int32 CurrentEffectNum = GetComboCount() - 1;
+
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect->Template, GetActorLocation(),
 		SlashRot, true);
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffect->Template, GetActorLocation(),
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectList[CurrentEffectNum]->Template, GetActorLocation(),
 		AttackEffectRot, true);
 }
 
@@ -1510,7 +1540,7 @@ int32 APlayerCharacter::GetLocationSyncFailCount()
 	return LocationSyncFailCount;
 }
 
-int32 APlayerCharacter::GetbIsPathFinding()
+bool APlayerCharacter::GetbIsPathFinding()
 {
 	return bIsPathFinding;
 }

@@ -116,7 +116,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 		virtual void SendDamage(int32 ActionID, FVector Location, FRotator Rotator, AActor* OtherActor);
 
-
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		TArray<int> ReadySkillList;
 
 
 	UFUNCTION(BlueprintCallable)
@@ -131,6 +132,8 @@ public:
 
 
 
+
+
 	UPROPERTY(BlueprintAssignable)
 	FOnNpcReadyState OnNpcReady;
 
@@ -138,13 +141,16 @@ public:
 
 
 
+	UFUNCTION(BlueprintCallable)
+		void SetOnSkillQueue(int32 index);
 
 	UFUNCTION(BlueprintCallable)
 		virtual void NpcTakeDamaged(float setHP, class AController* EventInstigator, int32 AttackInstigatorID);
 
 
 
-
+	UPROPERTY(BlueprintReadWrite,VisibleAnywhere)
+	int32 CurrentAttackAction;
 
 
 protected:

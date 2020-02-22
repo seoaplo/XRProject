@@ -49,20 +49,12 @@ private:
 
 	//사용자 정의///
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TArray<FBossSkill> BossAttackList;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		TArray<int> ReadySkillList;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<FTransform> RemoteSpawnActorQue;
 
 
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		int32 CurrentUseSkill;
-
-	UFUNCTION(BlueprintCallable)
-		void SetOnSkillQueue(int32 index);
 
 
 	UFUNCTION(BlueprintNativeEvent)

@@ -9,6 +9,22 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSkillFireDelegate);
+
+USTRUCT(Atomic, BlueprintType)
+struct FNpcSkill
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UAnimMontage* AttackAction;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		int32 SkilID;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float CoolTime;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		float AttackRange;
+};
+
 /*
 //작성자 조재진
 */
@@ -37,7 +53,7 @@ public:
 
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
-		TArray<UAnimMontage*> NpcAttackMontage;
+		TArray<FNpcSkill> NpcAttackMontage;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
 		UAnimMontage* NpcTakeDamageMontage;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Meta = (AllowPrivateAccess = true))
