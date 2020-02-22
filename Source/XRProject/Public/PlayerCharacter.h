@@ -152,6 +152,8 @@ private:
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FVector ScaleVector;
+	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
+		FRotator AttackEffectRot;
 	UPROPERTY(EditInstanceOnly, Category = "C_COLLISION")
 		FVector2D CapsuleSize;
 	UPROPERTY(EditInstanceOnly, Category = "C_COLLLISION")
@@ -175,10 +177,19 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		UParticleSystemComponent* BerserkBuffLoop;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* AttackEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
+		UParticleSystemComponent* BloodEffect;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		TArray<UParticleSystemComponent*> ParticleArray;
 	UPROPERTY(EditDefaultsOnly, Category = "C_KnockBack")
 		FVector KnockBackVector;
-
+	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
+		UMaterialInstance* BlurMaterial;
+	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
+		UMaterialInstanceDynamic* DynamicBlurMaterial;
+	UPROPERTY(EditDefaultsOnly, Category = "C_AI")
+		bool bUsePathFinding;
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -211,6 +222,7 @@ public:
 	bool bIsSkillMove;
 	bool bIsSkillPlaying;
 	bool bIsKnockBackMoving;
+	bool bIsMoveLocked;
 	bool bIsInvisible;
 
 	/*TEST*/
@@ -234,6 +246,8 @@ private:
 	FVector MeshLocationVector;
 	FVector WeaponScaleVector;
 	FVector NameTagLocation;
+	int32 LocationSyncFailCount;
+	bool bIsPathFinding;
 
 public:
 	/*Test Value*/
@@ -270,6 +284,12 @@ public:
 	void SetbSavedCombo(bool b);
 	void SetComboCount(int32 NextCombo);
 	void SetKnockBackVector(FVector& Vec);
+	void ForceAttackStop();
+	void ForceRollStop();
+	void ForceSkillStop();
+	void LockCharacterMove(bool Lock);
+	void AddLocationSyncFailCount();
+	void SetbIsPathFinding(bool bPathFd);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
@@ -281,6 +301,8 @@ public:
 	bool GetbIsKnockBackMoving();
 	bool GetbIsInvisible();
 	int32 GetComboCount();
+	int32 GetLocationSyncFailCount();
+	int32 GetbIsPathFinding();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
 	/*Test Function*/

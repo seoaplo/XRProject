@@ -20,6 +20,8 @@ UPlayerCameraShake::~UPlayerCameraShake()
 
 }
 
+
+
 void UPlayerCameraShake::SetSmallShakeMode()
 {
 	LocOscillation.X.Amplitude = FMath::RandRange(5.0f, 8.0f);

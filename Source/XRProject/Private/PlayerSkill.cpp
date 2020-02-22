@@ -120,11 +120,11 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 	out << Character->GetActorRotation();
 	out.CompletePacketBuild();
 	GetNetMgr().SendPacket(out);
-
+	
 	FString GaiaStr = "GaiaCrush";
 	int32 Idx = MyAnimInst->SkillMontage->GetSectionIndex(FName(*GaiaStr));
 	float length = MyAnimInst->SkillMontage->GetSectionLength(Idx);
-
+	
 	Character->GetCharacterMovement()->MaxWalkSpeed = MoveDistance / length;
 	Character->GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 

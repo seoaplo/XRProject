@@ -18,6 +18,8 @@ const float kNormalMovementAcceleration = 2048.0f;
 const float kRollingMovementSpeed = 800.0f;
 const float kAttackMovementSpeed = 250.0f;
 const float kKnockBackSpeed = 1200.0f;
+const int32 kMaxLocationFailCount = 3;
+const float kMaxLocationFailLength = 500.0f;
 
 enum class StatBit : int64_t {
 	kHP = 0x0000000000000001,
@@ -67,10 +69,6 @@ public:
 		UItemManager* ItemManager;
 
 	UPlayerSkillManager* GetPlayerSkillManager() { return PlayerSkillManager; }
-	
-
-public:
-
 
 private:
 	UPROPERTY(VisibleAnywhere, Meta = (AllowPrivateAccess = true))
@@ -132,7 +130,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
 		int32 ID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "C_DamageInfo")
-		bool bIntensity; //노격 0 약격 1 강격 2
+		int32 bIntensity; //노격 0 약격 1 강격 2
 };
 
 #define GetNetMgr UNetworkManager::GetInstance

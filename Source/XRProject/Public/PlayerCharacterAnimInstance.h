@@ -71,6 +71,8 @@ private:
 		bool bIsHit;
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
 		TArray<UAnimMontage*> FemaleMontageList;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadonly, Category = "C_Montage", Meta = (AllowPrivateAccess = true))
+		TArray<UAnimMontage*> MaleMontageList;
 
 	APlayerCharacter* MyCharacter;
 
@@ -126,5 +128,6 @@ public:
 	void JumpToComboMontageSection(int32 Section);
 	void JumpToMoveMontageSection(FString Section);
 	void JumpToSkillMonatgeSection(FString Section);
+	void InitializeMontage(bool IsMale);
 
 };
