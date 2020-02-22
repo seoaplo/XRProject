@@ -135,13 +135,25 @@ float ANonePlayerCharacter::TakeDamage(float DamageAmount, FDamageEvent const& D
 	auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 	if (npcAnim)
 	{
-		if (!npcAnim->Montage_IsPlaying(npcAnim->NpcTakeDamageMontage))
+		if (npcAnim->IsAnyMontagePlaying())
 		{
-			if (npcAnim->IsAnyMontagePlaying())
+			if (npcAnim->Montage_IsPlaying(npcAnim->NpcTakeDamageMontage))
 			{
-				npcAnim->StopAllMontages(0.05f);
 			}
+			else if (npcAnim->Montage_IsPlaying(npcAnim->GetDeadMontage()))
+			{
+			}
+			else
+			{
+				GetMesh()->SetGenerateOverlapEvents(false);
+				npcAnim->StopAllMontages(0.05f);
+				npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
+			}
+		}
+		else
+		{
 			GetMesh()->SetGenerateOverlapEvents(false);
+			npcAnim->StopAllMontages(0.05f);
 			npcAnim->Montage_Play(npcAnim->NpcTakeDamageMontage);
 		}
 	}
@@ -239,6 +251,7 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 		AICon->StopAI();
 		if (npcAnim)
 		{
+			npcAnim->StopAllMontages(0.1f);
 			npcAnim->Montage_Play(npcAnim->GetDeadMontage());
 		}
 		else
@@ -257,6 +270,7 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 
 void ANonePlayerCharacter::OnDead()
 {
+
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 }
 

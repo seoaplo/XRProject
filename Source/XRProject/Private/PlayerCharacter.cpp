@@ -1516,7 +1516,7 @@ int32 APlayerCharacter::GetLocationSyncFailCount()
 	return LocationSyncFailCount;
 }
 
-int32 APlayerCharacter::GetbIsPathFinding()
+bool APlayerCharacter::GetbIsPathFinding()
 {
 	return bIsPathFinding;
 }

@@ -302,7 +302,7 @@ public:
 	bool GetbIsInvisible();
 	int32 GetComboCount();
 	int32 GetLocationSyncFailCount();
-	int32 GetbIsPathFinding();
+	bool GetbIsPathFinding();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
 	/*Test Function*/
