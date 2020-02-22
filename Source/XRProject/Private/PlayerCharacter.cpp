@@ -287,7 +287,6 @@ APlayerCharacter::APlayerCharacter()
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(AISenseDamage->GetSenseImplementation());
 
-
 	/*TEST CODE*/
 	AttackEffectRot = FRotator(0.0f, 0.0f, 0.0f);
 
@@ -1193,11 +1192,6 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 				if (FlagNpc->GetName() == NPC->GetName())
 					return;
 			}
-			///수정자 조재진///
-//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
-			//NPC->TakeDamage(1.f, FDamageEvent(), GetController(), this);
-			/// 오프라인 공격 테스트용도 지워도 무상관///////
-
 
 			FCollisionQueryParams Params(NAME_None, false, this);
 			TArray<FHitResult> HitResult;
@@ -1222,10 +1216,10 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 					float HalfHeight = (Rst.TraceEnd - Rst.TraceStart).Size() / 2;
 
 					FVector HitLocation = Rst.Location;
-					DrawDebugBox(GetWorld(), Rst.TraceStart, MiniBox, FColor::Red, false, 3.0f);
-					DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
-					DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
-					DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
+					//DrawDebugBox(GetWorld(), Rst.TraceStart, MiniBox, FColor::Red, false, 3.0f);
+					//DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
+					//DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
+					//DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
 					
 					int32 CurrentEffectNum = GetComboCount() - 1;
 

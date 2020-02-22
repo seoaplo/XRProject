@@ -19,7 +19,7 @@ const float kRollingMovementSpeed = 800.0f;
 const float kAttackMovementSpeed = 250.0f;
 const float kKnockBackSpeed = 1200.0f;
 const int32 kMaxLocationFailCount = 3;
-const float kMaxLocationFailLength = 500.0f;
+const float kMaxLocationFailLength = 1000.0f;
 
 enum class StatBit : int64_t {
 	kHP = 0x0000000000000001,
