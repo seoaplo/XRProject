@@ -188,6 +188,8 @@ private:
 		UMaterialInstance* BlurMaterial;
 	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
 		UMaterialInstanceDynamic* DynamicBlurMaterial;
+	UPROPERTY(EditDefaultsOnly, Category = "C_AI")
+		bool bUsePathFinding;
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -244,6 +246,8 @@ private:
 	FVector MeshLocationVector;
 	FVector WeaponScaleVector;
 	FVector NameTagLocation;
+	int32 LocationSyncFailCount;
+	bool bIsPathFinding;
 
 public:
 	/*Test Value*/
@@ -284,6 +288,8 @@ public:
 	void ForceRollStop();
 	void ForceSkillStop();
 	void LockCharacterMove(bool Lock);
+	void AddLocationSyncFailCount();
+	void SetbIsPathFinding(bool bPathFd);
 
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
@@ -295,6 +301,8 @@ public:
 	bool GetbIsKnockBackMoving();
 	bool GetbIsInvisible();
 	int32 GetComboCount();
+	int32 GetLocationSyncFailCount();
+	int32 GetbIsPathFinding();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
 
 	/*Test Function*/

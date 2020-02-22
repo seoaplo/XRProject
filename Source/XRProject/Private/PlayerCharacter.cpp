@@ -27,7 +27,7 @@ APlayerCharacter::APlayerCharacter()
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_PlayerCharacter.ABP_PlayerCharacter_C'"));
-
+	
 	static ConstructorHelpers::FClassFinder<UAnimInstance> FemaleAnimBP
 	(TEXT("AnimBlueprint'/Game/Blueprint/Character/ABP_F_PlayerCharacter.ABP_F_PlayerCharacter_C'"));
 
@@ -64,7 +64,7 @@ APlayerCharacter::APlayerCharacter()
 	RollingCapsuleOffset = 45.0f;
 
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
-	HitCapsule->SetVisibility(true);
+	HitCapsule->SetVisibility(false);
 	HitCapsule->bHiddenInGame = true;
 	HitCapsule->SetCapsuleHalfHeight(CapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(CapsuleSize.Y);
@@ -248,9 +248,11 @@ APlayerCharacter::APlayerCharacter()
 	bIsMouseShow = false;
 	bIsMoveLocked = false;
 	bIsInvisible = false;
+	bIsPathFinding = false;
 	ForwardValue = 0.0f;
 	RightValue = 0.0f;
 	KnockBackVector = FVector(0.0f, 0.0f, 0.0f);
+	LocationSyncFailCount = 0;
 
 	MyShake = UPlayerCameraShake::StaticClass();
 	TestID = 2;
@@ -342,6 +344,14 @@ void APlayerCharacter::Tick(float deltatime)
 		SetActorRotation(NextRot);
 	}
 
+	float CurVelocity = GetCharacterMovement()->Velocity.Size();
+	float DensityValue = CurVelocity / 750.f * 3.5f;
+
+	if(CurVelocity > kNormalMovementSpeed + 1.1f)
+		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
+	else
+		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -393,6 +403,7 @@ void APlayerCharacter::BeginPlay()
 {
 	ABaseCharacter::BeginPlay();
 
+	CurGameInstance = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
 	//ChangePartsById(EPartsType::HAIR, 110);
 	//ChangePartsById(EPartsType::FACE, 120);
 }
@@ -436,7 +447,7 @@ void APlayerCharacter::MoveRight(float Value)
 
 void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 {
-
+	
 	FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
 		FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));
 
@@ -609,11 +620,8 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 
 float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	//Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
-	//FName CurrentHitName = MyAnimInstance->Montage_GetCurrentSection(MyAnimInstance->HitMontage);
-	//if (CurrentHitName == NAME_None) //bIsHit시엔 Hit를 적용받지 않음(
-	//	return -1.0f;
+
 
 	if (GetbIsInvisible())
 	{
@@ -638,7 +646,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	bIsHit = true;
 	
 	
-	if (DamageEvent.bIntensity == true)
+	if (DamageEvent.bIntensity == 1)
 	{
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
@@ -801,14 +809,13 @@ void APlayerCharacter::Sprint()
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
 	}
-	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 3.5f);
+
 }
 
 void APlayerCharacter::SprintEnd()
 {
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 	bIsSprint = false;
-	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
 }
 
 void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data)
@@ -816,6 +823,8 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 	bInitialized = true;
 
 	bIsPlayer = bIsPlayerCharacter;
+
+
 
 	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
@@ -844,6 +853,9 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 	else
 		this->bIsMale = false;
 
+	/*TEST CODE*/
+	//bIsMale = true;
+
 	if (bIsPlayerCharacter)
 	{
 		if (bIsMale)
@@ -852,6 +864,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 			Equipments.BodyComponent->SetAnimInstanceClass(FemaleAnimInstance);
 
 		MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+		MyAnimInstance->InitializeMontage(bIsMale);
 		MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
 		MyAnimInstance->Delegate_CharacterAttackMoveStart.BindUFunction(this, FName("StartMoveAttack"));
 		MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
@@ -866,6 +879,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 			Equipments.BodyComponent->SetAnimInstanceClass(FemaleRemoteAnimInstance);
 
 		MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+		MyAnimInstance->InitializeMontage(bIsMale);
 	}
 		
 
@@ -951,6 +965,7 @@ void APlayerCharacter::TestInitialize()
 	bInitialized = true;
 	bIsPlayer = true;
 	bIsTestMode = true;
+	bIsMale = true;
 
 	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
@@ -981,6 +996,7 @@ void APlayerCharacter::TestInitialize()
 
 	Equipments.BodyComponent->SetAnimInstanceClass(AnimInstance);
 	MyAnimInstance = Cast<UPlayerCharacterAnimInstance>(Equipments.BodyComponent->GetAnimInstance());
+	MyAnimInstance->InitializeMontage(true); //Male
 	MyAnimInstance->Delegate_CheckNextCombo.BindUFunction(this, FName("ContinueCombo"));
 	MyAnimInstance->Delegate_CharacterAttackMoveStart.BindUFunction(this, FName("StartMoveAttack"));
 	MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
@@ -994,13 +1010,20 @@ void APlayerCharacter::TestInitialize()
 	const int32 kMalePrimaryLeg = 150;
 	const int32 kMalePrimaryWeapon = 3300001;
 
-	ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+	//ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
 
-	ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+	//ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
 
-	ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+	//ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
 
 	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+		MyGameInstance->GetWorld(), this);
+
+	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3040001,
+		MyGameInstance->GetWorld(), this);
+	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3140001,
+		MyGameInstance->GetWorld(), this);
+	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3240001,
 		MyGameInstance->GetWorld(), this);
 
 	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(GetWorld()->GetPlayerControllerIterator()->Get());
@@ -1467,9 +1490,29 @@ void APlayerCharacter::LockCharacterMove(bool Lock)
 	bIsMoveLocked = Lock;
 }
 
+void APlayerCharacter::AddLocationSyncFailCount()
+{
+	LocationSyncFailCount++;
+}
+
+void APlayerCharacter::SetbIsPathFinding(bool bPathFd)
+{
+	bIsPathFinding = bPathFd;
+}
+
 int32 APlayerCharacter::GetComboCount()
 {
 	return ComboCount;
+}
+
+int32 APlayerCharacter::GetLocationSyncFailCount()
+{
+	return LocationSyncFailCount;
+}
+
+int32 APlayerCharacter::GetbIsPathFinding()
+{
+	return bIsPathFinding;
 }
 
 UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString FindStr)

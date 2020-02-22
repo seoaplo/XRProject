@@ -240,7 +240,19 @@ void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 	{
 		if (TargetPlayer->GetbIsOverallRollAnimPlaying() == false)
 		{
-			aicon->MoveToLocation(Location, 2, false, true);
+			//위치 싱크 강제조정(텔레포트)
+			FVector Length = TargetPlayer->GetActorLocation() - Location;
+			if (Length.Size() >= kMaxLocationFailLength)
+			{
+				TargetPlayer->AddLocationSyncFailCount();
+				TargetPlayer->SetActorLocation(Location);
+			}
+
+			if (TargetPlayer->GetLocationSyncFailCount() > kMaxLocationFailCount)
+				TargetPlayer->SetbIsPathFinding(true);
+
+
+			aicon->MoveToLocation(Location, 2, false, TargetPlayer->GetbIsPathFinding());
 		}
 	}
 }
@@ -344,7 +356,6 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 	int32 AttackActionID = input.ReadInt32();
 	float AttackSetHp = input.ReadFloat32();
 	
-	//bool AttackIntensity = input.ReadBool();
 	/*TEST CODE*/
 	bool AttackIntensity = true;
 
@@ -353,16 +364,20 @@ void UXRGameInstance::ActorDamaged(InputStream& input)
 		ANonePlayerCharacter* AttackerMonster = MapManager->FindMonster(AttackerID);
 		APlayerCharacter* AttackedCharacter = MapManager->FindPlayer(AttackedID);
 		
-		//데미지 강격/약격 나누기 위한 잔재
+		//몬스터 스킬테이블 들어갈 곳
+		/*FPartsResource* PartResourceTable = CurGameInstance->ItemManager->PartsDataTable->
+			FindRow<FPartsResource>(*(FString::FromInt(ID)), TEXT("t"));*/
+
+		//데미지 강격/약격
 		FXRDamageEvent MonsterDamageEvent;
-		//MonsterDamageEvent.ID = AttackActionID;
+		MonsterDamageEvent.ID = AttackActionID;
 		MonsterDamageEvent.bIntensity = AttackIntensity;
 
 		if (AttackerMonster)
 		{
 			if (AttackedCharacter == MapManager->GetPlayer())
 				AttackedCharacter->TakeDamage(AttackSetHp, MonsterDamageEvent, AttackerMonster->GetController(), AttackerMonster);
-			else
+			else //Remote
 			{
 				if (AttackIntensity)
 				{

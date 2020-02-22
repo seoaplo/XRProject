@@ -15,65 +15,56 @@ UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
 	bIsCharacterDead = false;
 	bIsHit = false;
 	bIsOverallRollAnimPlaying = false;
-	FemaleMontageList.Reserve(5);
-	MaleMontageList.Reserve(5);
+	FemaleMontageList.Reserve(7);
+	MaleMontageList.Reserve(7);
+
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ATTACK_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/AttackMontage.AttackMontage'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		FEMALE_ATTACK_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleAttackMontage.FemaleAttackMontage'"));
+	MaleMontageList.Add(ATTACK_MONTAGE.Object);
+	FemaleMontageList.Add(FEMALE_ATTACK_MONTAGE.Object);
 
-	MaleMontageList.Add()
-
-	if (ATTACK_MONTAGE.Succeeded())
-	{
-		AttackMontage = ATTACK_MONTAGE.Object;
-	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ATTACK_MONTAGE_ONLYPLAY(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/AttackMontageOnlyPlay.AttackMontageOnlyPlay'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		FEMALE_ATTACK_MONTAGE_ONLYPLAY
 		(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleAttackMontageOnlyPlay.FemaleAttackMontageOnlyPlay'"));
-
-	
-	if (ATTACK_MONTAGE_ONLYPLAY.Succeeded())
-	{
-		AttackMontageOnlyPlay = ATTACK_MONTAGE_ONLYPLAY.Object;
-	}	
+	MaleMontageList.Add(ATTACK_MONTAGE_ONLYPLAY.Object);
+	FemaleMontageList.Add(FEMALE_ATTACK_MONTAGE_ONLYPLAY.Object);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		MOVE_MONTAGE_ONLYPLAY(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/MoveMontageOnlyPlay.MoveMontageOnlyPlay'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		FEMALE_MOVE_MONTAGE_ONLYPLAY
 		(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleMoveMontageOnlyPlay.FemaleMoveMontageOnlyPlay'"));
+	MaleMontageList.Add(MOVE_MONTAGE_ONLYPLAY.Object);
+	FemaleMontageList.Add(FEMALE_MOVE_MONTAGE_ONLYPLAY.Object);
 
-
-	if (MOVE_MONTAGE_ONLYPLAY.Succeeded())
-	{
-		MoveMontageOnlyPlay = MOVE_MONTAGE_ONLYPLAY.Object;
-	}
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		HIT_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/HitMontage.HitMontage'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		FEMALE_HIT_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleHitMontage.FemaleHitMontage'"));
-	if (HIT_MONTAGE.Succeeded())
-		HitMontage = HIT_MONTAGE.Object;
+	MaleMontageList.Add(HIT_MONTAGE.Object);
+	FemaleMontageList.Add(FEMALE_HIT_MONTAGE.Object);
+
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		ROLL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/RollMontage.RollMontage'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		FEMALE_ROLL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleRollMontage.FemaleRollMontage'"));
-	if (ROLL_MONTAGE.Succeeded())
-		RollMontage = ROLL_MONTAGE.Object;
-
+	MaleMontageList.Add(ROLL_MONTAGE.Object);
+	FemaleMontageList.Add(FEMALE_ROLL_MONTAGE.Object);
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		SKILL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/SkillMontage.SkillMontage'"));
 	static ConstructorHelpers::FObjectFinder<UAnimMontage>
 		FEMALE_SKILL_MONTAGE(TEXT("AnimMontage'/Game/Resources/Character/PlayerCharacter/Animation/Female/FemaleSkillMontage.FemaleSkillMontage'"));
-	if (SKILL_MONTAGE.Succeeded())
-		SkillMontage = SKILL_MONTAGE.Object;
+	MaleMontageList.Add(SKILL_MONTAGE.Object);
+	FemaleMontageList.Add(FEMALE_SKILL_MONTAGE.Object);
+
 
 }
 
@@ -325,7 +316,25 @@ void UPlayerCharacterAnimInstance::AnimNotify_KnockBackMoveEnd()
 	}
 }
 
-void InitializeMontage(bool IsMale)
+void UPlayerCharacterAnimInstance::InitializeMontage(bool IsMale)
 {
-
+	if (IsMale)
+	{
+		AttackMontage			= MaleMontageList[0];
+		AttackMontageOnlyPlay	= MaleMontageList[1];
+		MoveMontageOnlyPlay		= MaleMontageList[2];
+		HitMontage			    = MaleMontageList[3];
+		RollMontage				= MaleMontageList[4];
+		SkillMontage		    = MaleMontageList[5];
+	}
+	else
+	{
+		AttackMontage			= FemaleMontageList[0];
+		AttackMontageOnlyPlay	= FemaleMontageList[1];
+		MoveMontageOnlyPlay		= FemaleMontageList[2];
+		HitMontage				= FemaleMontageList[3];
+		RollMontage				= FemaleMontageList[4];
+		SkillMontage			= FemaleMontageList[5];
+	}
+	
 }
