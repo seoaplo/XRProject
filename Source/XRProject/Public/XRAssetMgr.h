@@ -55,8 +55,6 @@ struct FMonsterSkillTableRow : public FTableRowBase
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-		int32 MonsterSkillID;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 		FString CharacterName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 		FString SkillName;
