@@ -131,7 +131,6 @@ APlayerCharacter::APlayerCharacter()
 	check(SWORDTRAIL_FINAL.Succeeded());
 	check(BERSERK_EFFECT_START.Succeeded());
 	check(BERSERK_EFFECT_LOOP.Succeeded());
-
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
@@ -1079,7 +1078,7 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 			}
 			///수정자 조재진///
 //UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
-			NPC->TakeDamage(1.f, FDamageEvent(), GetController(), this);
+			//NPC->TakeDamage(1.f, FDamageEvent(), GetController(), this);
 			/// 오프라인 공격 테스트용도 지워도 무상관///////
 
 
