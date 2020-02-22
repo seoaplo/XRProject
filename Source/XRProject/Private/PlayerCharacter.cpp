@@ -345,9 +345,9 @@ void APlayerCharacter::Tick(float deltatime)
 	}
 
 	float CurVelocity = GetCharacterMovement()->Velocity.Size();
-	float DensityValue = CurVelocity / 750.f * 3.5f;
+	float DensityValue = CurVelocity / 750.f * 2.5f;
 
-	if(CurVelocity > kNormalMovementSpeed + 1.1f)
+	if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling)
 		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
 	else
 		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
