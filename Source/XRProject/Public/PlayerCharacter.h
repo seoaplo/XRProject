@@ -288,6 +288,7 @@ public:
 	void ForceAttackStop();
 	void ForceRollStop();
 	void ForceSkillStop();
+	void ForceKnockbackStop();
 	void LockCharacterMove(bool Lock);
 	void AddLocationSyncFailCount();
 	void SetbIsPathFinding(bool bPathFd);

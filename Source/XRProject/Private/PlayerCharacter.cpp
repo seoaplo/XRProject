@@ -367,9 +367,9 @@ void APlayerCharacter::Tick(float deltatime)
 	}
 
 	float CurVelocity = GetCharacterMovement()->Velocity.Size();
-	float DensityValue = CurVelocity / 750.f * 2.5f;
+	float DensityValue = CurVelocity / 750.f * 2.0f;
 
-	if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling)
+	if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling && !bIsKnockBackMoving)
 		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
 	else
 		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
@@ -668,14 +668,15 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	if (DamageEvent.bIntensity == 1)
 	{
 		SetbIsInvisible(true);  
+		ForceSkillStop();
+		ForceAttackStop();
+		ForceRollStop();
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
 		SetbIsKnockBackMoving(true);
-		ForceSkillStop();
-		ForceAttackStop();
-		ForceRollStop();
+
 		
 		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
 		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
@@ -684,13 +685,15 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
 		AgainstMonster = FRotator(0.0f, (FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
-		//AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
 		SetActorRotation(AgainstMonster);
 		KnockBackVector = -VecToTarget;
 	}
 	else if (!MyAnimInstance->Montage_IsPlaying(MyAnimInstance->AttackMontage) && !bIsSkillPlaying)
 	{
 		SetbIsInvisible(true);
+		ForceSkillStop();
+		ForceAttackStop();
+		ForceRollStop();
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
@@ -736,12 +739,17 @@ void APlayerCharacter::Attack()
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 
+	ForceKnockbackStop();
+	ForceSkillStop();
+
 	//first
 	if (bIsAttack == false)
 	{
 		AttackNextRotation = GetActorRotation(); //공격 시작시에, 액터로케이션과 Next로테이션을 동일하게 맞춤
 
 		bIsAttack = true;
+		ForceKnockbackStop();
+		ForceSkillStop();
 		MyAnimInstance->PlayAttackMontage();
 
 		OutputStream out;
@@ -784,6 +792,10 @@ void APlayerCharacter::Roll()
 		bIsAttackMoving = false;
 		bIsAttack = false;
 	}
+
+	ForceSkillStop();
+	ForceKnockbackStop();
+	ForceAttackStop();
 
 	bool bArrowKeyNotPressed = false;
 
@@ -843,8 +855,6 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 	bInitialized = true;
 
 	bIsPlayer = bIsPlayerCharacter;
-
-
 
 	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
@@ -1513,6 +1523,12 @@ void APlayerCharacter::ForceSkillStop()
 	bIsSkillPlaying = false;
 	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->SkillMontage);
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
+}
+
+void APlayerCharacter::ForceKnockbackStop()
+{
+	bIsKnockBackMoving = false;
+	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->HitMontage);
 }
 
 void APlayerCharacter::LockCharacterMove(bool Lock)
