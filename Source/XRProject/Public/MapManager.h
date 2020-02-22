@@ -41,6 +41,7 @@ public:
 public:
 	int64_t GetPlayerID() { return PlayerID; }
 	int32_t GetMapID() { return LevelID; }
+	void SetCompleteLoad(bool Check) { CheckLoad = Check; }
 	APlayerCharacter* GetPlayer() { return PlayerCharacter; }
 	const TMap<int64_t, APlayerCharacter*>& GetCharacterList() { return CharacterList; }
 	const TMap<int64_t, ANonePlayerCharacter*>& GetMonsterList() { return MonsterList; }
@@ -70,7 +71,6 @@ public:
 	bool MonsterListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
 	bool PossessPlayer(UWorld* World);
-	void LoadLevelCompleteFunc(const FName & LevelName, UPackage * LoadPackege, EAsyncLoadingResult::Type LoadingResult);
 	// 포탈 관련 함수
 	void PotalInPlayer(AActor* OtherCharacter);
 	// 삭제
@@ -94,6 +94,8 @@ private:
 	int32_t LevelID;
 	int64_t PlayerID;
 	float	LoadingPercent;
+	bool	CheckLoad;
+
 	std::vector<CharacterData> CharacterDataList;
 	std::vector<MonsterData> MonsterDataList;
 
