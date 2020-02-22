@@ -1023,16 +1023,17 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 		ANonePlayerCharacter* NPC = Cast<ANonePlayerCharacter>(OtherActor);
 		if (NPC)
 		{
-			///수정자 조재진///
-			//NPC->TakeDamage(10.f, FDamageEvent(), GetController(), this);
-			//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
-			/// 오프라인 공격 테스트용도 지워도 무상관///////
 
 			for (ANonePlayerCharacter* FlagNpc : AttackOverlapList)
 			{
 				if (FlagNpc == NPC)
 					return;
 			}
+			///수정자 조재진///
+//UGameplayStatics::ApplyDamage(NPC, 10.f, GetController(), this, UDamageType::StaticClass());
+			NPC->TakeDamage(1.f, FDamageEvent(), GetController(), this);
+			/// 오프라인 공격 테스트용도 지워도 무상관///////
+
 
 			int64 EnemyID = NPC->ObjectID;
 			int64 MyID = this->ObjectID;

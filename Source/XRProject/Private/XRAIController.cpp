@@ -24,7 +24,7 @@ AXRAIController::AXRAIController()
 	SightConfig = CreateOptionalDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
 	SightConfig->SightRadius = 1000.f;
 	SightConfig->LoseSightRadius = 1000.f + 50.f;
-	SightConfig->PeripheralVisionAngleDegrees = 85.f;
+	SightConfig->PeripheralVisionAngleDegrees = 180.f;
 	SightConfig->SetMaxAge(10.f);
 
 

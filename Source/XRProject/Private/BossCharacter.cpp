@@ -12,17 +12,6 @@ ABossCharacter::ABossCharacter()
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
-void ABossCharacter::SetOnSkillQueue(int32 index)
-{
-	FTimerHandle handle;
-	GetWorld()->GetTimerManager().SetTimer(handle, FTimerDelegate::CreateLambda(
-		[this,index]()
-	{
-		ReadySkillList.AddUnique(index);
-	}
-	), BossAttackList[index].CoolTime, false);
-}
-
 void ABossCharacter::FireSkill_Implementation()
 {
 
@@ -63,7 +52,7 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 				if (npcAnim)
 				{
-					npcAnim->Montage_Play(npcAnim->NpcAttackMontage[ActionID]);
+					npcAnim->Montage_Play(npcAnim->NpcAttackMontage[ActionID].AttackAction);
 				}
 			}
 			else if (ActionID == 1000)
@@ -80,19 +69,6 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 				else
 				{
 					bInBattle = true;
-				}
-			}
-			else if (ActionID >= 3000 && ActionID < 4000)
-			{
-				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID));
-				AttackOverlapList.Reset();
-				int32 SkillID = ActionID % 3000;
-				SetActorLocation(Location);
-				SetActorRotation(Rotator);
-				auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
-				if (npcAnim)
-				{
-					npcAnim->Montage_Play(BossAttackList[SkillID].AttackAction);
 				}
 			}
 			else if (ActionID >= 4000)
