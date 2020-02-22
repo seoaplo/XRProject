@@ -23,13 +23,12 @@ UMapManager::UMapManager()
 		LevelPathData(FName(TEXT("LEVLE_Boss")), 
 			FString(L"/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss")));
 
-	LoadLevelComplete.BindUObject(this, &UMapManager::LoadLevelCompleteFunc);
-
 }
 bool UMapManager::Init()
 {
 	PlayerID = -1;
 	LevelID = -1;
+	CheckLoad = false;
 
 	Spawn_Character.Unbind();
 	PreWorld = nullptr;
@@ -52,6 +51,8 @@ bool UMapManager::Clear()
 
 	CharacterDataList.clear();
 	MonsterDataList.clear();
+
+	CheckLoad = false;
 
 	return true;
 }
@@ -294,42 +295,13 @@ bool UMapManager::OpenMap(UWorld* World)
 	LoadingPercent = 1.0f;
 
 	UGameplayStatics::OpenLevel(PreWorld, LevelPath->LevelName);
-	//LoadPackageAsync(LevelPath->LevelPath, LoadLevelComplete);
-	//ULoadingBarWidget* LoadingWidgetLamda = BP_LoadingWidget;
-	//auto gInst = Cast<UXRGameInstance>(World->GetGameInstance());
-	//if (gInst)
-	//{
-	//	FSoftObjectPath path(LevelPath->LevelName, LevelPath->LevelPath.c_str());
-	//
-	//	FStreamableDelegate resultcallback;
-	//	resultcallback.BindLambda([path, this, World, LevelPath, LoadingWidgetLamda]()
-	//	{
-	//		TSoftObjectPtr<ULevel> LoadedMap(path);
-	//		XRLOG(Warning, TEXT("Map ASync Load Complete"));
-	//
-	//		BP_LoadingWidget->ApplyPercentage(1.0f);
-	//		UGameplayStatics::OpenLevel(World, LevelPath->LevelName);
-	//	});
-	//	gInst->GetXRAssetMgr()->ASyncLoadAssetFromPath(path, resultcallback);
-	//}
-	//LoadingWidgetLamda = nullptr;
 	return true;
 }
 
-void UMapManager::LoadLevelCompleteFunc(const FName & LevelName, UPackage * LoadPackege, EAsyncLoadingResult::Type LoadingResult)
-{
-	if (PreWorld == nullptr) return;
-	if (BP_LoadingWidget)
-	{
-		LoadingPercent = 1.0f;
-		BP_LoadingWidget->ApplyPercentage(LoadingPercent);
-	}
-
-	UGameplayStatics::OpenLevel(PreWorld, LevelName);
-}
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
+	if (CheckLoad == false) return false;
 	for (auto& CurrentData : CharacterDataList)
 	{
 		FActorSpawnParameters Param;
@@ -383,6 +355,7 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 }
 bool UMapManager::PossessPlayer(UWorld* World)
 {
+	if (CheckLoad == false) return false;
 	APlayerCharacter* Player = CharacterList.FindRef(PlayerID);
 	if (Player == nullptr) return false;
 	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(World->GetPlayerControllerIterator()->Get());
@@ -394,6 +367,7 @@ bool UMapManager::PossessPlayer(UWorld* World)
 bool UMapManager::MonsterListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
+	if (CheckLoad == false) return false;
 
 	for (auto& CurrentData : MonsterDataList)
 	{
