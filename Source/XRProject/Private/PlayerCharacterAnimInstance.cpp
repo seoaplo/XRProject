@@ -4,6 +4,8 @@
 #include "PlayerCharacterAnimInstance.h"
 #include "AccountManager.h"
 #include "XRGameInstance.h"
+#include "PlayerSkill.h"
+#include "playerSkillTimeDuration.h"
 #include "PlayerCharacter.h"
 
 UPlayerCharacterAnimInstance::UPlayerCharacterAnimInstance()
@@ -244,28 +246,45 @@ void UPlayerCharacterAnimInstance::AnimNotify_BerserkEnd()
 void UPlayerCharacterAnimInstance::AnimNotify_NormalTrail()
 {
 	int32 ComboCount = MyCharacter->GetComboCount();
-	UParticleSystemComponent* Comp;
+	UParticleSystemComponent* Comp = nullptr;
 
 	FName aaa("FxBottom");
 
-	switch (ComboCount)
+	//SwordTrail 지속시간
+	auto GI = Cast<UXRGameInstance>(MyCharacter->GetGameInstance());
+	FString Fstr = "Berserk";
+	UPlayerSkill* Bersk = GI->GetPlayerSkillManager()->FindSkillFromListByName(GI->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
+	int32 RetNum = GI->GetPlayerSkillManager()->FindSkillFromTimeDurationList(Bersk->GetID());
+
+	//int32 TDNum = GI->GetPlayerSkillManager()->TimeDurationList[RetNum];
+
+	UPlayerSkillTimeDuration* TD = nullptr;
+
+	if(RetNum != -1)
+		TD= GI->GetPlayerSkillManager()->TimeDurationList[RetNum];
+
+	if (TD != nullptr && TD->GetbSkillRemainTime())
 	{
+		Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailBerserkNormal"));
+	}
+	else
+		Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
+
+	switch (ComboCount)
+	{		
 		case 1:
-			Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
 			Comp->SetActive(false);
 			Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent, 
 				FAttachmentTransformRules::KeepRelativeTransform , MyCharacter->GetComboSocket().FXCombo1);
 			Comp->SetActive(true);
 			break;
 		case 2:
-			Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
 			Comp->SetActive(false);
 			Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent,
 				FAttachmentTransformRules::KeepRelativeTransform, MyCharacter->GetComboSocket().FXCombo2);
 			Comp->SetActive(true);
 			break;
 		case 3:
-			Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
 			Comp->SetActive(false);
 			Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent,
 				FAttachmentTransformRules::KeepRelativeTransform, MyCharacter->GetComboSocket().FXCombo3);
@@ -276,9 +295,27 @@ void UPlayerCharacterAnimInstance::AnimNotify_NormalTrail()
 
 void UPlayerCharacterAnimInstance::AnimNotify_FinalTrail()
 {
+	//SwordTrail 지속시간
+	auto GI = Cast<UXRGameInstance>(MyCharacter->GetGameInstance());
+	FString Fstr = "Berserk";
+	UPlayerSkill* Bersk = GI->GetPlayerSkillManager()->FindSkillFromListByName(GI->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
+	int32 RetNum = GI->GetPlayerSkillManager()->FindSkillFromTimeDurationList(Bersk->GetID());
+
+	//int32 TDNum = GI->GetPlayerSkillManager()->FindSkillFromTimeDurationList(ID);
+	UPlayerSkillTimeDuration* TD = nullptr;
+	if (RetNum != -1)
+		TD = GI->GetPlayerSkillManager()->TimeDurationList[RetNum];
+
 	const int32 FinalCombo = 4;
-	UParticleSystemComponent* Comp;
-	Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailFinal"));
+	UParticleSystemComponent* Comp = nullptr;
+
+	if (TD != nullptr && TD->GetbSkillRemainTime())
+	{
+		Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailBerserkFinal"));
+	}
+	else
+		Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailFinal"));
+
 	Comp->SetActive(false);
 	Comp->AttachToComponent(MyCharacter->Equipments.BodyComponent,
 		FAttachmentTransformRules::KeepRelativeTransform, MyCharacter->GetComboSocket().FXCombo4);

@@ -39,6 +39,8 @@ protected:
 	UPROPERTY(VisibleAnyWhere)
 	float			CoolTime;
 	UPROPERTY(VisibleAnyWhere)
+	float			TimeDuration;
+	UPROPERTY(VisibleAnyWhere)
 	int32			IconID;
 	UPROPERTY()
 	APlayerCharacter* OwnerPlayer;
@@ -56,6 +58,7 @@ public:
 	void SetCoolTime(float CoolDown) { CoolTime = CoolDown; }
 	void SetIconID(int32 ID) { IconID = ID; }
 	void SetRequireStamina(float Stamina) { RequireStamina = Stamina; }
+	void SetTimeDuration(float TD) { TimeDuration = TD; }
 
 	int32 GetID() { return SkillID; }
 	FString GetSkillName() { return SkillName; }
@@ -64,6 +67,7 @@ public:
 	float GetCoolTime() { return CoolTime; }
 	int32 GetIconID() { return IconID; }
 	float GetRequireStamina() { return RequireStamina; }
+	float GetTimeDuration() { return TimeDuration; }
 	//inline bool GetIsActiveMove() { return bIsActiveMove; }
 
 protected:
@@ -132,6 +136,8 @@ public:
 		virtual bool End(APlayerCharacter* Character) override;
 	UFUNCTION()
 		virtual bool ConditionCheck(APlayerCharacter* Character) override;
+	UFUNCTION()
+		void TimeDurationEnd(APlayerCharacter* Character);
 
 };
 
