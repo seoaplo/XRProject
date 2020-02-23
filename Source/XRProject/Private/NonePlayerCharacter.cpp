@@ -176,8 +176,6 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 	{
 	case ECharacterLoadState::PREINIT:
 	{
-		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : PREINIT")));
-	
 
 		SetCharacterLifeState(ECharacterLifeState::SPAWN);
 		SetCharacterLoadState(ECharacterLoadState::LOADING);
@@ -185,7 +183,6 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 	}
 	case ECharacterLoadState::LOADING:
 	{
-		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : LOADING")));
 		EnermyStatComponent->OnHPZero.AddDynamic(this, &ANonePlayerCharacter::OnDead);
 		if (AICon)
 		{
@@ -205,7 +202,6 @@ void ANonePlayerCharacter::SetCharacterLoadState(ECharacterLoadState NewState)
 	}
 	case ECharacterLoadState::READY:
 	{
-		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : READY")));
 		NpcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		
 		for (int i = 0; i < NpcAnim->NpcAttackMontage.Num(); i++)
@@ -233,19 +229,18 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 	{
 	case ECharacterLifeState::SPAWN:
 	{
-		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : SPAWN")));
+
 
 		break;
 	}
 	case ECharacterLifeState::ALIVE:
 	{
-		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Play")));
+
 
 		break;
 	}
 	case ECharacterLifeState::DEAD:
 	{
-		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Dead")));
 		SetActorEnableCollision(false);
 		auto npcAnim = Cast<UNonePlayerCharacterAnimInstance>(GetMesh()->GetAnimInstance());
 		AICon->StopAI();
@@ -331,7 +326,6 @@ void ANonePlayerCharacter::AttackCheck(UPrimitiveComponent* OverlappedComponent,
 			if (!AttackOverlapList.IsValidIndex(FindListCharacter))
 			{
 
-				GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Black, TEXT("PlayerHit"));
 				AttackOverlapList.AddUnique(castPlayerCharacter);
 				XRLOG(Warning, TEXT("OverlapPlayer"));
 				OutputStream out;
@@ -406,7 +400,6 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			if (ActionID < 1000)
 			{
 				CurrentAttackAction = ActionID;
-				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID) );
 				AttackOverlapList.Reset();
 				//AICon->StopMovement();
 				SetActorLocation(Location);

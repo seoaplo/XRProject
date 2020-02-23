@@ -43,7 +43,6 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 			if (ActionID < 1000)
 			{
 				CurrentAttackAction = ActionID;
-				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID));
 				AttackOverlapList.Reset();
 				//AICon->StopMovement();
 				SetActorLocation(Location);
@@ -73,7 +72,6 @@ void ABossCharacter::ExcuteRecvNpcAction(InputStream& input)
 			}
 			else if (ActionID >= 4000)
 			{
-				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID));
 				FTransform spawnTransform;
 				spawnTransform.SetLocation(Location);
 				spawnTransform.SetRotation(Rotator.Quaternion());

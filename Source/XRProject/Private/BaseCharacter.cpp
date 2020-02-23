@@ -55,13 +55,12 @@ void ABaseCharacter::SetCharacterLoadState(ECharacterLoadState NewLoadState)
 	{
 	case ECharacterLoadState::PREINIT:
 	{
-		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : PREINIT")));
+
 		SetCharacterLoadState(ECharacterLoadState::LOADING);
 		break;
 	}
 	case ECharacterLoadState::LOADING:
 	{
-		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : LOADING")));
 		
 		int32 SkeletalID = 1000001;
 		int32 AnimBPID = 3000001;
@@ -72,7 +71,6 @@ void ABaseCharacter::SetCharacterLoadState(ECharacterLoadState NewLoadState)
 	case ECharacterLoadState::READY:
 	{
 
-		GEngine->AddOnScreenDebugMessage(1, 50.0f, FColor::Yellow, FString::Printf(TEXT("CurrentState : READY")));
 		AIControllerClass = AXRAIController::StaticClass();
 		GetController()->Possess(this);
 		break;
@@ -92,20 +90,17 @@ void ABaseCharacter::SetCharacterLifeState(ECharacterLifeState NewLifeState)
 	{
 	case ECharacterLifeState::SPAWN:
 	{
-		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : SPAWN")));
+
 		
 		break;
 	}
 	case ECharacterLifeState::ALIVE:
 	{	
-		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Play")));
 		
 		break;
 	}
 	case ECharacterLifeState::DEAD:
 	{	
-		GEngine->AddOnScreenDebugMessage(2, 50.0f, FColor::Blue, FString::Printf(TEXT("CurrentState : Dead")));
-
 		break;
 	}
 	default:
