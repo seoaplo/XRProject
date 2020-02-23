@@ -402,10 +402,10 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
 
-			XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+			//XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 			if (ActionID < 1000)
 			{
-
+				CurrentAttackAction = ActionID;
 				GEngine->AddOnScreenDebugMessage(99, 5, FColor::Red, FString::FromInt(ActionID) );
 				AttackOverlapList.Reset();
 				//AICon->StopMovement();

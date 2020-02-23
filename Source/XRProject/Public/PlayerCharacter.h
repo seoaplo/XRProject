@@ -167,10 +167,6 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FCameraShakeInfo ShakeInfo;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
-		UParticleSystemComponent* SwordTrailNormal;
-	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
-		UParticleSystemComponent* SwordTrailFinal;
-	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		FComboSocket ComboParticleSocketName;
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		UParticleSystemComponent* BerserkBuffStart;

@@ -123,6 +123,14 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		SWORDTRAIL_FINAL
 		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrailFianl.P_PlayerSwordTrailFianl'"));
+	
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SWORDTRAIL_BERSERK_NORMAL
+		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrail_Berserk.P_PlayerSwordTrail_Berserk'"));
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>
+		SWORDTRAIL_BERSERK_FINAL
+		(TEXT("ParticleSystem'/Game/Resources/Effect/SwordTrail/P_PlayerSwordTrailFianl_Berserk.P_PlayerSwordTrailFianl_Berserk'"));
+
 	static ConstructorHelpers::FObjectFinder<UParticleSystem>
 		BLOOD_EFFECT
 		(TEXT("ParticleSystem'/Game/Resources/Effect/Paticle/Blood_cloud_large.Blood_cloud_large'"));
@@ -164,7 +172,7 @@ APlayerCharacter::APlayerCharacter()
 	BlurMaterial = Cast<UMaterialInstance>(BLUR_MAT.Object);
 	DynamicBlurMaterial = UMaterialInstanceDynamic::Create(BlurMaterial, CameraComponent);
 	CameraComponent->PostProcessSettings.AddBlendable(DynamicBlurMaterial, 1.0f);
-	
+
 	GetMesh()->SetSkeletalMesh(INVISIBLE_MESH.Object);
 	FaceComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
 
@@ -211,9 +219,11 @@ APlayerCharacter::APlayerCharacter()
 	this->GetMesh()->SetRelativeLocation(MeshLocationVector);
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTagLocation = FVector(0.0f, 0.0f, 90.0f);
-
-	SwordTrailNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailNormal"));
-	SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailFinal"));
+	
+	UParticleSystemComponent* SwordTrailNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailNormal"));
+	UParticleSystemComponent* SwordTrailFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailFinal"));
+	UParticleSystemComponent* SwordTrailBerserkNormal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailBerserkNormal"));
+	UParticleSystemComponent* SwordTrailBerserkFinal = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("SwordTrailBerserkFinal"));
 	BerserkBuffStart = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkStart"));
 	BerserkBuffLoop = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BerserkLoop"));
 	UParticleSystemComponent* AttackEffect1 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect1"));
@@ -221,14 +231,21 @@ APlayerCharacter::APlayerCharacter()
 	UParticleSystemComponent* AttackEffect3 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect3"));
 	UParticleSystemComponent* AttackEffect4 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("AttackEffect4"));
 	BloodEffect = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("BloodEffect"));
-	SwordTrailNormal->bAutoActivate = false;
-	SwordTrailFinal->bAutoActivate = false;
+
 
 	SwordTrailNormal->SetTemplate(SWORDTRAIL_NORMAL.Object);
 	SwordTrailFinal->SetTemplate(SWORDTRAIL_FINAL.Object);
+	SwordTrailBerserkNormal->SetTemplate(SWORDTRAIL_BERSERK_NORMAL.Object);
+	SwordTrailBerserkFinal->SetTemplate(SWORDTRAIL_BERSERK_FINAL.Object);
 	BerserkBuffStart->SetTemplate(BERSERK_EFFECT_START.Object);
 	BerserkBuffLoop->SetTemplate(BERSERK_EFFECT_LOOP.Object);
 	BloodEffect->SetTemplate(BLOOD_EFFECT.Object);
+
+	SwordTrailNormal->bAutoActivate = false;
+	SwordTrailFinal->bAutoActivate = false;
+	SwordTrailBerserkNormal->bAutoActivate = false;
+	SwordTrailBerserkFinal->bAutoActivate = false;
+
 
 	AttackEffect1->SetTemplate(ATTACK_EFFECT_1.Object);
 	AttackEffect2->SetTemplate(ATTACK_EFFECT_2.Object);
@@ -245,6 +262,8 @@ APlayerCharacter::APlayerCharacter()
 
 	ParticleArray.Add(SwordTrailNormal);
 	ParticleArray.Add(SwordTrailFinal);
+	ParticleArray.Add(SwordTrailBerserkNormal);
+	ParticleArray.Add(SwordTrailBerserkFinal);
 	ParticleArray.Add(BerserkBuffStart);
 	ParticleArray.Add(BerserkBuffLoop);
 	ParticleArray.Add(BloodEffect);
@@ -432,7 +451,7 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::MoveForward(float Value)
 {
 	ForwardValue = Value;
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsMoveLocked)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsKnockBackMoving ||bIsMoveLocked)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -452,7 +471,7 @@ void APlayerCharacter::MoveRight(float Value)
 {
 	RightValue = Value;
 	
-	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsMoveLocked)
+	if (bIsAttack || bIsOverallRollAnimPlaying || bIsHit || bIsCharacterDead || bIsSkillPlaying || bIsKnockBackMoving || bIsMoveLocked)
 		return;
 
 	if ((Controller != NULL) && (Value != 0.0f))
@@ -1070,6 +1089,7 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 		bSavedCombo = false;
 		ComboCount = 1;
 		Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
 
 		if(bIsSprint)
 			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
@@ -1145,6 +1165,7 @@ void APlayerCharacter::StartMoveAttack()
 	bIsAttackMoving = true;
 	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Equipments.WeaponComponent->SetGenerateOverlapEvents(true);
 }
 void APlayerCharacter::EndMoveAttack()
 {
@@ -1160,6 +1181,7 @@ void APlayerCharacter::EndMoveAttack()
 	GetNetMgr().SendPacket(out);
 
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
 }
 
 void APlayerCharacter::LoadPartsComplete(FSoftObjectPath AssetPath, EPartsType Type)

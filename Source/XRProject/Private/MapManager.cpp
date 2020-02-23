@@ -349,6 +349,8 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 
 				GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
 					CharacterSkillIDList[ii]), false);
+				GI->GetPlayerSkillManager()->AddSkillToTimeDurationList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
+					CharacterSkillIDList[ii]), false);
 			}
 
 			Player->InitializeCharacter(true, CurrentData);
