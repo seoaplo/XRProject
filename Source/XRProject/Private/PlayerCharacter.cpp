@@ -839,6 +839,7 @@ void APlayerCharacter::Roll()
 	ForceSkillStop();
 	ForceKnockbackStop();
 	ForceAttackStop();
+	bIsSprint = false;
 
 	bool bArrowKeyNotPressed = false;
 
@@ -943,7 +944,9 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 		MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 		UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
+		UHealthBarWidget::GetInatance()->ApplyHp(PlayerStatComp->GetCurrentHP());
 		UExpBar::GetInstance()->SetMaxExp(PlayerStatComp->GetMaxExp());
+		UExpBar::GetInstance()->SetCurrentExp(PlayerStatComp->GetCurrentExp());
 	}
 	else
 	{
