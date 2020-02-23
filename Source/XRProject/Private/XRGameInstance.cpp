@@ -9,6 +9,7 @@
 #include "InventoryWidget.h"
 #include "CharacterInfoWidget.h"
 #include "QuickBar.h"
+#include "ExpBar.h"
 #include "Engine/Engine.h"
 #include "EngineMinimal.h"
 
@@ -23,6 +24,7 @@ void UXRGameInstance::Init()
 	MapManager->Init();
 	PlayerSkillManager = NewObject<UPlayerSkillManager>();
 	PlayerSkillManager->SetGameInstance(this);
+	InitSoundLoad();
 
 	NetworkManager->GetPacketReceiveDelegate(ENetworkSCOpcode::kUserEnterTheMap)->BindUObject(
 		this, &UXRGameInstance::HandleEnterZone);
@@ -552,7 +554,12 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 		if (flag & ToINT64(StatBit::kIntel))
 			TargetPlayer->PlayerStatComp->SetINT(input.ReadInt32());
 		if (flag & ToINT64(StatBit::kExp))
-			TargetPlayer->PlayerStatComp->SetCurrentExp(input.ReadInt32());
+		{
+			int32 NewExp = input.ReadInt32();
+			TargetPlayer->PlayerStatComp->SetCurrentExp(NewExp);
+			if (UExpBar::GetInstance() != nullptr)
+				UExpBar::GetInstance()->SetCurrentExp(NewExp);
+		}
 		if (flag & ToINT64(StatBit::kMaxExp))
 			TargetPlayer->PlayerStatComp->SetMaxExp(input.ReadInt32());
 		if (flag & ToINT64(StatBit::kStamina))
@@ -663,4 +670,94 @@ void UXRGameInstance::CharacterBuffEnd(InputStream & input)
 	UParticleSystemComponent* Comp = TargetCharacter->GetParticleComponentByName(TEXT("BerserkLoop"));
 	Comp->SetActive(false);
 
+}
+
+
+void UXRGameInstance::InitSoundLoad()
+{
+	USoundBase* Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/SwordHitMud1.SwordHitMud1'"), NULL , LOAD_None, NULL);
+	UAudioComponent* Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("SwordHitMud1"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/SwordHitMud2.SwordHitMud2'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("SwordHitMud2"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/SwordHitMud3.SwordHitMud3'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("SwordHitMud3"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/SwordHitNormal1.SwordHitNormal1'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("SwordHitNormal1"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/SwordHitNormal2.SwordHitNormal2'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("SwordHitNormal2"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/Weapon_Sword_L_00.Weapon_Sword_L_00'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("AirGargi1"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/Weapon_Sword_L_01.Weapon_Sword_L_01'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("AirGargi2"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/Weapon_Sword_L_02.Weapon_Sword_L_02'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("AirGargi3"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/Weapon_Sword_L_03.Weapon_Sword_L_03'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("AirGargi4"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+	
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/PlayerHit1.PlayerHit1'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("PlayerHit1"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/PlayerHIt2.PlayerHIt2'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("PlayerHit2"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+}
+
+int32 UXRGameInstance::GetSoundIdxByName(FString& Name)
+{
+	for (int ii = 0 ; ii < SoundList.Num(); ii++)
+	{
+		if (SoundList[ii]->GetName() == Name)
+			return ii;
+	}
+	return -1;
+}
+
+
+UAudioComponent* UXRGameInstance::GetAudioComponentByIdx(int32 Index)
+{
+	if (Index <= SoundList.Num())
+	{
+		return SoundList[Index];
+	}
+	return nullptr;
 }

@@ -113,8 +113,9 @@ public:
 		void AnimNotify_InvisibleOff();
 	UFUNCTION()
 		void AnimNotify_KnockBackMoveEnd();
-
-
+	UFUNCTION()
+		void AnimNotify_GargiSound();
+	
 	void PlayAttackMontage();
 	void PlaySkillMontage();
 

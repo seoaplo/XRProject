@@ -114,6 +114,7 @@ public:
 	const int32 kCameraWheelSpeed = 40.0f;
 	const int32 kCameraWheelMaxLimit = 550.0f;
 	const int32 kCameraWheelMinLimit = 150.0f;
+	const int32 kFallDistance = 1500;
 
 
 public:
@@ -152,8 +153,6 @@ private:
 		TSubclassOf<UAnimInstance> FemaleRemoteAnimInstance;
 	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
 		FVector ScaleVector;
-	UPROPERTY(EditInstanceOnly, Category = "C_TEST")
-		FRotator AttackEffectRot;
 	UPROPERTY(EditInstanceOnly, Category = "C_COLLISION")
 		FVector2D CapsuleSize;
 	UPROPERTY(EditInstanceOnly, Category = "C_COLLLISION")
@@ -211,8 +210,12 @@ public:
 		bool bSavedCombo;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Character", Meta = (AllowPrivateAccess = true))
 		int32 ComboCount;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "C_Sound", Meta = (AllowPrivateAccess = true))
+		USoundAttenuation* Attenuation; 
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
+		float RotSpeed;
 
-	
+
 	bool bIsMove;
 	bool bIsCharacterDead;
 	bool bIsHit;

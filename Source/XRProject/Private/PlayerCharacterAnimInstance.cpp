@@ -269,6 +269,7 @@ void UPlayerCharacterAnimInstance::AnimNotify_NormalTrail()
 	}
 	else
 		Comp = MyCharacter->GetParticleComponentByName(TEXT("SwordTrailNormal"));
+	
 
 	switch (ComboCount)
 	{		
@@ -373,5 +374,30 @@ void UPlayerCharacterAnimInstance::InitializeMontage(bool IsMale)
 		RollMontage				= FemaleMontageList[4];
 		SkillMontage			= FemaleMontageList[5];
 	}
-	
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_GargiSound()
+{
+	FString HitSound;
+
+	int32 Rand = FMath::RandRange(0, 3);
+	switch (Rand)
+	{
+	case 0:
+		HitSound = "AirGargi1";
+		break;
+	case 1:
+		HitSound = "AirGargi2";
+		break;
+	case 2:
+		HitSound = "AirGargi3";
+		break;
+	default:
+		HitSound = "AiRGargi4";
+		break;
+	}
+	int32 idx = MyCharacter->CurGameInstance->GetSoundIdxByName(HitSound);
+	UAudioComponent* SoundComp = MyCharacter->CurGameInstance->GetAudioComponentByIdx(idx);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundComp->Sound, MyCharacter->GetActorLocation(),
+		1.0f, 1.0f, 0.0f, MyCharacter->Attenuation);
 }
