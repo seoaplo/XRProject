@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
@@ -89,9 +89,9 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
-	bUseControllerRotationYaw = false; //ÄÁÆ®·Ñ·¯ ·ÎÅ×ÀÌ¼Ç¿¡ µû¶ó Ä³¸¯ÅÍ°¡ È¸ÀüÇÏ´Â bool. ÇØÁ¦ÇØ¾ß ÀÓÀÇ·Î È¸Àü½ÃÅ³ ¼ö ÀÖÀ½.
-	bUseControllerRotationPitch = false; //ÄÁÆ®·Ñ·¯ ·ÎÅ×ÀÌ¼Ç¿¡ µû¶ó Ä³¸¯ÅÍ°¡ È¸ÀüÇÏ´Â bool. ÇØÁ¦ÇØ¾ß ÀÓÀÇ·Î È¸Àü½ÃÅ³ ¼ö ÀÖÀ½.
-	bUseControllerRotationRoll = false; //ÄÁÆ®·Ñ·¯ ·ÎÅ×ÀÌ¼Ç¿¡ µû¶ó Ä³¸¯ÅÍ°¡ È¸ÀüÇÏ´Â bool. ÇØÁ¦ÇØ¾ß ÀÓÀÇ·Î È¸Àü½ÃÅ³ ¼ö ÀÖÀ½.
+	bUseControllerRotationYaw = false; //ì»¨íŠ¸ë¡¤ëŸ¬ ë¡œí…Œì´ì…˜ì— ë”°ë¼ ìºë¦­í„°ê°€ íšŒì „í•˜ëŠ” bool. í•´ì œí•´ì•¼ ìž„ì˜ë¡œ íšŒì „ì‹œí‚¬ ìˆ˜ ìžˆìŒ.
+	bUseControllerRotationPitch = false; //ì»¨íŠ¸ë¡¤ëŸ¬ ë¡œí…Œì´ì…˜ì— ë”°ë¼ ìºë¦­í„°ê°€ íšŒì „í•˜ëŠ” bool. í•´ì œí•´ì•¼ ìž„ì˜ë¡œ íšŒì „ì‹œí‚¬ ìˆ˜ ìžˆìŒ.
+	bUseControllerRotationRoll = false; //ì»¨íŠ¸ë¡¤ëŸ¬ ë¡œí…Œì´ì…˜ì— ë”°ë¼ ìºë¦­í„°ê°€ íšŒì „í•˜ëŠ” bool. í•´ì œí•´ì•¼ ìž„ì˜ë¡œ íšŒì „ì‹œí‚¬ ìˆ˜ ìžˆìŒ.
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, RotateSpeed, 0.0f);
@@ -497,7 +497,7 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 
 	if (Type == EPartsType::HAIR)
 	{
-		//Çì¾îÆÄÃ÷
+		//í—¤ì–´íŒŒì¸ 
 		FSoftObjectPath HairAssetPath = nullptr;
 		HairAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate HairAssetLoadDelegate;
@@ -507,7 +507,7 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 	}
 	else if (Type == EPartsType::FACE)
 	{
-		//ÆäÀÌ½º ÆÄÃ÷
+		//íŽ˜ì´ìŠ¤ íŒŒì¸ 
 		FSoftObjectPath FaceAssetPath = nullptr;
 		FaceAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate FaceAssetLoadDelegate;
@@ -739,7 +739,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		ComboCount = 1;
 		bSavedCombo = false;
 	}
-	else //°ø°Ý Áß, ½ºÅ³ Áß...
+	else //ê³µê²© ì¤‘, ìŠ¤í‚¬ ì¤‘...
 	{
 		bIsHit = false;
 	}
@@ -751,7 +751,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
 	}
 
-	/*µ¿ÀÛ Ãë¼Ò Ã³¸®*/
+	/*ë™ìž‘ ì·¨ì†Œ ì²˜ë¦¬*/
 	bIsSprint = false;
 	bIsMove = false;
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -785,7 +785,7 @@ void APlayerCharacter::Attack()
 	//first
 	if (bIsAttack == false)
 	{
-		AttackNextRotation = GetActorRotation(); //°ø°Ý ½ÃÀÛ½Ã¿¡, ¾×ÅÍ·ÎÄÉÀÌ¼Ç°ú Next·ÎÅ×ÀÌ¼ÇÀ» µ¿ÀÏÇÏ°Ô ¸ÂÃã
+		AttackNextRotation = GetActorRotation(); //ê³µê²© ì‹œìž‘ì‹œì—, ì•¡í„°ë¡œì¼€ì´ì…˜ê³¼ Nextë¡œí…Œì´ì…˜ì„ ë™ì¼í•˜ê²Œ ë§žì¶¤
 
 		bIsAttack = true;
 		ForceKnockbackStop();
@@ -805,7 +805,7 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-	AttackOverlapList.clear(); //Overlap list ÃÊ±âÈ­
+	AttackOverlapList.clear(); //Overlap list ì´ˆê¸°í™”
 
 }
 
@@ -819,7 +819,7 @@ void APlayerCharacter::Roll()
 	if (PlayerStatComp->GetCurrentStamina() < kRollStamina)
 		return;
 
-	//ÈÄµô·¹ÀÌ µ¿ÀÛ¿¡¼­ ±¸¸£´ÂÁö Ã¼Å©
+	//í›„ë”œë ˆì´ ë™ìž‘ì—ì„œ êµ¬ë¥´ëŠ”ì§€ ì²´í¬
 	if (bIsAttack)
 	{
 		FName CurrentSectionName = MyAnimInstance->Montage_GetCurrentSection(MyAnimInstance->AttackMontage);
@@ -842,7 +842,7 @@ void APlayerCharacter::Roll()
 
 	bool bArrowKeyNotPressed = false;
 
-	//¹«½ÄÇÑ°Ç ¾Æ´Âµ¥ ´çÀå »ý°¢ÀÌ ¾È³²
+	//ë¬´ì‹í•œê±´ ì•„ëŠ”ë° ë‹¹ìž¥ ìƒê°ì´ ì•ˆë‚¨
 	float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
 
 	const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
@@ -972,7 +972,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 
 	for (int ii = 0; ii < Data.kEquipmentArraySize; ii++)
 	{
-		/*¸Ç¸öÀÏ ¶§ */
+		/*ë§¨ëª¸ì¼ ë•Œ */
 		if (Data.EquipArray[ii].ID == -1)
 		{
 
@@ -1023,12 +1023,12 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 	}
 
 
-	UNickNameWidget* NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
+	NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
 	if (NickNameWidget)
 	{
 		NickNameWidget->SettingName(this->PlayerStatComp->GetCharacterName());
 		NickNameWidget->SettingLevel(this->PlayerStatComp->GetLevel());
-		NickNameWidget->SettingTitle(TEXT("Title Sample"));
+		NickNameWidget->SettingTitle(TEXT("ì´ˆë³´ìž"));
 		NameTag->SetWidget(NickNameWidget);
 	}
 	NameTag->SetRelativeLocation(NameTagLocation);
@@ -1359,20 +1359,20 @@ bool APlayerCharacter::GetIsTestMode()
 	return bIsTestMode;
 }
 
-//±¸¸¦¶§ ¸ðµå ¼³Á¤. Ä¸½¶»Ó¾Æ´Ï¶ó ÀÌµ¿¼Óµµµµ °üÀåÇÔ
+//êµ¬ë¥¼ë•Œ ëª¨ë“œ ì„¤ì •. ìº¡ìŠë¿ì•„ë‹ˆë¼ ì´ë™ì†ë„ë„ ê´€ìž¥í•¨
 void APlayerCharacter::SetRollingCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation() + FVector(0.0f, 0.0f, -RollingCapsuleOffset));
 
-	/* ¼Óµµ ¼³Á¤ */
+	/* ì†ë„ ì„¤ì • */
 	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kRollingMovementSpeed;
 
 }
 
-//±¸¸¥ µÚ¿¡ ¸ðµå ¼³Á¤. Ä¸½¶»Ó¾Æ´Ï¶ó ÀÌµ¿¼Óµµµµ °üÀåÇÔ
+//êµ¬ë¥¸ ë’¤ì— ëª¨ë“œ ì„¤ì •. ìº¡ìŠë¿ì•„ë‹ˆë¼ ì´ë™ì†ë„ë„ ê´€ìž¥í•¨
 void APlayerCharacter::SetNormalCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(GetNormalCapsuleSize().X);
@@ -1380,7 +1380,7 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, RollingCapsuleOffset));
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
 
-	/*¼Óµµ ¼³Á¤*/
+	/*ì†ë„ ì„¤ì •*/
 	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
@@ -1657,6 +1657,11 @@ UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString 
 
 	check(false);
 	return nullptr;
+}
+
+UNickNameWidget * APlayerCharacter::GetNickNameWidget()
+{
+	return NickNameWidget;
 }
 
 FComboSocket APlayerCharacter::GetComboSocket()

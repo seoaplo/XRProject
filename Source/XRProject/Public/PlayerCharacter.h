@@ -19,7 +19,7 @@ class UXRGameInstance;
 class UXRPlayerController;
 class UHealthBarWidget;
 struct FXRDamageEvent;
-
+class UNickNameWidget;
 
 UENUM()
 enum class EEquipmentsType : uint8
@@ -186,6 +186,8 @@ private:
 		UMaterialInstanceDynamic* DynamicBlurMaterial;
 	UPROPERTY(EditDefaultsOnly, Category = "C_AI")
 		bool bUsePathFinding;
+	UPROPERTY(EditDefaultsOnly, Category = "C_Widget")
+		UNickNameWidget* NickNameWidget;
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -306,6 +308,7 @@ public:
 	int32 GetLocationSyncFailCount();
 	bool GetbIsPathFinding();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
+	UNickNameWidget* GetNickNameWidget();
 
 	/*Test Function*/
 	void TestPlay();
