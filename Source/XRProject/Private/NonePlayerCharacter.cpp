@@ -259,6 +259,9 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 			XRLOG(Warning, TEXT("NpcAnimInstance Lost"));
 		}
 
+		AIngameGameMode* MyGameMode = Cast<AIngameGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		if (MyGameMode == nullptr) break;
+		MyGameMode->DeathMonster(ObjectID);
 
 		break;
 	}
@@ -270,7 +273,6 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 
 void ANonePlayerCharacter::OnDead()
 {
-
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 }
 

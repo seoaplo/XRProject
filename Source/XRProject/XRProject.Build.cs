@@ -6,9 +6,10 @@ public class XRProject : ModuleRules
 {
 	public XRProject(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject",
+        //PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        PCHUsage = PCHUsageMode.UseSharedPCHs;
+
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject",
             "Engine", "InputCore", "UMG", "AIModule", "NavigationSystem", "Slate", "SlateCore" ,"GameplayTasks"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

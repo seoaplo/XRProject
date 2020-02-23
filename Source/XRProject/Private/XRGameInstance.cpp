@@ -519,7 +519,7 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 	APlayerCharacter* TargetPlayer = MapManager->FindPlayer(TargetID);
 	int64 flag = input.ReadInt64();
 	int32 val = 0;
-
+	if (TargetPlayer == nullptr) return;
 	if (TargetPlayer == MapManager->GetPlayer())
 	{
 		if (flag & ToINT64(StatBit::kHP))

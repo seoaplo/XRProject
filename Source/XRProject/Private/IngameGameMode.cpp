@@ -36,9 +36,14 @@ void AIngameGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kNotifyStartLevel)->BindUObject(
 		this, &AIngameGameMode::NotifyStartLevel);
 
+	GetMapMgr().RemoteCharacterDelete.BindUObject(this, &AIngameGameMode::DeleteRemotePlayer);
+
+	GetMapMgr().CreateLoadingWidget(GetWorld(), 1.0f);
+
 	if (GetMapMgr().IsDungeon())
 	{
 		NotifyLoadComplete();
+		GetMapMgr().DeleteWidget();
 	}
 	else
 	{
@@ -84,6 +89,7 @@ void AIngameGameMode::BeginPlay()
 		int32 SizeX = 0;
 		int32 SizeY = 0;
 		GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
+		GetMapMgr().DeleteWidget();
 	}
 }
 
@@ -106,9 +112,30 @@ void AIngameGameMode::SpawnRemotePlayer()
 }
 void AIngameGameMode::DeleteRemotePlayer(int64_t ObjectID)
 {
-	GetMapMgr().DeleteRemotePlayer(ObjectID);
-}
+	if (CurrentWidget->MiniMap != nullptr)
+	{
+		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
 
+		APlayerCharacter* FindRemotePlayer = GetMapMgr().FindPlayer(ObjectID);
+		if (FindRemotePlayer)
+		{
+			CurrentMiniMap.DeleteActorList(Cast<AActor>(FindRemotePlayer));
+		}
+	}
+}
+void AIngameGameMode::DeathMonster(int64_t ObjectID)
+{
+	if (CurrentWidget->MiniMap != nullptr)
+	{
+		UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+
+		ANonePlayerCharacter* FindMonster = GetMapMgr().FindMonster(ObjectID);
+		if (FindMonster)
+		{
+			CurrentMiniMap.DeleteActorList(Cast<AActor>(FindMonster));
+		}
+	}
+}
 void AIngameGameMode::NotifyMatchResult(class InputStream& input)
 {
 	if (CurrentWidget == nullptr) return;

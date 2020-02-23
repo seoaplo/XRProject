@@ -38,6 +38,7 @@ public:
 
 	void SpawnRemotePlayer();
 	void DeleteRemotePlayer(int64_t ObjectID);
+	void DeathMonster(int64_t ObjectID);
 
 	void NotifyStartLevel(class InputStream& input);
 	void NotifyLoadComplete();
