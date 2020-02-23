@@ -6,6 +6,7 @@
 #include "NonePlayerCharacter.h"
 #include "MapManager.h"
 #include "SkillCooldown.h"
+#include "PlayerSkillTimeDuration.h"
 #include "XRGameInstance.h"
 
 UPlayerSkill::UPlayerSkill()
@@ -49,10 +50,6 @@ bool UPlayerSkill::CooldownCheck(APlayerCharacter * Character, UPlayerSkill * Sk
 			XRLOG(Warning, TEXT("Skill CoolTime Still Remain %f"), GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetRemainCoolTime());
 			return false;
 		}
-		else //enable = true
-		{
-			GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
-		}
 	}
 	return true;
 }
@@ -74,12 +71,11 @@ USkill_GaiaCrush::~USkill_GaiaCrush()
 
 void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 {
-
 	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
-
 	
-	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying())
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying() || 
+		OwnerPlayer->bIsHit)
 		return;
 
 	if (!ConditionCheck(Character))
@@ -88,6 +84,10 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 		OwnerPlayer->SetbIsSkillMove(false);
 		return;
 	}
+
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(this->SkillID);
+	GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
 
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
 		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("GaiaTargetCheck"));
@@ -108,10 +108,8 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 		OwnerPlayer->EndMoveAttack();
 	}
 
-
 	if (!MyAnimInst)
 		check(false);
-	
 	
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
@@ -265,7 +263,8 @@ void USkill_Berserk::Play(APlayerCharacter * Character)
 	if (OwnerPlayer == nullptr || OwnerPlayer != Character)
 		OwnerPlayer = Character;
 
-	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying())
+	if (OwnerPlayer->GetbIsRolling() || OwnerPlayer->GetbIsDead() || OwnerPlayer->GetbIsSkillPlaying() || 
+		OwnerPlayer->bIsHit)
 		return;
 	
 	if (!ConditionCheck(Character))
@@ -273,6 +272,10 @@ void USkill_Berserk::Play(APlayerCharacter * Character)
 		OwnerPlayer->SetbIsSkillPlaying(false);
 		return;
 	}
+	
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(this->SkillID);
+	GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
 
 	if (!Character->MyAnimInstance->Delegate_BerserkEnd.IsBound())
 		Character->MyAnimInstance->Delegate_BerserkEnd.BindUFunction(this, FName("End"));
@@ -307,6 +310,12 @@ bool USkill_Berserk::End(APlayerCharacter * Character)
 	if (OwnerPlayer->bIsSprint)
 		OwnerPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromTimeDurationList(GetID());
+	if (Ret != -1)
+	{
+		GI->GetPlayerSkillManager()->TimeDurationList[Ret]->SetTimer();
+	}
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
 	out << 102;
@@ -329,5 +338,11 @@ bool USkill_Berserk::ConditionCheck(APlayerCharacter * Character)
 		return true;
 	}
 	return false;
+}
+
+void USkill_Berserk::TimeDurationEnd(APlayerCharacter * Character)
+{
+	//Ä® »ö ¹Ù²ãÁÖ°í
+
 }
 

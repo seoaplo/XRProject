@@ -10,6 +10,7 @@
 class USkillCooldown;
 class UPlayerSkill;
 class UXRGameInstance;
+class UPlayerSkillTimeDuration;
 
 /**
  * 
@@ -31,15 +32,18 @@ public:
 		TArray<UPlayerSkill*> SkillListForPlalyer;
 	UPROPERTY(VisibleAnywhere)
 		TArray<USkillCooldown*> CoolDownList;
-
+	UPROPERTY(VisibleAnywhere)
+		TArray<UPlayerSkillTimeDuration*> TimeDurationList;
 public:
 	void SetGameInstance(UXRGameInstance* GI);
 	UPlayerSkill* CreateSkillFromID(int32 ID);
 	UPlayerSkill* FindSkillFromList(TArray<UPlayerSkill*>& SkillList, int32 ID);
 	int32 FindSkillFromCooldownList(int32 ID);
+	int32 FindSkillFromTimeDurationList(int32 ID);
 	UPlayerSkill* FindSkillFromListByName(TArray<UPlayerSkill*>& SkillList, FString& Name);
 	void AddSkill(UPlayerSkill* Skill, bool bNeedCheckDuplication);
 	void AddSkillToCooldownList(UPlayerSkill* Skill, bool AutoSetTimer);
+	void AddSkillToTimeDurationList(UPlayerSkill* Skill, bool AutoSetTimer);
 	UDataTable* GetSkillDataTable();
 
 	

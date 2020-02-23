@@ -106,7 +106,10 @@ float UQuickSlot::GetCurCoolDown()
 
 void UQuickSlot::ClearSlot()
 {
+	TargetObject = nullptr;
+	bIsSkill = false;
 	ID = 0;
+	Icon->SetVisibility(ESlateVisibility::Hidden);
 
 	OutputStream out;
 	out.WriteOpcode(ENetworkCSOpcode::kApplyQuickSlot);

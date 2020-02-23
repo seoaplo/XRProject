@@ -259,6 +259,9 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 			XRLOG(Warning, TEXT("NpcAnimInstance Lost"));
 		}
 
+		AIngameGameMode* MyGameMode = Cast<AIngameGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+		if (MyGameMode == nullptr) break;
+		MyGameMode->DeathMonster(ObjectID);
 
 		break;
 	}
@@ -270,7 +273,6 @@ void ANonePlayerCharacter::SetCharacterLifeState(ECharacterLifeState NewState)
 
 void ANonePlayerCharacter::OnDead()
 {
-
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 }
 
@@ -400,7 +402,7 @@ void ANonePlayerCharacter::ExcuteRecvNpcAction(InputStream& input)
 			FVector Location = input.ReadFVector();
 			FRotator Rotator = input.ReadFRotator();
 
-			XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
+			//XRLOG(Warning, TEXT("Recv MonsterAction : (ObjectID : %d)(ActionID : %d)(Location : %s)"), ObjectID, ActionID, *Location.ToString());
 			if (ActionID < 1000)
 			{
 				CurrentAttackAction = ActionID;

@@ -18,8 +18,10 @@
  * 작성자 : 서승석
  */
 class ULoadingBarWidget;
+class UMiniMapWidget;
 
 DECLARE_DELEGATE(CharacterDataProcess)
+DECLARE_DELEGATE_OneParam(CharacterDelete, int64_t)
 
 struct LevelPathData
 {
@@ -71,6 +73,9 @@ public:
 	bool MonsterListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
 	bool PossessPlayer(UWorld* World);
+
+	bool CreateLoadingWidget(UWorld* World, float Percent);
+	bool DeleteWidget();
 	// 포탈 관련 함수
 	void PotalInPlayer(AActor* OtherCharacter);
 	// 삭제
@@ -79,7 +84,7 @@ public:
 	void InputExpData(class InputStream& input); //EXP 받을방법이 없어서 임의로 만든 클래스.
 public:
 	CharacterDataProcess Spawn_Character;
-	FLoadPackageAsyncDelegate LoadLevelComplete;
+	CharacterDelete		 RemoteCharacterDelete;
 	TArray<int> CharacterSkillIDList; //캐릭터 스킬 리스트 받아놓는곳
 
 private:

@@ -8,7 +8,8 @@ public class XRProjectEditorTarget : TargetRules
 	public XRProjectEditorTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
+        bEnforceIWYU = false;
+        ExtraModuleNames.AddRange( new string[] { "XRProject" } );
 
-		ExtraModuleNames.AddRange( new string[] { "XRProject" } );
-	}
+    }
 }

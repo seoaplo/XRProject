@@ -8,7 +8,8 @@ public class XRProjectTarget : TargetRules
 	public XRProjectTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
+        bEnforceIWYU = false;
 
-		ExtraModuleNames.AddRange( new string[] { "XRProject" } );
-	}
+        ExtraModuleNames.AddRange( new string[] { "XRProject" } );
+    }
 }

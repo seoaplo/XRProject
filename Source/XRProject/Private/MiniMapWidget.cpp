@@ -138,6 +138,7 @@ void UMiniMapWidget::DeleteActorList(AActor * Actor)
 		if ((*temp).second == Actor)
 		{
 			auto saver = temp;
+			(*temp).first->RemoveFromParent();
 			temp--;
 			ActorIconList.erase(saver);
 		}

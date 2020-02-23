@@ -5,7 +5,7 @@
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 #include "BossCharacter.h"
-//#include "WidgetBlueprint.h"
+
 
 UMapManager::UMapManager()
 {
@@ -23,16 +23,15 @@ UMapManager::UMapManager()
 		LevelPathData(FName(TEXT("LEVLE_Boss")), 
 			FString(L"/Game/Resources/Map/Zone_Boss/Level/LEVLE_Boss")));
 
+	BP_LoadingWidget = nullptr;
 }
 bool UMapManager::Init()
 {
 	PlayerID = -1;
 	LevelID = -1;
 	CheckLoad = false;
-
-	Spawn_Character.Unbind();
 	PreWorld = nullptr;
-	BP_LoadingWidget = nullptr;
+
 	return true;
 }
 bool UMapManager::Clear()
@@ -51,6 +50,9 @@ bool UMapManager::Clear()
 
 	CharacterDataList.clear();
 	MonsterDataList.clear();
+
+	Spawn_Character.Unbind();
+	RemoteCharacterDelete.Unbind();
 
 	CheckLoad = false;
 
@@ -282,22 +284,38 @@ bool UMapManager::OpenMap(UWorld* World)
 
 	LevelPathData* LevelPath = MapList.Find(LevelID);
 	if (LevelPath == nullptr) return false;
-
-
-	FStringClassReference MyWidgetClassRef(TEXT("/Game/Resources/UI/Blueprint/Widget/LoadingBar/BP_LoadingBarWidget.BP_LoadingBarWidget_C"));
-	UClass* MyWidgetClass = MyWidgetClassRef.TryLoadClass<UUserWidget>();
-	if (MyWidgetClass == nullptr) return false;
 	
-	BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
-	if (BP_LoadingWidget == nullptr) return false;
-
-	BP_LoadingWidget->AddToViewport();
-	LoadingPercent = 1.0f;
+	CreateLoadingWidget(World, 1.0f);
 
 	UGameplayStatics::OpenLevel(PreWorld, LevelPath->LevelName);
 	return true;
 }
+bool UMapManager::CreateLoadingWidget(UWorld* World, float Percent)
+{
+	if (BP_LoadingWidget == nullptr)
+	{
+		FStringClassReference MyWidgetClassRef(TEXT("/Game/Resources/UI/Blueprint/Widget/LoadingBar/BP_LoadingBarWidget.BP_LoadingBarWidget_C"));
+		UClass* MyWidgetClass = MyWidgetClassRef.TryLoadClass<UUserWidget>();
+		if (MyWidgetClass == nullptr) return false;
 
+		BP_LoadingWidget = CreateWidget<ULoadingBarWidget>(World, MyWidgetClass);
+		if (BP_LoadingWidget == nullptr) return false;
+	}
+
+	BP_LoadingWidget->AddToViewport();
+	BP_LoadingWidget->ApplyPercentage(Percent);
+	LoadingPercent = Percent;
+
+	return true;
+}
+bool UMapManager::DeleteWidget()
+{
+	if (BP_LoadingWidget == nullptr) return false;
+
+	BP_LoadingWidget->RemoveFromViewport();
+	BP_LoadingWidget = nullptr;
+	return true;
+}
 bool UMapManager::PlayerListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
@@ -330,6 +348,8 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 				SkillManager->AddSkill(SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
 
 				GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
+					CharacterSkillIDList[ii]), false);
+				GI->GetPlayerSkillManager()->AddSkillToTimeDurationList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
 					CharacterSkillIDList[ii]), false);
 			}
 
@@ -425,6 +445,10 @@ bool UMapManager::RemotePlayerSpawn(UWorld* world)
 }
 bool UMapManager::DeleteRemotePlayer(int64_t ObjectID)
 {
+	if (RemoteCharacterDelete.IsBound())
+	{
+		RemoteCharacterDelete.ExecuteIfBound(ObjectID);
+	}
 	APlayerCharacter* DeletePlayer = CharacterList.FindAndRemoveChecked(ObjectID);
 	if (DeletePlayer == nullptr) return true;
 
