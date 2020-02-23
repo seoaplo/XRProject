@@ -13,6 +13,10 @@ public class XRProject : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-        if (Target.Type == TargetRules.TargetType.Editor) PrivateDependencyModuleNames.AddRange(new string[] { "Engine", "UMG", "Slate", "SlateCore" });
+        if (Target.Type == TargetRules.TargetType.Editor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "Engine", "UMG" });
+            //PrivateDependencyModuleNames.AddRange(new string[] { "Engine", "UMG", "Slate", "SlateCore" });
+        }
     }
 }
