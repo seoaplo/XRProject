@@ -115,6 +115,7 @@ public:
 	const int32 kCameraWheelMaxLimit = 550.0f;
 	const int32 kCameraWheelMinLimit = 150.0f;
 	const int32 kFallDistance = 1500;
+	const int32 kRollStamina = 10;
 
 
 public:

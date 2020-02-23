@@ -160,6 +160,13 @@ void USkill_GaiaCrush::GaiaTargetCheck(APlayerCharacter* Character)
 	}
 	else
 		check(false);
+
+	FString GC = "GaiaCrush";
+	int32 idx = Character->CurGameInstance->GetSoundIdxByName(GC);
+	UAudioComponent* SoundComp = Character->CurGameInstance->GetAudioComponentByIdx(idx);
+	UGameplayStatics::PlaySoundAtLocation(Character->GetWorld(), SoundComp->Sound, Character->GetActorLocation(),
+		1.0f, 1.0f, 0.0f, Character->Attenuation);
+
 }
 
 bool USkill_GaiaCrush::End(APlayerCharacter* Character)
@@ -283,6 +290,12 @@ void USkill_Berserk::Play(APlayerCharacter * Character)
 	OwnerPlayer->SetbIsSkillPlaying(true);
 
 	UPlayerCharacterAnimInstance* MyAnimInst = Character->MyAnimInstance;
+
+	FString Roar = "Roar";
+	int32 idx = Character->CurGameInstance->GetSoundIdxByName(Roar);
+	UAudioComponent* SoundComp = Character->CurGameInstance->GetAudioComponentByIdx(idx);
+	UGameplayStatics::PlaySoundAtLocation(Character->GetWorld(), SoundComp->Sound, Character->GetActorLocation(),
+		1.0f, 1.0f, 0.0f, Character->Attenuation);
 
 	/*Attack 취소처리*/
 	if (OwnerPlayer->GetbIsAttack())

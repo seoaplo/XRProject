@@ -818,6 +818,9 @@ void APlayerCharacter::Roll()
 	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
 		return;
 
+	if (PlayerStatComp->GetCurrentStamina() < kRollStamina)
+		return;
+
 	//후딜레이 동작에서 구르는지 체크
 	if (bIsAttack)
 	{
@@ -1042,7 +1045,7 @@ void APlayerCharacter::TestInitialize()
 	bInitialized = true;
 	bIsPlayer = true;
 	bIsTestMode = true;
-	bIsMale = true;
+	bIsMale = false;
 
 	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
@@ -1112,6 +1115,9 @@ void APlayerCharacter::TestInitialize()
 		const int32 kFemalePrimaryLeg = 250;
 		const int32 kFemalePrimaryWeapon = 3300001;
 
+		ChangePartsById(EPartsType::HAIR, 210);
+		ChangePartsById(EPartsType::FACE, 220);
+		
 		ChangePartsById(EPartsType::NUDEBODY, kFemalePrimaryBody);
 
 		ChangePartsById(EPartsType::NUDEHAND, kFemalePrimaryHand);
@@ -1243,6 +1249,11 @@ void APlayerCharacter::OnDead()
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
 
+	FString DeadStr = "Dead";
+	int32 idx = CurGameInstance->GetSoundIdxByName(DeadStr);
+	UAudioComponent* Comp = CurGameInstance->GetAudioComponentByIdx(idx);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), Comp->Sound, GetActorLocation(), 1.0f, 1.0f, 0.0f, Attenuation);
+
 	UE_LOG(LogTemp, Warning, TEXT("Character Is Dead!"));
 }
 
@@ -1312,8 +1323,6 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 					
 					int32 idx = CurGameInstance->GetSoundIdxByName(HitSound);
 					UAudioComponent* Comp = CurGameInstance->GetAudioComponentByIdx(idx);
-					
-
 					UGameplayStatics::PlaySoundAtLocation(GetWorld(), Comp->Sound, GetActorLocation(), 1.0f, 1.0f, 0.0f, Attenuation);
 
 				}
@@ -1525,7 +1534,6 @@ void APlayerCharacter::ToggleMouseCursor()
 		GetWorld()->GetFirstPlayerController()->SetInputMode(FInputModeGameAndUI());
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 	}
-
 }
 
 void APlayerCharacter::WheelUp()

@@ -740,6 +740,24 @@ void UXRGameInstance::InitSoundLoad()
 	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("PlayerHit2"));
 	Comp->SetSound(Sound);
 	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/Roar.Roar'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("Roar"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/Dead.Dead'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("Dead"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
+
+	Sound = LoadObject<USoundBase>(NULL,
+		TEXT("SoundWave'/Game/Resources/Effect/Sound/Player/GaiaCrush.GaiaCrush'"), NULL, LOAD_None, NULL);
+	Comp = NewObject<UAudioComponent>(GetTransientPackage(), TEXT("GaiaCrush"));
+	Comp->SetSound(Sound);
+	SoundList.Add(Comp);
 }
 
 int32 UXRGameInstance::GetSoundIdxByName(FString& Name)
