@@ -50,10 +50,6 @@ bool UPlayerSkill::CooldownCheck(APlayerCharacter * Character, UPlayerSkill * Sk
 			XRLOG(Warning, TEXT("Skill CoolTime Still Remain %f"), GI->GetPlayerSkillManager()->CoolDownList[Ret]->GetRemainCoolTime());
 			return false;
 		}
-		else //enable = true
-		{
-			GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
-		}
 	}
 	return true;
 }
@@ -88,6 +84,10 @@ void USkill_GaiaCrush::Play(APlayerCharacter* Character)
 		OwnerPlayer->SetbIsSkillMove(false);
 		return;
 	}
+
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(this->SkillID);
+	GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
 
 	if (!Character->MyAnimInstance->Delegate_GaiaCrushEnd.IsBound())
 		Character->MyAnimInstance->Delegate_GaiaCrushEnd.BindUFunction(this, FName("GaiaTargetCheck"));
@@ -272,6 +272,10 @@ void USkill_Berserk::Play(APlayerCharacter * Character)
 		OwnerPlayer->SetbIsSkillPlaying(false);
 		return;
 	}
+	
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Character->GetWorld()->GetGameInstance());
+	int32 Ret = GI->GetPlayerSkillManager()->FindSkillFromCooldownList(this->SkillID);
+	GI->GetPlayerSkillManager()->CoolDownList[Ret]->SetTimer();
 
 	if (!Character->MyAnimInstance->Delegate_BerserkEnd.IsBound())
 		Character->MyAnimInstance->Delegate_BerserkEnd.BindUFunction(this, FName("End"));
