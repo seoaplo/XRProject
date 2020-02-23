@@ -37,7 +37,10 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 	void SpawnRemotePlayer();
+
+	void AddRemotePlayerForMinimap(APlayerCharacter* RemotePlayer);
 	void DeleteRemotePlayer(int64_t ObjectID);
+	void DeathMonster(int64_t ObjectID);
 
 	void NotifyStartLevel(class InputStream& input);
 	void NotifyLoadComplete();

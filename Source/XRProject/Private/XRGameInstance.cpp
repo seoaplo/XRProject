@@ -522,7 +522,6 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 
 	if (!TargetPlayer)
 		return;
-
 	if (TargetPlayer == MapManager->GetPlayer())
 	{
 		if (flag & ToINT64(StatBit::kHP))

@@ -53,16 +53,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		TArray<FTransform> RemoteSpawnActorQue;
 
-
-
-
-
 	UFUNCTION(BlueprintNativeEvent)
 		void FireSkill();
 	void FireSkill_Implementation();
-
-
-
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		int32 BossPhase;
