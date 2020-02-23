@@ -128,10 +128,7 @@ void UXRGameInstance::ReadInventoryInfo(InputStream & input)
 	for (int i = 0; i < Inventory::GetInstance().GetInventorySize(); i++)
 	{
 		UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
-		if (newItem)
-		{
-			Inventory::GetInstance().AddItem(newItem, i);
-		}
+		Inventory::GetInstance().AddItem(newItem, i);
 	}
 }
 
@@ -144,10 +141,17 @@ void UXRGameInstance::UpdateInventory(InputStream & input)
 	{
 	case 0 : // 积己
 	{
+		int SlotNum = input.ReadInt32();
+		UItem* newItem = GameInstance->ItemManager->CreateItem(input).GetValue();
+		Inventory::GetInstance().SetItem(newItem, SlotNum);
+		UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
 		break;
 	}
 	case 1 : // 昏力
 	{
+		int SlotNum = input.ReadInt32();
+		Inventory::GetInstance().SetItem(nullptr, SlotNum);
+		UInventoryWidget::GetInstance()->list[SlotNum]->SetSlotObject();
 		break;
 	}
 	case 2 : // 诀单捞飘
