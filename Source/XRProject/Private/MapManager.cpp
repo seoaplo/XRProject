@@ -1,11 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MapManager.h"
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 #include "BossCharacter.h"
+<<<<<<< HEAD
 
+=======
+>>>>>>> UI
 
 UMapManager::UMapManager()
 {

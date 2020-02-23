@@ -24,6 +24,8 @@ public:
 		int TargetCurrentExp;
 public:
 	UFUNCTION(BlueprintCallable)
+		void ClearInstance() { Instance = nullptr; };
+	UFUNCTION(BlueprintCallable)
 		void SetInstance() { Instance = this; };
 	UFUNCTION(BlueprintCallable)
 		void SetMaxExp(int Exp);

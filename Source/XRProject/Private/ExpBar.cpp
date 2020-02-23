@@ -7,7 +7,6 @@ UExpBar* UExpBar::Instance = nullptr;
 
 UExpBar::~UExpBar()
 {
-	Instance = nullptr;
 }
 
 void UExpBar::SetMaxExp(int Exp)

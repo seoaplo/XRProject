@@ -15,6 +15,7 @@ ChatingManager::~ChatingManager()
 
 void ChatingManager::ReceiveChat(int Type, std::string& Chat)
 {
+	if (!UChatingWidget::ChatingWidgetInstance) return;
 	std::wstring RecivedChat = mbs_to_wcs(Chat, std::locale("kor"));
 	ChatList.push_back(ChatStruct((TextType)Type, RecivedChat));
 	if (ChatList.size() > kMaxChatListSize)
