@@ -5,7 +5,7 @@
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 #include "BossCharacter.h"
-#include "WidgetBlueprint.h"
+//#include "WidgetBlueprint.h"
 
 UMapManager::UMapManager()
 {
