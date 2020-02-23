@@ -110,6 +110,14 @@ void AIngameGameMode::SpawnRemotePlayer()
 {
 	GetMapMgr().RemotePlayerSpawn(GetWorld());
 }
+void AIngameGameMode::AddRemotePlayerForMinimap(APlayerCharacter* RemotePlayer)
+{
+	if (RemotePlayer == nullptr) return;
+	if (CurrentWidget->MiniMap == nullptr) return;
+	
+	UMiniMapWidget& CurrentMiniMap = *(CurrentWidget->MiniMap);
+	CurrentMiniMap.AddActorList(Cast<AActor>(RemotePlayer), static_cast<int>(EMiniMapObjectType::EParty));
+}
 void AIngameGameMode::DeleteRemotePlayer(int64_t ObjectID)
 {
 	if (CurrentWidget->MiniMap != nullptr)

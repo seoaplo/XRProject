@@ -14,6 +14,7 @@
 #include "XRPlayerController.h"
 #include "XRGameInstance.h"
 #include "NonePlayerCharacter.h"
+#include "IngameGameMode.h"
 #include "NickNameWidget.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -1006,6 +1007,10 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		NameTag->SetWidget(NickNameWidget);
 	}
 	NameTag->SetRelativeLocation(NameTagLocation);
+
+	AIngameGameMode* MyGameMode = Cast<AIngameGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (MyGameMode == nullptr) return;
+	MyGameMode->AddRemotePlayerForMinimap(this);
 }
 
 void APlayerCharacter::TestInitialize()
