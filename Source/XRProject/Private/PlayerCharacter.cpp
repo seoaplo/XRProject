@@ -193,6 +193,7 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.WeaponComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Equipments.WeaponComponent->SetCollisionProfileName("PlayerWeapon");
+	Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	GetMesh()->SetGenerateOverlapEvents(false);
@@ -307,9 +308,8 @@ APlayerCharacter::APlayerCharacter()
 	AISenseDamage = CreateOptionalDefaultSubobject<UAISenseConfig_Damage>(TEXT("Damage Config"));
 	PlayerAIPerceptionStimul->bAutoRegister = true;
 	PlayerAIPerceptionStimul->RegisterForSense(AISenseDamage->GetSenseImplementation());
-
-	/*TEST CODE*/
-	RotSpeed = 2000.0f;
+	
+	RotSpeed = 1500.0f;
 
 }
 
@@ -942,7 +942,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 		MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 		UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
-		//UExpBar::GetInstance()->SetMaxExp(PlayerStatComp->GetMaxExp());
+		UExpBar::GetInstance()->SetMaxExp(PlayerStatComp->GetMaxExp());
 	}
 	else
 	{
@@ -1081,27 +1081,44 @@ void APlayerCharacter::TestInitialize()
 	//UBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 
 	MyAnimInstance->SetOwnerCharacter(this);
+	bIsMale = false;
+	if (bIsMale)
+	{
+		const int32 kMalePrimaryBody = 130;
+		const int32 kMalePrimaryHand = 140;
+		const int32 kMalePrimaryLeg = 150;
+		const int32 kMalePrimaryWeapon = 3300001;
 
-	const int32 kMalePrimaryBody = 130;
-	const int32 kMalePrimaryHand = 140;
-	const int32 kMalePrimaryLeg = 150;
-	const int32 kMalePrimaryWeapon = 3300001;
+		//ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
 
-	//ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
+		//ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
 
-	//ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
+		//ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
 
-	//ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
+		MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
+			MyGameInstance->GetWorld(), this);
 
-	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
-		MyGameInstance->GetWorld(), this);
+		MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3040001,
+			MyGameInstance->GetWorld(), this);
+		MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3140001,
+			MyGameInstance->GetWorld(), this);
+		MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3240001,
+			MyGameInstance->GetWorld(), this);
+	}
+	else
+	{
+		const int32 kFemalePrimaryBody = 230;
+		const int32 kFemalePrimaryHand = 240;
+		const int32 kFemalePrimaryLeg = 250;
+		const int32 kFemalePrimaryWeapon = 3300001;
 
-	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3040001,
-		MyGameInstance->GetWorld(), this);
-	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3140001,
-		MyGameInstance->GetWorld(), this);
-	MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, 3240001,
-		MyGameInstance->GetWorld(), this);
+		ChangePartsById(EPartsType::NUDEBODY, kFemalePrimaryBody);
+
+		ChangePartsById(EPartsType::NUDEHAND, kFemalePrimaryHand);
+
+		ChangePartsById(EPartsType::NUDELEG, kFemalePrimaryLeg);
+	}
+
 
 	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(GetWorld()->GetPlayerControllerIterator()->Get());
 	if (MyPlayerController == nullptr) return;
