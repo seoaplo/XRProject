@@ -10,7 +10,6 @@
 #include "Components/WidgetComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Damage.h"
-#include "HealthBarWidget.h"
 #include "XRPlayerController.h"
 #include "XRGameInstance.h"
 #include "NonePlayerCharacter.h"
@@ -274,6 +273,8 @@ APlayerCharacter::APlayerCharacter()
 	AttackEffectList.Add(AttackEffect3);
 	AttackEffectList.Add(AttackEffect4);
 
+	
+
 	ComboCount = 1;
 	CurrentAttackID = -1;
 	bIsMove = false;
@@ -308,7 +309,7 @@ APlayerCharacter::APlayerCharacter()
 	PlayerAIPerceptionStimul->RegisterForSense(AISenseDamage->GetSenseImplementation());
 
 	/*TEST CODE*/
-	AttackEffectRot = FRotator(0.0f, 0.0f, 0.0f);
+	RotSpeed = 2000.0f;
 
 }
 
@@ -381,7 +382,7 @@ void APlayerCharacter::Tick(float deltatime)
 
 	if (bIsAttackMoving)
 	{
-		FRotator NextRot = FMath::RInterpConstantTo(GetActorRotation(), AttackNextRotation, deltatime, 1200.0f);
+		FRotator NextRot = FMath::RInterpConstantTo(GetActorRotation(), AttackNextRotation, deltatime, RotSpeed);
 		SetActorRotation(NextRot);
 	}
 
@@ -445,6 +446,12 @@ void APlayerCharacter::BeginPlay()
 	ABaseCharacter::BeginPlay();
 
 	CurGameInstance = Cast<UXRGameInstance>(GetWorld()->GetGameInstance());
+	Attenuation = NewObject<USoundAttenuation>();
+	Attenuation->Attenuation.bAttenuate = true;
+	Attenuation->Attenuation.bSpatialize = true;
+	Attenuation->Attenuation.FalloffDistance = 1500;
+	Attenuation->Attenuation.SpatializationAlgorithm = ESoundSpatializationAlgorithm::SPATIALIZATION_HRTF;
+	Attenuation->Attenuation.AttenuationShape = EAttenuationShape::Capsule;
 	//ChangePartsById(EPartsType::HAIR, 110);
 	//ChangePartsById(EPartsType::FACE, 120);
 }
@@ -684,6 +691,23 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	bIsHit = true;
 	
 	
+	int32 Rand = FMath::RandRange(0, 1);
+	FString HitSound;
+	switch (Rand)
+	{
+	case 0:
+		HitSound = "PlayerHit1";
+		break;
+	default:
+		HitSound = "PlayerHit2";
+		break;
+	}
+
+	int32 idx = CurGameInstance->GetSoundIdxByName(HitSound);
+	UAudioComponent* SoundComp = CurGameInstance->GetAudioComponentByIdx(idx);
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundComp->Sound, GetActorLocation(),
+		1.0f, 1.0f, 0.0f, Attenuation);
+	
 	if (DamageEvent.bIntensity == true)
 	{
 		SetbIsInvisible(true);  
@@ -695,7 +719,6 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		ComboCount = 1;
 		bSavedCombo = false;
 		SetbIsKnockBackMoving(true);
-
 		
 		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
 		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
@@ -919,6 +942,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 		MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 		UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
+		//UExpBar::GetInstance()->SetMaxExp(PlayerStatComp->GetMaxExp());
 	}
 	else
 	{
@@ -1236,27 +1260,44 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 
 				if (CapComp)
 				{
-					FVector TraceVec = Rst.TraceEnd - Rst.TraceStart;
-					FVector TestCenter = (Rst.TraceStart  +
-						Rst.TraceEnd) / 2;
-					FQuat CapsuleRot = FRotationMatrix::MakeFromZ(TraceVec).ToQuat();
-					float HalfHeight = (Rst.TraceEnd - Rst.TraceStart).Size() / 2;
-
 					FVector HitLocation = Rst.Location;
-					//DrawDebugBox(GetWorld(), Rst.TraceStart, MiniBox, FColor::Red, false, 3.0f);
-					//DrawDebugBox(GetWorld(), Rst.TraceEnd, MiniBox, FColor::Blue, false, 3.0f);
-					//DrawDebugBox(GetWorld(), HitLocation, MiniBox, FColor::Green, false, 3.0f);
-					//DrawDebugCapsule(GetWorld(), TestCenter, HalfHeight, 15.0f, CapsuleRot, FColor::Emerald, false, 5.0f);
 					
 					int32 CurrentEffectNum = GetComboCount() - 1;
-
-					FRotator SlashRot = FRotator(90.0f, 90.0f, 90.0f);
+					
 					FRotator BloodRot = FRotator(-90.0f, 0.0f, 0.0f);
 
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectList[CurrentEffectNum]->Template, HitLocation,
-						SlashRot, true);
+						FRotator::ZeroRotator, true);
 					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect->Template, HitLocation,
 						BloodRot, true);
+
+					int32 Rand = FMath::RandRange(0, 4);
+					FString HitSound;
+
+					switch (Rand)
+					{
+					case 0:
+						HitSound = "SwordHitMud1";
+						break;
+					case 1:
+						HitSound = "SwordHitMud2";
+						break;
+					case 2:
+						HitSound = "SwordHitMud3";
+						break;
+					case 3:
+						HitSound = "SwordHitNormal1";
+						break;
+					default:
+						HitSound = "SwordHitNormal2";
+						break;
+					}
+					
+					int32 idx = CurGameInstance->GetSoundIdxByName(HitSound);
+					UAudioComponent* Comp = CurGameInstance->GetAudioComponentByIdx(idx);
+					
+
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), Comp->Sound, GetActorLocation(), 1.0f, 1.0f, 0.0f, Attenuation);
 
 				}
 			}
@@ -1385,20 +1426,18 @@ bool APlayerCharacter::GetbIsDead()
 
 void APlayerCharacter::TestPlay()
 {
-	//FString Fstr = "Berserk";
-	//UPlayerSkill* Skill = CurGameInstance->GetPlayerSkillManager()->
-	//	FindSkillFromListByName(CurGameInstance->GetPlayerSkillManager()->SkillListForPlalyer, Fstr);
 
-	//Skill->Play(this);
+	FString HitSound = "SwordHitMud1";
+	int32 idx = CurGameInstance->GetSoundIdxByName(HitSound);
+	UAudioComponent* Comp = CurGameInstance->GetAudioComponentByIdx(idx);
+	USoundAttenuation* Att = NewObject<USoundAttenuation>();
+	Att->Attenuation.bAttenuate = true;
+	Att->Attenuation.bSpatialize = true;
+	Att->Attenuation.FalloffDistance = 1500;
+	Att->Attenuation.SpatializationAlgorithm = ESoundSpatializationAlgorithm::SPATIALIZATION_HRTF;
+	Att->Attenuation.AttenuationShape = EAttenuationShape::Sphere;
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), Comp->Sound, GetActorLocation(), 1.0f, 1.0f, 0.0f, Attenuation);
 
-	FRotator SlashRot = FRotator(90.0f, 90.0f, 90.0f);
-
-	int32 CurrentEffectNum = GetComboCount() - 1;
-
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), BloodEffect->Template, GetActorLocation(),
-		SlashRot, true);
-	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectList[CurrentEffectNum]->Template, GetActorLocation(),
-		AttackEffectRot, true);
 }
 
 UItemEquipment* APlayerCharacter::GetEquippedItem(EEquipmentsType Type)

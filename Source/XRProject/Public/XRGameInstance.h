@@ -77,6 +77,8 @@ private:
 		UMapManager* MapManager;
 	UPROPERTY()
 		UPlayerSkillManager* PlayerSkillManager;
+	UPROPERTY()
+		TArray<UAudioComponent*> SoundList;
 private:
 	UPROPERTY(BlueprintReadWrite,EditAnywhere,Meta =(AllowPrivateAccess=true))
 	bool  IsSuper = false;
@@ -106,6 +108,11 @@ private:
 	void NotifyChat(class InputStream& input);
 	void NotifySpawnPotal(class InputStream& input);
 	void NotifyDeleteRemotePlayer(class InputStream& input);
+public:
+	int32 GetSoundIdxByName(FString& Name);
+	UAudioComponent* GetAudioComponentByIdx(int32 Index);
+	void InitSoundLoad();
+	
 };
 
 //넣었는데 문제있으면 말씀하십쇼 -수찬-
