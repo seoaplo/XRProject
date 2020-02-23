@@ -2,10 +2,6 @@
 #include "XRGameInstance.h"
 #include "XRPlayerController.h"
 #include "BossCharacter.h"
-<<<<<<< HEAD
-
-=======
->>>>>>> UI
 
 UMapManager::UMapManager()
 {
