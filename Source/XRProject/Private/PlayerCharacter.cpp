@@ -336,8 +336,6 @@ void APlayerCharacter::Tick(float deltatime)
 				out << 999;
 				out << GetActorLocation();
 				out << GetActorRotation();
-				GEngine->AddOnScreenDebugMessage(1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Location : %s"), *GetActorLocation().ToString()));
-				GEngine->AddOnScreenDebugMessage(2, 5.0f, FColor::Yellow, FString::Printf(TEXT("Send Rotator : %s"), *GetActorRotation().ToString()));
 				out.CompletePacketBuild();
 				GetNetMgr().SendPacket(out);
 
@@ -358,7 +356,6 @@ void APlayerCharacter::Tick(float deltatime)
 				bIsMove = false;
 			}
 		}
-		GEngine->AddOnScreenDebugMessage(10, 5.0f, FColor::Yellow, FString::Printf(TEXT("Velocity : %s"), *GetCharacterMovement()->Velocity.ToString()));
 	}
 	else
 	{
@@ -368,7 +365,6 @@ void APlayerCharacter::Tick(float deltatime)
 			bIsMove = false;
 	}
 
-	GEngine->AddOnScreenDebugMessage(3, 5.0f, FColor::Red, FString::Printf(TEXT("MoveSpeed : %s"), *FString::SanitizeFloat(GetCharacterMovement()->Velocity.Size())));
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 	

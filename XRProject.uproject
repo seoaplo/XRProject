@@ -10,14 +10,13 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UMG",
 				"CoreUObject",
-				"UMGEditor",
-				"AIModule",
+				"AIModule"
 			]
 		}
 	],
 	"TargetPlatforms": [
+
 		"AllDesktop",
 		"WindowsNoEditor"
 	]

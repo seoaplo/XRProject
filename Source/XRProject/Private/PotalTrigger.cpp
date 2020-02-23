@@ -17,7 +17,7 @@ APotalTrigger::APotalTrigger()
 void APotalTrigger::BeginPlay()
 {
 	Super::BeginPlay();
-	SetActorHiddenInGame(false);
+	SetActorHiddenInGame(true);
 	
 }
 

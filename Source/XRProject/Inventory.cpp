@@ -71,7 +71,6 @@ UItem * Inventory::GetItem(int index)
 
 bool Inventory::AddItem(UItem* item, int index)
 {
-	if (item == nullptr) return false;
 	if (index < 0 || index >= kMaxInventorySlotSize) return false;
 	Slot[index] = item;
 	return true;

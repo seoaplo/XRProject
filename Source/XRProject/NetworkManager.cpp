@@ -122,7 +122,7 @@ void UNetworkManager::Connect(const char* server_ip, uint16 port, const task_t& 
         iResult = ioctlsocket(*Socket, FIONBIO, &on);
         if (iResult != SOCKET_ERROR) {
             if (GEngine) {
-                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString(TEXT("Connect Success")));
+               // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString(TEXT("Connect Success")));
             }
             ConnectState = EConnectState::Connected;
             IsConnected.store(true);
@@ -155,7 +155,7 @@ void UNetworkManager::Connect(const char* server_ip, uint16 port, const task_t& 
             
         } else {
             if (GEngine) {
-                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::FromInt(GetLastError()));
+              //  GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::FromInt(GetLastError()));
             }
             ConnectState = EConnectState::Fail;
         };
