@@ -4,7 +4,9 @@
 #include "PlayerSkillManager.h"
 #include "PlayerSkill.h"
 #include "SkillCooldown.h"
+#include "PlayerSkillTimeDuration.h"
 #include "XRGameInstance.h"
+
 
 UPlayerSkillManager::UPlayerSkillManager()
 {
@@ -50,6 +52,7 @@ UPlayerSkill * UPlayerSkillManager::CreateSkillFromID(int32 ID)
 		Bsk->SetRequireStamina(SkillInfo->RequireStamina);
 		Bsk->SetCoolTime(SkillInfo->CoolTime);
 		Bsk->SetIconID(SkillInfo->IconID);
+		Bsk->SetTimeDuration(FCString::Atof(*(SkillInfo->TimeDuration))/ 1000.0f);
 		Bsk->SetID(ID);
 
 		return Bsk;
@@ -74,7 +77,19 @@ int32 UPlayerSkillManager::FindSkillFromCooldownList(int32 ID)
 	{
 		if (CoolDownList[ii]->GetID() == ID)
 		{
-			XRLOG(Warning, TEXT("Skill CoolD Found, Index : %d"), ii);
+			//XRLOG(Warning, TEXT("Skill CoolD Found, Index : %d"), ii);
+			return ii;
+		}
+	}
+	return -1;
+}
+
+int32 UPlayerSkillManager::FindSkillFromTimeDurationList(int32 ID)
+{
+	for (int ii = 0; ii < TimeDurationList.Num(); ii++)
+	{
+		if (TimeDurationList[ii]->GetID() == ID)
+		{
 			return ii;
 		}
 	}
@@ -134,6 +149,21 @@ void UPlayerSkillManager::AddSkillToCooldownList(UPlayerSkill* Skill, bool AutoS
 	if (AutoSetTimer)
 	{
 		CoolDownList[Idx]->SetTimer();
+	}
+}
+
+void UPlayerSkillManager::AddSkillToTimeDurationList(UPlayerSkill * Skill, bool AutoSetTimer)
+{
+	check(Skill);
+
+	UPlayerSkillTimeDuration* TD = NewObject<UPlayerSkillTimeDuration>();
+	TD->SetTD(Skill->GetID(), Skill->GetTimeDuration(), CurrentInstance);
+
+	int32 Idx = TimeDurationList.Add(TD);
+
+	if (AutoSetTimer)
+	{
+		TimeDurationList[Idx]->SetTimer();
 	}
 }
 
