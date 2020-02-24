@@ -472,9 +472,6 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 		TargetPlayer->bIsSprint = true;
 		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
-
-		TargetPlayer->ForceRollStop();
-		TargetPlayer->ForceAttackStop();
 	}
 }
 
