@@ -1250,6 +1250,9 @@ void APlayerCharacter::OnDead()
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
 
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	GetMesh()->SetGenerateOverlapEvents(false);
+
 	FString DeadStr = "Dead";
 	int32 idx = CurGameInstance->GetSoundIdxByName(DeadStr);
 	UAudioComponent* Comp = CurGameInstance->GetAudioComponentByIdx(idx);
