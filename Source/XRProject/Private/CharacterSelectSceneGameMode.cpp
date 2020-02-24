@@ -286,6 +286,9 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	InitData.Gender = 0;
 
 	Character->InitializeCharacter(false, InitData);
+	UNickNameWidget* Widget = Character->GetNickNameWidget();
+	Widget->SetVisibility(ESlateVisibility::Hidden);
+
 	Character->SetActorEnableCollision(false);
 
 	CreatePlayerCharacter(Character, Info);
