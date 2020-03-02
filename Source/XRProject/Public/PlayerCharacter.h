@@ -12,6 +12,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "PlayerCameraShake.h"
 #include "PlayerSkillManager.h"
+#include "NickNameWidget.h"
 #include "PlayerCharacter.generated.h"
 
 class ANonePlayerCharacter;
@@ -187,13 +188,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
 		UMaterialInstanceDynamic* DynamicBlurMaterial;
 	UPROPERTY(EditDefaultsOnly, Category = "C_AI")
-<<<<<<< Updated upstream
-		bool bUsePathFinding;
-=======
 		bool bUsePathFinding; //미사용
 	UPROPERTY(EditDefaultsOnly, Category = "C_Widget")
 		UNickNameWidget* NickNameWidget;
->>>>>>> Stashed changes
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
@@ -306,12 +303,9 @@ public:
 	int32 GetComboCount();
 	int32 GetLocationSyncFailCount();
 	bool GetbIsPathFinding();
-<<<<<<< Updated upstream
-	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
-=======
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr); //ParticleArray에서 이름으로 호출
 	UNickNameWidget* GetNickNameWidget();
->>>>>>> Stashed changes
+
 
 	/*Force(해당 동작 바로 정지, 모든 관련 변수 초기화)*/
 	void ForceAttackStop();

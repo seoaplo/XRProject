@@ -804,11 +804,7 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-<<<<<<< Updated upstream
 	AttackOverlapList.clear(); //Overlap list 초기화
-=======
-	//AttackOverlapList.clear(); //Overlap list 珥덇린??
->>>>>>> Stashed changes
 
 }
 
@@ -845,10 +841,6 @@ void APlayerCharacter::Roll()
 
 	bool bArrowKeyNotPressed = false;
 
-<<<<<<< Updated upstream
-	//무식한건 아는데 당장 생각이 안남
-=======
->>>>>>> Stashed changes
 	float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
 
 	const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
