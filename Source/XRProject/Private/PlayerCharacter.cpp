@@ -56,6 +56,7 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
+	/* Í∞ÅÏ¢Ö SizeÍ¥Ä???§Ï†ï??*/
 	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
 	CapsuleSize = FVector2D(90.0f, 34.0f);
 	RollingHitCapsuleSize = FVector2D(45.0f, 34.0f);
@@ -63,6 +64,7 @@ APlayerCharacter::APlayerCharacter()
 	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
 	RollingCapsuleOffset = 45.0f;
 
+	/*HitCapsule(?àÌä∏Î∞ïÏä§ ?©ÎèÑ??Ï∫°Ïäê)*/
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
 	HitCapsule->SetVisibility(false);
 	HitCapsule->bHiddenInGame = true;
@@ -161,12 +163,11 @@ APlayerCharacter::APlayerCharacter()
 		(TEXT("MaterialInstanceConstant'/Game/Resources/Character/PlayerCharacter/Material/RadialBlur_Inst.RadialBlur_Inst'"));
 
 
-	//check(SWORDTRAIL_NORMAL.Succeeded());
-	//check(SWORDTRAIL_FINAL.Succeeded());
-	//check(BERSERK_EFFECT_START.Succeeded());
-	//check(BERSERK_EFFECT_LOOP.Succeeded());
-	//check(BLOOD_EFFECT.Succeeded());
-	//check(ATTACK_EFFECT.Succeeded());
+	check(SWORDTRAIL_NORMAL.Succeeded());
+	check(SWORDTRAIL_FINAL.Succeeded());
+	check(BERSERK_EFFECT_START.Succeeded());
+	check(BERSERK_EFFECT_LOOP.Succeeded());
+	check(BLOOD_EFFECT.Succeeded());
 
 
 	BlurMaterial = Cast<UMaterialInstance>(BLUR_MAT.Object);
@@ -208,7 +209,6 @@ APlayerCharacter::APlayerCharacter()
 	Equipments.WeaponComponent->OnComponentBeginOverlap.AddDynamic(this, &APlayerCharacter::OnOverlapBegin);
 
 	Equipments.BodyComponent->SetSkeletalMesh(FIRSTBODYMESH.Object);
-	//Equipments.BodyComponent->SetAnimInstanceClass(AnimBP.Class);
 
 	Equipments.LegsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
 	Equipments.HandsComponent->SetMasterPoseComponent(Equipments.BodyComponent);
@@ -299,8 +299,7 @@ APlayerCharacter::APlayerCharacter()
 	LocationSyncFailCount = 0;
 
 	MyShake = UPlayerCameraShake::StaticClass();
-	TestID = 2;
-
+	
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 
@@ -576,11 +575,11 @@ void APlayerCharacter::ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh)
 		break;
 	}
 }
-
+/*?ÑÏù¥??Î©îÏãúÎ•??¨Ìï®?òÏ? ?äÍ≥†, ?ïÎ≥¥Îß??ºÎã® ?ÖÎç∞?¥Ìä∏?òÎäî ?®Ïàò*/
 void APlayerCharacter::PseudoChangeEquipmentWithoutMesh(UItem* Item)
 {
 	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
-
+	
 	if (EquipItem == nullptr)
 		check(false);
 
@@ -625,6 +624,7 @@ void APlayerCharacter::ChangeEquipment(UItem* Item, UStaticMesh* SmMesh)
 	Equipments.WeaponComponent->SetStaticMesh(SmMesh);
 }
 
+//?åÏ∏† : ?§Ïñ¥, ?ºÍµ¥, ?ÑÎìú Î∞îÎîî,?∏Îìú, ?àÍ∑∏(?ÑÎìúÍ∞Ä ?ÑÎãàÎ©??•ÎπÑÎ°?Î∂ÑÎ•ò)
 void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(PartAsset);
@@ -644,7 +644,8 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	else if (Type == EPartsType::NUDEBODY)
 	{
 		Equipments.BodyItem = nullptr;
-		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get());
+		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get()); 
+		//bodyÍ∞Ä ÎßàÏä§?∞Ìè¨Ï¶àÏù¥Í∏??åÎ¨∏?? Î∞îÎîîÎ•?Î∞îÍæ∏Î©??òÎ®∏ÏßÄ Ïª¥Ìè¨?åÌä∏(Î∞îÎîîÎ•?ÎßàÏä§?∞Î°ú ???§ÎèÑ ?§Ïãú Í∞ôÏ?Í±∏Î°ú ?¨Ï†Å?©Ìï¥Ï§òÏïº ?úÎã§.(ÎßàÏä§??Î≥?Í∞ÄÏ§ëÏπò ?§Î•ò)
 		Equipments.LegsComponent->SetSkeletalMesh(nullptr);
 		Equipments.LegsComponent->SetSkeletalMesh(LegMesh);
 		Equipments.HandsComponent->SetSkeletalMesh(nullptr);
@@ -803,7 +804,11 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
+<<<<<<< Updated upstream
 	AttackOverlapList.clear(); //Overlap list √ ±‚»≠
+=======
+	//AttackOverlapList.clear(); //Overlap list Ï¥àÍ∏∞??
+>>>>>>> Stashed changes
 
 }
 
@@ -840,7 +845,10 @@ void APlayerCharacter::Roll()
 
 	bool bArrowKeyNotPressed = false;
 
+<<<<<<< Updated upstream
 	//π´Ωƒ«—∞« æ∆¥¬µ• ¥Á¿Â ª˝∞¢¿Ã æ»≥≤
+=======
+>>>>>>> Stashed changes
 	float Yaw = GetYawFromArrowKeys(ForwardValue, RightValue, bArrowKeyNotPressed);
 
 	const FRotator CameraForward = FRotator(0.0f, CameraComponent->GetComponentRotation().Yaw, 0.0f);
@@ -891,6 +899,7 @@ void APlayerCharacter::SprintEnd()
 	bIsSprint = false;
 }
 
+/* Ï∫êÎ¶≠??Ï¥àÍ∏∞?? Î∞òÎìú??Ï∫êÎ¶≠???¨Ïö©?ÑÏóê ?∏Ï∂ú?¥Ïïº ?òÎ©∞, bInitialziedÎ•?trueÎ°?ÎßåÎì§?¥Ïïº ?¨Ïö©?????àÏùå. */
 void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data)
 {
 	bInitialized = true;
@@ -1080,19 +1089,13 @@ void APlayerCharacter::TestInitialize()
 	//UBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 
 	MyAnimInstance->SetOwnerCharacter(this);
-	bIsMale = false;
+	bIsMale = true;
 	if (bIsMale)
 	{
 		const int32 kMalePrimaryBody = 130;
 		const int32 kMalePrimaryHand = 140;
 		const int32 kMalePrimaryLeg = 150;
 		const int32 kMalePrimaryWeapon = 3300001;
-
-		//ChangePartsById(EPartsType::NUDEBODY, kMalePrimaryBody);
-
-		//ChangePartsById(EPartsType::NUDEHAND, kMalePrimaryHand);
-
-		//ChangePartsById(EPartsType::NUDELEG, kMalePrimaryLeg);
 
 		MyGameInstance->ItemManager->BuildItem(EItemType::EQUIPMENT, kMalePrimaryWeapon,
 			MyGameInstance->GetWorld(), this);
@@ -1206,6 +1209,8 @@ void APlayerCharacter::ContinueCombo()
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
 	}
+	AttackOverlapList.clear(); //Overlap list Ï¥àÍ∏∞??
+
 }
 
 void APlayerCharacter::StartMoveAttack()
@@ -1316,7 +1321,6 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 						HitSound = "SwordHitNormal2";
 						break;
 					}
-					
 					int32 idx = CurGameInstance->GetSoundIdxByName(HitSound);
 					UAudioComponent* Comp = CurGameInstance->GetAudioComponentByIdx(idx);
 					UGameplayStatics::PlaySoundAtLocation(GetWorld(), Comp->Sound, GetActorLocation(), 1.0f, 1.0f, 0.0f, Attenuation);
@@ -1383,6 +1387,7 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
+/* Î∞©Ìñ•?§Ïóê ?∞Î•∏ 8Î∞©Ìñ• Íµ¨Î•¥Í∏?*/
 float APlayerCharacter::GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed)
 {
 	float Yaw = 0.0f;

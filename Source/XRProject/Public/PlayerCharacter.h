@@ -38,6 +38,8 @@ enum class EPartsType : uint8
 	NUDEHAND,
 	NUDELEG,
 };
+
+/* 콤보 소드트레일에 사용되는 이펙트 소켓 구조체 */
 USTRUCT(BlueprintType)
 struct FComboSocket
 {
@@ -68,6 +70,7 @@ public:
 };
 
 
+/*캐릭터 장비 메시컴포넌트, 파츠별 장비 클래스 구조체*/
 USTRUCT(BlueprintType)
 struct FEquipment
 {
@@ -108,13 +111,12 @@ public:
 	APlayerCharacter();
 	virtual ~APlayerCharacter();
 
-	const int32 kMaxComboCount = 4;
+	const int32 kMaxComboCount = 4; //최대 4콤보까지
 	const float kSprintMovementSpeed = 750.0f;
 	const float kNormalMovementSpeed = 450.0f;
-	const int32 kCameraWheelSpeed = 40.0f;
+	const int32 kCameraWheelSpeed = 40.0f; //Wheel 카메라 조작 이동량
 	const int32 kCameraWheelMaxLimit = 550.0f;
 	const int32 kCameraWheelMinLimit = 150.0f;
-	const int32 kFallDistance = 1500;
 	const int32 kRollStamina = 10;
 
 
@@ -122,19 +124,19 @@ public:
 	UPROPERTY()
 		class  UAISenseConfig_Damage* AISenseDamage;
 
-	UPROPERTY(EditInstanceOnly, Category = "Variable")
+	UPROPERTY(EditInstanceOnly, Category = "C_Movement")
 		float RotateSpeed;
-	UPROPERTY(EditInstanceOnly, Category = "Variable")
+	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
 		float SpringArmLength;
-	UPROPERTY(EditInstanceOnly, Category = "Variable")
+	UPROPERTY(EditInstanceOnly, Category = "C_Movement")
 		float MovementSpeed;
 	UPROPERTY()
-		bool bIsMale; //���� üũ�� ���� bool��.
+		bool bIsMale; //남자/여자
 
 private:
 	UPROPERTY(EditInstanceOnly, Category = "C_Collision")
-		class UCapsuleComponent* HitCapsule;
-	UPROPERTY(EditInstanceOnly, Category = "C_Camera")
+		class UCapsuleComponent* HitCapsule;//Hitbox
+	UPROPERTY(EditInstanceOnly, Category = "C_Widget")
 		class UWidgetComponent* NameTag;
 	UPROPERTY(EditInstanceOnly, Category = "C_Camera", Meta = (AllowPrivateAccess = true))
 		class UCameraComponent* CameraComponent;
@@ -145,7 +147,7 @@ private:
 	UPROPERTY(EditInstanceOnly, Category = "C_Parts")
 		class USkeletalMeshComponent* HairComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
-		TSubclassOf<UAnimInstance> AnimInstance;
+		TSubclassOf<UAnimInstance> AnimInstance; //임시 애님인스턴스
 	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
 		TSubclassOf<UAnimInstance> FemaleAnimInstance;
 	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
@@ -179,20 +181,26 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "C_Particle")
 		TArray<UParticleSystemComponent*> AttackEffectList;
 	UPROPERTY(EditDefaultsOnly, Category = "C_KnockBack")
-		FVector KnockBackVector;
+		FVector KnockBackVector; //넉백으로 인해 튕겨나가는 벡터값
 	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
 		UMaterialInstance* BlurMaterial;
 	UPROPERTY(EditDefaultsOnly, Category = "C_PostProcess")
 		UMaterialInstanceDynamic* DynamicBlurMaterial;
 	UPROPERTY(EditDefaultsOnly, Category = "C_AI")
+<<<<<<< Updated upstream
 		bool bUsePathFinding;
+=======
+		bool bUsePathFinding; //미사용
+	UPROPERTY(EditDefaultsOnly, Category = "C_Widget")
+		UNickNameWidget* NickNameWidget;
+>>>>>>> Stashed changes
 public:
 	UPROPERTY(EditAnywhere)
 		FEquipment Equipments;
 	UPROPERTY(VisibleAnywhere, Category = "C_CharacterStatus")
 		UPlayerCharacterStatComponent* PlayerStatComp;
 	UPROPERTY(EditDefaultsOnly, Category = "C_AnimInstance")
-		UPlayerCharacterAnimInstance* MyAnimInstance;
+		UPlayerCharacterAnimInstance* MyAnimInstance; //AnimInstance를 통해 초기화
 	UPROPERTY(VisibleAnywhere, Category = "C_GameInstance")
 		UXRGameInstance* CurGameInstance;
 	UPROPERTY(VisibleAnywhere, Category = "C_CharacterSkill")
@@ -216,7 +224,7 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
 		float RotSpeed;
 
-
+	/* 캐릭터 상태를 bool로 정의 */
 	bool bIsMove;
 	bool bIsCharacterDead;
 	bool bIsHit;
@@ -230,7 +238,7 @@ public:
 private:
 	FRotator DeltaRotation;
 	FRotator AttackNextRotation; //공격 시에 방향전환에 사용되는 로테이터.
-	FRotator AdditionalRotationValue;
+	FRotator AdditionalRotationValue; 
 	FVector SpringArmLocation;
 	bool bForwardKeyIsNeutral;
 	std::vector<ANonePlayerCharacter*> AttackOverlapList;
@@ -253,10 +261,6 @@ private:
 public:
 	/*Test Value*/
 	bool bIsTestMode;
-	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
-		int32 TestID; //실제 출시 땐 제거될 테스트ID
-	UPROPERTY(EditInstanceOnly, Category = "C_TEST", Meta = (AllowPrivateAccess = true))
-		float TestVal; //실제 출시 땐 제거될 테스트ID
 public:
 	virtual void Tick(float Deltatime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -269,7 +273,7 @@ public:
 	void ChangePartsById(EPartsType Type, int32 ID);
 	void ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh);
 	void ChangeEquipment(UItem* Item, UStaticMesh* SmMesh);
-	void PseudoChangeEquipmentWithoutMesh(UItem * Item);//아이템 메시를 포함하지 않고, 정보만 일단 업데이트하는 함수
+	void PseudoChangeEquipmentWithoutMesh(UItem * Item);/*아이템 메시를 포함하지 않고, 정보만 일단 업데이트하는 함수*/
 	void ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset);
 	void SetIsPlayer(bool is);
 	bool GetIsPlayer();
@@ -277,6 +281,8 @@ public:
 	void SetRollingCapsuleMode(); //구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
+	
+	/*Setter*/
 	void SetbIsSkillMove(bool b);
 	void SetbIsSkillPlaying(bool b);
 	void SetbIsKnockBackMoving(bool b);
@@ -285,14 +291,9 @@ public:
 	void SetbSavedCombo(bool b);
 	void SetComboCount(int32 NextCombo);
 	void SetKnockBackVector(FVector& Vec);
-	void ForceAttackStop();
-	void ForceRollStop();
-	void ForceSkillStop();
-	void ForceKnockbackStop();
-	void LockCharacterMove(bool Lock);
-	void AddLocationSyncFailCount();
 	void SetbIsPathFinding(bool bPathFd);
-
+	
+	/*Getter*/
 	bool GetbIsRolling();
 	bool GetbIsOverallRollAnimPlaying();
 	bool GetbIsSkillMove();
@@ -305,11 +306,27 @@ public:
 	int32 GetComboCount();
 	int32 GetLocationSyncFailCount();
 	bool GetbIsPathFinding();
+<<<<<<< Updated upstream
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
+=======
+	UParticleSystemComponent* GetParticleComponentByName(FString FindStr); //ParticleArray에서 이름으로 호출
+	UNickNameWidget* GetNickNameWidget();
+>>>>>>> Stashed changes
+
+	/*Force(해당 동작 바로 정지, 모든 관련 변수 초기화)*/
+	void ForceAttackStop();
+	void ForceRollStop();
+	void ForceSkillStop();
+	void ForceKnockbackStop();
+	void LockCharacterMove(bool Lock); 
+	void AddLocationSyncFailCount(); //PathFinding 조건 카운트 : 미사용
+
+
 
 	/*Test Function*/
 	void TestPlay();
 
+	/*아이템 장착, 가져오기(주로 UI에서 사용)*/
 	UItemEquipment* GetEquippedItem(EEquipmentsType Type);
 	void SetEquippedItem(EEquipmentsType Type, UItemEquipment* Item);
 
@@ -321,6 +338,7 @@ public:
 	FComboSocket GetComboSocket();
 	
 	UFUNCTION()
+		/* 공격시 칼 오버랩 */
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor,
 			class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
@@ -328,7 +346,7 @@ public:
 	UFUNCTION()
 		void ContinueCombo();
 	UFUNCTION()
-		void StartMoveAttack();
+		void StartMoveAttack(); //공격 시 전방 이동거리 조절
 	UFUNCTION()
 		void EndMoveAttack();
 	UFUNCTION()
