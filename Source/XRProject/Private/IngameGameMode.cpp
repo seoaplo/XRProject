@@ -173,8 +173,8 @@ void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 	GetMapMgr().SetCompleteLoad(true);
 
 	XRLOG(Warning, TEXT("NotifyStartLevel"));
-	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PlayerListSpawn(GetWorld());
+	GetMapMgr().MonsterListSpawn(GetWorld());
 	GetMapMgr().PossessPlayer(GetWorld());
 
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;

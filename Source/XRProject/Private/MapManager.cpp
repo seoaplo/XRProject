@@ -352,8 +352,6 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			Player->InitializeCharacter(true, CurrentData);
 		}
 
-		auto GameInstance = Cast <UXRGameInstance>(Player->GetGameInstance());
-
 		if (Player)
 		{
 			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
