@@ -149,6 +149,7 @@ void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingAllEnd()
 {
 	bIsOverallRollAnimPlaying = false;
 	MyCharacter->bIsOverallRollAnimPlaying = false;
+
 }
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
 {

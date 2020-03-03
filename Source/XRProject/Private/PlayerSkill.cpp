@@ -314,6 +314,14 @@ void USkill_Berserk::Play(APlayerCharacter * Character)
 	MyAnimInst->PlaySkillMontage();
 	MyAnimInst->JumpToSkillMonatgeSection(BerserkStr);
 
+	OutputStream out;
+	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
+	out << 102;
+	out << Character->GetActorLocation();
+	out << Character->GetActorRotation();
+	out.CompletePacketBuild();
+	GetNetMgr().SendPacket(out);
+
 }
 
 bool USkill_Berserk::End(APlayerCharacter * Character)
@@ -329,13 +337,7 @@ bool USkill_Berserk::End(APlayerCharacter * Character)
 	{
 		GI->GetPlayerSkillManager()->TimeDurationList[Ret]->SetTimer();
 	}
-	OutputStream out;
-	out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
-	out << 102;
-	out << Character->GetActorLocation();
-	out << Character->GetActorRotation();
-	out.CompletePacketBuild();
-	GetNetMgr().SendPacket(out);
+
 	return true;
 }
 
