@@ -55,7 +55,7 @@ void AIngameGameMode::BeginPlay()
 		}
 
 		GetMapMgr().PlayerListSpawn(GetWorld());
-		GetMapMgr().PossessPlayer(GetWorld());
+		//GetMapMgr().PossessPlayer(GetWorld());
 
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 
@@ -175,7 +175,7 @@ void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 	XRLOG(Warning, TEXT("NotifyStartLevel"));
 	GetMapMgr().PlayerListSpawn(GetWorld());
 	GetMapMgr().MonsterListSpawn(GetWorld());
-	GetMapMgr().PossessPlayer(GetWorld());
+	//GetMapMgr().PossessPlayer(GetWorld());
 
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
 

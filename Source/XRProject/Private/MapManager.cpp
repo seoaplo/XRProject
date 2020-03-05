@@ -332,6 +332,18 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 
 		UXRGameInstance* GI = Cast<UXRGameInstance>(Player->GetWorld()->GetGameInstance());
 
+		if (Player)
+		{
+			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
+			if (CheckPlayer != nullptr)
+			{
+				Player->Destroy();
+				continue;
+			}
+			if (Player->PlayerStatComp == nullptr) continue;
+			CharacterList.Add(CurrentData.ObjectID, Player);
+		}
+
 		if (CurrentData.ObjectID != PlayerID)
 		{
 			Player->InitializeCharacter(false, CurrentData);
@@ -350,18 +362,7 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			}
 
 			Player->InitializeCharacter(true, CurrentData);
-		}
-
-		if (Player)
-		{
-			APlayerCharacter** CheckPlayer = CharacterList.Find(CurrentData.ObjectID);
-			if (CheckPlayer != nullptr)
-			{
-				Player->Destroy();
-				continue;
-			}
-			if (Player->PlayerStatComp == nullptr) continue;
-			CharacterList.Add(CurrentData.ObjectID, Player);
+			PossessPlayer(World);
 		}
 	}
 	CharacterDataList.clear();
