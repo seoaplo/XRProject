@@ -868,7 +868,7 @@ void APlayerCharacter::Roll()
 
 void APlayerCharacter::Sprint()
 {
-	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit || bIsKnockBackMoving)
 		return;
 
 	bIsSprint = true;
@@ -1241,6 +1241,10 @@ void APlayerCharacter::OnDead()
 
 	SetCharacterLifeState(ECharacterLifeState::DEAD);
 	bIsCharacterDead = true;
+
+	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	GetMesh()->SetGenerateOverlapEvents(false);
+
 
 	FString DeadStr = "Dead";
 	int32 idx = CurGameInstance->GetSoundIdxByName(DeadStr);
