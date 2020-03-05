@@ -367,8 +367,16 @@ void APlayerCharacter::Tick(float deltatime)
 	Equipments.WeaponComponent->SetRelativeScale3D(WeaponScaleVector);
 	NameTag->SetRelativeLocation(NameTagLocation);
 	
-	if (bIsRolling || bIsAttackMoving || bIsSkillMove)
+	if (bIsRolling || bIsSkillMove)
+	{
 		AddMovementInput(GetActorForwardVector(), 1.0f, false);
+	}
+	UAnimMontage* Montage = MyAnimInstance->GetCurrentActiveMontage();
+	if (bIsAttackMoving && Montage == MyAnimInstance->AttackMontage)
+	{
+		AddMovementInput(GetActorForwardVector(), 1.0f, false);
+	}
+
 	if(bIsKnockBackMoving)
 	{
 		FVector vVec = KnockBackVector;
@@ -709,8 +717,6 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundComp->Sound, GetActorLocation(),
 		1.0f, 1.0f, 0.0f, Attenuation);
 	
-	DamageEvent.bIntensity = true;
-
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
 
@@ -1153,7 +1159,6 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	}
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
-		XRLOG(Error, TEXT("MONTAGE _HIT ENDEDDDDDD"));
 		bIsHit = false;
 		SetbIsInvisible(false);
 
@@ -1223,10 +1228,14 @@ void APlayerCharacter::ContinueCombo()
 
 void APlayerCharacter::StartMoveAttack()
 {
+	
+
 	bIsAttackMoving = true;
 	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.WeaponComponent->SetGenerateOverlapEvents(true);
+
+
 }
 void APlayerCharacter::EndMoveAttack()
 {
