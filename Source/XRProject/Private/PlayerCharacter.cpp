@@ -1269,7 +1269,7 @@ void APlayerCharacter::OnDead()
 
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetGenerateOverlapEvents(false);
-
+	HitCapsule->SetGenerateOverlapEvents(false);
 
 	FString DeadStr = "Dead";
 	int32 idx = CurGameInstance->GetSoundIdxByName(DeadStr);

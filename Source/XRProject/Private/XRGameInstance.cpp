@@ -532,6 +532,8 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 
 	if (!TargetPlayer || !(MapManager->GetPlayer()))
 		return;
+	if (TargetPlayer->GetCharacterLifeState() == ECharacterLifeState::DEAD)
+		return;
 
 	if (TargetPlayer == MapManager->GetPlayer())
 	{
