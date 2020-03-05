@@ -456,6 +456,8 @@ void APlayerCharacter::BeginPlay()
 	Attenuation->Attenuation.FalloffDistance = 1500;
 	Attenuation->Attenuation.SpatializationAlgorithm = ESoundSpatializationAlgorithm::SPATIALIZATION_HRTF;
 	Attenuation->Attenuation.AttenuationShape = EAttenuationShape::Capsule;
+
+	SetCharacterLifeState(ECharacterLifeState::ALIVE);
 	//ChangePartsById(EPartsType::HAIR, 110);
 	//ChangePartsById(EPartsType::FACE, 120);
 }
