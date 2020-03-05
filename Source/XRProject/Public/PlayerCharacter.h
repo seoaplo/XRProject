@@ -316,9 +316,6 @@ public:
 	void LockCharacterMove(bool Lock); 
 	void AddLocationSyncFailCount(); //PathFinding 조건 카운트 : 미사용
 
-	UParticleSystemComponent* GetParticleComponentByName(FString FindStr);
-	UNickNameWidget* GetNickNameWidget();
-
 
 	/*Test Function*/
 	void TestPlay();
