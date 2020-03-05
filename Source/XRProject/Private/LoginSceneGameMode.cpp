@@ -19,7 +19,7 @@ void ALoginSceneGameMode::BeginPlay()
 	GetNetMgr().GetPacketReceiveDelegate(ENetworkSCOpcode::kLoginResult)->BindUObject(
 		this, &ALoginSceneGameMode::HandleLoginResult);
 
-	GetNetMgr().Connect("192.168.0.118", 8181, nullptr);
+	GetNetMgr().Connect("192.168.0.27", 8181, nullptr);
 }
 
 void ALoginSceneGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
