@@ -385,10 +385,10 @@ void APlayerCharacter::Tick(float deltatime)
 	float CurVelocity = GetCharacterMovement()->Velocity.Size();
 	float DensityValue = CurVelocity / 750.f * 2.0f;
 
-	if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling && !bIsKnockBackMoving)
-		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
-	else
-		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
+//if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling && !bIsKnockBackMoving)
+//	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
+//else
+//	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
 
 }
 
@@ -805,7 +805,7 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-	AttackOverlapList.clear(); //Overlap list 초기화
+	//AttackOverlapList.clear(); //Overlap list 초기화
 
 }
 
@@ -1046,7 +1046,7 @@ void APlayerCharacter::TestInitialize()
 	bInitialized = true;
 	bIsPlayer = true;
 	bIsTestMode = true;
-	bIsMale = false;
+	bIsMale = true;
 
 	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
@@ -1085,7 +1085,7 @@ void APlayerCharacter::TestInitialize()
 	//UBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
 
 	MyAnimInstance->SetOwnerCharacter(this);
-	bIsMale = false;
+	bIsMale = true;
 	if (bIsMale)
 	{
 		const int32 kMalePrimaryBody = 130;
@@ -1211,6 +1211,7 @@ void APlayerCharacter::ContinueCombo()
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
 	}
+	AttackOverlapList.clear(); //Overlap list 초기화
 }
 
 void APlayerCharacter::StartMoveAttack()
@@ -1302,6 +1303,26 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 
 					int32 Rand = FMath::RandRange(0, 4);
 					FString HitSound;
+
+
+
+					UAnimMontage* CurrentAttackMontage = MyAnimInstance->GetCurrentActiveMontage();
+					MyAnimInstance->Montage_Pause(CurrentAttackMontage);
+					FTimerHandle thandle;
+					FTimerDelegate lamb;
+					lamb.BindLambda([this, CurrentAttackMontage](){
+						MyAnimInstance->Montage_Resume(CurrentAttackMontage);
+						bIsAttackMoving = true;
+					});
+					GetWorld()->GetTimerManager().SetTimer(thandle, lamb, 0.3f,false);
+					bIsAttackMoving = false;
+
+					if (MyShake)
+					{
+						auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+						Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
+					}
+					
 
 					switch (Rand)
 					{
