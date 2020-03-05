@@ -373,8 +373,7 @@ void APlayerCharacter::Tick(float deltatime)
 	{
 		FVector vVec = KnockBackVector;
 		AddMovementInput(vVec, 1.0f, false);
-		XRLOG(Warning, TEXT("Kn : %d  / Hit : %d / AttMov : %d // KnockbackMvoe : %d"), bIsKnockBackMoving, bIsHit, bIsAttackMoving,
-			bIsKnockBackMoving);
+		//XRLOG(Warning, TEXT("Kn : %d  / Hit : %d / AttMov : %d // KnockbackMvoe : %d"), bIsKnockBackMoving, bIsHit, bIsAttackMoving, bIsKnockBackMoving);
 	}
 
 	if (bIsAttackMoving)
@@ -464,7 +463,7 @@ void APlayerCharacter::MoveForward(float Value)
 		if (bInitialized == false)
 			check(false);
 
-		XRLOG(Warning, TEXT("ForwardMove : Kn : %d  Hit : %d"), bIsKnockBackMoving, bIsHit);
+		//XRLOG(Warning, TEXT("ForwardMove : Kn : %d  Hit : %d"), bIsKnockBackMoving, bIsHit);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
@@ -483,7 +482,7 @@ void APlayerCharacter::MoveRight(float Value)
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
 
-		XRLOG(Warning, TEXT("RightMove : Kn : %d  Hit : %d"), bIsKnockBackMoving, bIsHit);
+		//XRLOG(Warning, TEXT("RightMove : Kn : %d  Hit : %d"), bIsKnockBackMoving, bIsHit);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 

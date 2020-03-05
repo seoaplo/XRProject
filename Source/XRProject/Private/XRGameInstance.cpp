@@ -543,7 +543,12 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 			TargetPlayer->PlayerStatComp->SetCurrentHP(NewHP);
 		}
 		if (flag & ToINT64(StatBit::kMaxHp))
-			TargetPlayer->PlayerStatComp->SetMaxHP(input.ReadInt32());
+		{
+			int MaxHP = input.ReadInt32();
+			if (UHealthBarWidget::GetInatance() != nullptr)
+				UHealthBarWidget::GetInatance()->SetMaxHp(MaxHP);
+			TargetPlayer->PlayerStatComp->SetMaxHP(MaxHP);
+		}
 		if (flag & ToINT64(StatBit::kAttackMin))
 			TargetPlayer->PlayerStatComp->SetAttack_Min(input.ReadInt32());
 		if (flag & ToINT64(StatBit::kAttackMax))
@@ -570,11 +575,21 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 				UExpBar::GetInstance()->SetCurrentExp(NewExp);
 		}
 		if (flag & ToINT64(StatBit::kMaxExp))
-			TargetPlayer->PlayerStatComp->SetMaxExp(input.ReadInt32());
+		{
+			int32 MaxExp = input.ReadInt32();
+			TargetPlayer->PlayerStatComp->SetMaxExp(MaxExp);
+			if (UExpBar::GetInstance() != nullptr)
+				UExpBar::GetInstance()->SetMaxExp(MaxExp);
+		}
 		if (flag & ToINT64(StatBit::kStamina))
 			TargetPlayer->PlayerStatComp->SetCurrentStamina(input.ReadInt32());
 		if (flag & ToINT64(StatBit::kMaxStamina))
-			TargetPlayer->PlayerStatComp->SetMaxStamina(input.ReadInt32());
+		{
+			int32 MaxStamina = input.ReadInt32();
+			TargetPlayer->PlayerStatComp->SetMaxStamina(MaxStamina);
+			if (UHealthBarWidget::GetInatance() != nullptr)
+				UHealthBarWidget::GetInatance()->SetMaxStamina(MaxStamina);
+		}
 
 		//READ_STAT_BIT(StatBit::kHP, SetCurrentHP);
 		//READ_STAT_BIT(StatBit::kMaxHp, SetMaxHP);
