@@ -3,6 +3,7 @@
 #include "AccountManager.h"
 #include "XRGameInstance.h"
 #include "ChatingManager.h"
+#include "NickNameWidget.h"
 #include "InputStream.h"
 #include <functional>
 #include <locale>
@@ -224,8 +225,11 @@ void ACharacterSelectSceneGameMode::HandleCharacterList(InputStream& input)
 
 		APlayerCharacter* Character = GetWorld()->SpawnActor<APlayerCharacter>(APlayerCharacter::StaticClass(),
 			CharacterActorLocation, FRotator(0.0f, -200.0f, 0.0f));
-
+				
 		Character->InitializeCharacter(false, InitData);
+		UNickNameWidget* Widget =  Character->GetNickNameWidget();
+		Widget->SetVisibility(ESlateVisibility::Hidden);
+
 		Character->SetActorEnableCollision(false);
 
 		CreatePlayerCharacter(Character, Info);
@@ -282,6 +286,9 @@ void ACharacterSelectSceneGameMode::HandleCharacterCreate(InputStream & input)
 	InitData.Gender = 0;
 
 	Character->InitializeCharacter(false, InitData);
+	UNickNameWidget* Widget = Character->GetNickNameWidget();
+	Widget->SetVisibility(ESlateVisibility::Hidden);
+
 	Character->SetActorEnableCollision(false);
 
 	CreatePlayerCharacter(Character, Info);

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PlayerCharacter.h"
 #include "ItemManager.h"
@@ -56,7 +56,7 @@ APlayerCharacter::APlayerCharacter()
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
 
-	/* ê°ì¢… Sizeê´€???¤ì •??*/
+	/* ê°ì¢… Sizeê´€???ï¿½ì •??*/
 	ScaleVector = FVector(3.85f, 3.85f, 3.85f);
 	CapsuleSize = FVector2D(90.0f, 34.0f);
 	RollingHitCapsuleSize = FVector2D(45.0f, 34.0f);
@@ -64,7 +64,7 @@ APlayerCharacter::APlayerCharacter()
 	WeaponScaleVector = FVector(0.4f, 0.4f, 0.4f);
 	RollingCapsuleOffset = 45.0f;
 
-	/*HitCapsule(?ˆíŠ¸ë°•ìŠ¤ ?©ë„??ìº¡ìŠ)*/
+	/*HitCapsule(?ï¿½íŠ¸ë°•ìŠ¤ ?ï¿½ë„??ìº¡ìŠ)*/
 	HitCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("HitCapsule"));
 	HitCapsule->SetVisibility(false);
 	HitCapsule->bHiddenInGame = true;
@@ -91,9 +91,9 @@ APlayerCharacter::APlayerCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
-	bUseControllerRotationYaw = false; //ÄÁÆ®·Ñ·¯ ·ÎÅ×ÀÌ¼Ç¿¡ µû¶ó Ä³¸¯ÅÍ°¡ È¸ÀüÇÏ´Â bool. ÇØÁ¦ÇØ¾ß ÀÓÀÇ·Î È¸Àü½ÃÅ³ ¼ö ÀÖÀ½.
-	bUseControllerRotationPitch = false; //ÄÁÆ®·Ñ·¯ ·ÎÅ×ÀÌ¼Ç¿¡ µû¶ó Ä³¸¯ÅÍ°¡ È¸ÀüÇÏ´Â bool. ÇØÁ¦ÇØ¾ß ÀÓÀÇ·Î È¸Àü½ÃÅ³ ¼ö ÀÖÀ½.
-	bUseControllerRotationRoll = false; //ÄÁÆ®·Ñ·¯ ·ÎÅ×ÀÌ¼Ç¿¡ µû¶ó Ä³¸¯ÅÍ°¡ È¸ÀüÇÏ´Â bool. ÇØÁ¦ÇØ¾ß ÀÓÀÇ·Î È¸Àü½ÃÅ³ ¼ö ÀÖÀ½.
+	bUseControllerRotationYaw = false; //ì»¨íŠ¸ë¡¤ëŸ¬ ë¡œí…Œì´ì…˜ì— ë”°ë¼ ìºë¦­í„°ê°€ íšŒì „í•˜ëŠ” bool. í•´ì œí•´ì•¼ ì„ì˜ë¡œ íšŒì „ì‹œí‚¬ ìˆ˜ ìˆìŒ.
+	bUseControllerRotationPitch = false; //ì»¨íŠ¸ë¡¤ëŸ¬ ë¡œí…Œì´ì…˜ì— ë”°ë¼ ìºë¦­í„°ê°€ íšŒì „í•˜ëŠ” bool. í•´ì œí•´ì•¼ ì„ì˜ë¡œ íšŒì „ì‹œí‚¬ ìˆ˜ ìˆìŒ.
+	bUseControllerRotationRoll = false; //ì»¨íŠ¸ë¡¤ëŸ¬ ë¡œí…Œì´ì…˜ì— ë”°ë¼ ìºë¦­í„°ê°€ íšŒì „í•˜ëŠ” bool. í•´ì œí•´ì•¼ ì„ì˜ë¡œ íšŒì „ì‹œí‚¬ ìˆ˜ ìˆìŒ.
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, RotateSpeed, 0.0f);
@@ -384,10 +384,10 @@ void APlayerCharacter::Tick(float deltatime)
 	float CurVelocity = GetCharacterMovement()->Velocity.Size();
 	float DensityValue = CurVelocity / 750.f * 2.0f;
 
-	if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling && !bIsKnockBackMoving)
-		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
-	else
-		DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
+//if(CurVelocity > kNormalMovementSpeed + 1.1f && !bIsRolling && !bIsKnockBackMoving)
+//	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), DensityValue);
+//else
+//	DynamicBlurMaterial->SetScalarParameterValue(TEXT("Density"), 1.0f);
 
 }
 
@@ -496,7 +496,7 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 
 	if (Type == EPartsType::HAIR)
 	{
-		//Çì¾îÆÄÃ÷
+		//í—¤ì–´íŒŒì¸ 
 		FSoftObjectPath HairAssetPath = nullptr;
 		HairAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate HairAssetLoadDelegate;
@@ -506,7 +506,7 @@ void APlayerCharacter::ChangePartsById(EPartsType Type, int32 ID)
 	}
 	else if (Type == EPartsType::FACE)
 	{
-		//ÆäÀÌ½º ÆÄÃ÷
+		//í˜ì´ìŠ¤ íŒŒì¸ 
 		FSoftObjectPath FaceAssetPath = nullptr;
 		FaceAssetPath = CurGameInstance->GetXRAssetMgr()->FindResourceFromDataTable(PartResourceTable->ResourceID);
 		FStreamableDelegate FaceAssetLoadDelegate;
@@ -575,7 +575,7 @@ void APlayerCharacter::ChangeEquipment(UItem* Item, USkeletalMesh* SkMesh)
 		break;
 	}
 }
-/*?„ì´??ë©”ì‹œë¥??¬í•¨?˜ì? ?Šê³ , ?•ë³´ë§??¼ë‹¨ ?…ë°?´íŠ¸?˜ëŠ” ?¨ìˆ˜*/
+/*?ï¿½ì´??ë©”ì‹œï¿½??ï¿½í•¨?ï¿½ï¿½? ?ï¿½ê³ , ?ï¿½ë³´ï¿½??ï¿½ë‹¨ ?ï¿½ë°?ï¿½íŠ¸?ï¿½ëŠ” ?ï¿½ìˆ˜*/
 void APlayerCharacter::PseudoChangeEquipmentWithoutMesh(UItem* Item)
 {
 	UItemEquipment* EquipItem = Cast<UItemEquipment>(Item);
@@ -624,7 +624,7 @@ void APlayerCharacter::ChangeEquipment(UItem* Item, UStaticMesh* SmMesh)
 	Equipments.WeaponComponent->SetStaticMesh(SmMesh);
 }
 
-//?Œì¸  : ?¤ì–´, ?¼êµ´, ?„ë“œ ë°”ë””,?¸ë“œ, ?ˆê·¸(?„ë“œê°€ ?„ë‹ˆë©??¥ë¹„ë¡?ë¶„ë¥˜)
+//?ï¿½ì¸  : ?ï¿½ì–´, ?ï¿½êµ´, ?ï¿½ë“œ ë°”ë””,?ï¿½ë“œ, ?ï¿½ê·¸(?ï¿½ë“œê°€ ?ï¿½ë‹ˆï¿½??ï¿½ë¹„ï¿½?ë¶„ë¥˜)
 void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPath PartAsset)
 {
 	TSoftObjectPtr<USkeletalMesh> LoadedMesh(PartAsset);
@@ -645,7 +645,7 @@ void APlayerCharacter::ChangePartsComponentsMesh(EPartsType Type, FSoftObjectPat
 	{
 		Equipments.BodyItem = nullptr;
 		Equipments.BodyComponent->SetSkeletalMesh(LoadedMesh.Get()); 
-		//bodyê°€ ë§ˆìŠ¤?°í¬ì¦ˆì´ê¸??Œë¬¸?? ë°”ë””ë¥?ë°”ê¾¸ë©??˜ë¨¸ì§€ ì»´í¬?ŒíŠ¸(ë°”ë””ë¥?ë§ˆìŠ¤?°ë¡œ ???¤ë„ ?¤ì‹œ ê°™ì?ê±¸ë¡œ ?¬ì ?©í•´ì¤˜ì•¼ ?œë‹¤.(ë§ˆìŠ¤??ë³?ê°€ì¤‘ì¹˜ ?¤ë¥˜)
+		//bodyê°€ ë§ˆìŠ¤?ï¿½í¬ì¦ˆì´ï¿½??ï¿½ë¬¸?? ë°”ë””ï¿½?ë°”ê¾¸ï¿½??ï¿½ë¨¸ì§€ ì»´í¬?ï¿½íŠ¸(ë°”ë””ï¿½?ë§ˆìŠ¤?ï¿½ë¡œ ???ï¿½ë„ ?ï¿½ì‹œ ê°™ï¿½?ê±¸ë¡œ ?ï¿½ì ?ï¿½í•´ì¤˜ì•¼ ?ï¿½ë‹¤.(ë§ˆìŠ¤??ï¿½?ê°€ì¤‘ì¹˜ ?ï¿½ë¥˜)
 		Equipments.LegsComponent->SetSkeletalMesh(nullptr);
 		Equipments.LegsComponent->SetSkeletalMesh(LegMesh);
 		Equipments.HandsComponent->SetSkeletalMesh(nullptr);
@@ -711,6 +711,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		ForceSkillStop();
 		ForceAttackStop();
 		ForceRollStop();
+		ForceKnockbackStop();
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
 		ComboCount = 1;
@@ -733,12 +734,13 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		ForceSkillStop();
 		ForceAttackStop();
 		ForceRollStop();
+		ForceKnockbackStop();
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
 	}
-	else //°ø°İ Áß, ½ºÅ³ Áß...
+	else //ê³µê²© ì¤‘, ìŠ¤í‚¬ ì¤‘...
 	{
 		bIsHit = false;
 	}
@@ -750,7 +752,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
 	}
 
-	/*µ¿ÀÛ Ãë¼Ò Ã³¸®*/
+	/*ë™ì‘ ì·¨ì†Œ ì²˜ë¦¬*/
 	bIsSprint = false;
 	bIsMove = false;
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -784,7 +786,7 @@ void APlayerCharacter::Attack()
 	//first
 	if (bIsAttack == false)
 	{
-		AttackNextRotation = GetActorRotation(); //°ø°İ ½ÃÀÛ½Ã¿¡, ¾×ÅÍ·ÎÄÉÀÌ¼Ç°ú Next·ÎÅ×ÀÌ¼ÇÀ» µ¿ÀÏÇÏ°Ô ¸ÂÃã
+		AttackNextRotation = GetActorRotation(); //ê³µê²© ì‹œì‘ì‹œì—, ì•¡í„°ë¡œì¼€ì´ì…˜ê³¼ Nextë¡œí…Œì´ì…˜ì„ ë™ì¼í•˜ê²Œ ë§ì¶¤
 
 		bIsAttack = true;
 		ForceKnockbackStop();
@@ -804,7 +806,7 @@ void APlayerCharacter::Attack()
 	else
 		bSavedCombo = true;
 
-	AttackOverlapList.clear(); //Overlap list ÃÊ±âÈ­
+	//AttackOverlapList.clear(); //Overlap list ì´ˆê¸°í™”
 
 }
 
@@ -818,7 +820,7 @@ void APlayerCharacter::Roll()
 	if (PlayerStatComp->GetCurrentStamina() < kRollStamina)
 		return;
 
-	//ÈÄµô·¹ÀÌ µ¿ÀÛ¿¡¼­ ±¸¸£´ÂÁö Ã¼Å©
+	//í›„ë”œë ˆì´ ë™ì‘ì—ì„œ êµ¬ë¥´ëŠ”ì§€ ì²´í¬
 	if (bIsAttack)
 	{
 		FName CurrentSectionName = MyAnimInstance->Montage_GetCurrentSection(MyAnimInstance->AttackMontage);
@@ -838,6 +840,7 @@ void APlayerCharacter::Roll()
 	ForceSkillStop();
 	ForceKnockbackStop();
 	ForceAttackStop();
+	bIsSprint = false;
 
 	bool bArrowKeyNotPressed = false;
 
@@ -891,7 +894,7 @@ void APlayerCharacter::SprintEnd()
 	bIsSprint = false;
 }
 
-/* ìºë¦­??ì´ˆê¸°?? ë°˜ë“œ??ìºë¦­???¬ìš©?„ì— ?¸ì¶œ?´ì•¼ ?˜ë©°, bInitialziedë¥?trueë¡?ë§Œë“¤?´ì•¼ ?¬ìš©?????ˆìŒ. */
+/* ìºë¦­??ì´ˆê¸°?? ë°˜ë“œ??ìºë¦­???ï¿½ìš©?ï¿½ì— ?ï¿½ì¶œ?ï¿½ì•¼ ?ï¿½ë©°, bInitialziedï¿½?trueï¿½?ë§Œë“¤?ï¿½ì•¼ ?ï¿½ìš©?????ï¿½ìŒ. */
 void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterData& Data)
 {
 	bInitialized = true;
@@ -942,7 +945,9 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 		MyAnimInstance->Delegate_CharacterAttackMoveEnd.BindUFunction(this, FName("EndMoveAttack"));
 		MyAnimInstance->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMyMontageEnded);
 		UHealthBarWidget::GetInatance()->SetMaxHp(PlayerStatComp->GetMaxHP());
+		UHealthBarWidget::GetInatance()->ApplyHp(PlayerStatComp->GetCurrentHP());
 		UExpBar::GetInstance()->SetMaxExp(PlayerStatComp->GetMaxExp());
+		UExpBar::GetInstance()->SetCurrentExp(PlayerStatComp->GetCurrentExp());
 	}
 	else
 	{
@@ -971,7 +976,7 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 
 	for (int ii = 0; ii < Data.kEquipmentArraySize; ii++)
 	{
-		/*¸Ç¸öÀÏ ¶§ */
+		/*ë§¨ëª¸ì¼ ë•Œ */
 		if (Data.EquipArray[ii].ID == -1)
 		{
 
@@ -1022,12 +1027,12 @@ void APlayerCharacter::InitializeCharacter(bool bIsPlayerCharacter, CharacterDat
 	}
 
 
-	UNickNameWidget* NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
+	NickNameWidget = CreateWidget<UNickNameWidget>(GetWorld(), UNickNameWidget::StaticClass());
 	if (NickNameWidget)
 	{
 		NickNameWidget->SettingName(this->PlayerStatComp->GetCharacterName());
 		NickNameWidget->SettingLevel(this->PlayerStatComp->GetLevel());
-		NickNameWidget->SettingTitle(TEXT("Title Sample"));
+		NickNameWidget->SettingTitle(TEXT("ì´ˆë³´ì"));
 		NameTag->SetWidget(NickNameWidget);
 	}
 	NameTag->SetRelativeLocation(NameTagLocation);
@@ -1042,7 +1047,7 @@ void APlayerCharacter::TestInitialize()
 	bInitialized = true;
 	bIsPlayer = true;
 	bIsTestMode = true;
-	bIsMale = false;
+	bIsMale = true;
 
 	auto MyGameInstance = Cast<UXRGameInstance>(GetGameInstance());
 
@@ -1201,7 +1206,8 @@ void APlayerCharacter::ContinueCombo()
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
 	}
-	AttackOverlapList.clear(); //Overlap list ì´ˆê¸°??
+
+	AttackOverlapList.clear(); //Overlap list ì´ˆê¸°í™”
 
 }
 
@@ -1299,6 +1305,26 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 					int32 Rand = FMath::RandRange(0, 4);
 					FString HitSound;
 
+
+
+					UAnimMontage* CurrentAttackMontage = MyAnimInstance->GetCurrentActiveMontage();
+					MyAnimInstance->Montage_Pause(CurrentAttackMontage);
+					FTimerHandle thandle;
+					FTimerDelegate lamb;
+					lamb.BindLambda([this, CurrentAttackMontage](){
+						MyAnimInstance->Montage_Resume(CurrentAttackMontage);
+						bIsAttackMoving = true;
+					});
+					GetWorld()->GetTimerManager().SetTimer(thandle, lamb, 0.3f,false);
+					bIsAttackMoving = false;
+
+					if (MyShake)
+					{
+						auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
+						Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
+					}
+					
+
 					switch (Rand)
 					{
 					case 0:
@@ -1357,20 +1383,20 @@ bool APlayerCharacter::GetIsTestMode()
 	return bIsTestMode;
 }
 
-//±¸¸¦¶§ ¸ğµå ¼³Á¤. Ä¸½¶»Ó¾Æ´Ï¶ó ÀÌµ¿¼Óµµµµ °üÀåÇÔ
+//êµ¬ë¥¼ë•Œ ëª¨ë“œ ì„¤ì •. ìº¡ìŠë¿ì•„ë‹ˆë¼ ì´ë™ì†ë„ë„ ê´€ì¥í•¨
 void APlayerCharacter::SetRollingCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(RollingHitCapsuleSize.X);
 	HitCapsule->SetCapsuleRadius(RollingHitCapsuleSize.Y);
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation() + FVector(0.0f, 0.0f, -RollingCapsuleOffset));
 
-	/* ¼Óµµ ¼³Á¤ */
+	/* ì†ë„ ì„¤ì • */
 	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kRollingMovementSpeed;
 
 }
 
-//±¸¸¥ µÚ¿¡ ¸ğµå ¼³Á¤. Ä¸½¶»Ó¾Æ´Ï¶ó ÀÌµ¿¼Óµµµµ °üÀåÇÔ
+//êµ¬ë¥¸ ë’¤ì— ëª¨ë“œ ì„¤ì •. ìº¡ìŠë¿ì•„ë‹ˆë¼ ì´ë™ì†ë„ë„ ê´€ì¥í•¨
 void APlayerCharacter::SetNormalCapsuleMode()
 {
 	HitCapsule->SetCapsuleHalfHeight(GetNormalCapsuleSize().X);
@@ -1378,12 +1404,12 @@ void APlayerCharacter::SetNormalCapsuleMode()
 	//HitCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, RollingCapsuleOffset));
 	HitCapsule->SetWorldLocation(GetCapsuleComponent()->GetComponentLocation());
 
-	/*¼Óµµ ¼³Á¤*/
+	/*ì†ë„ ì„¤ì •*/
 	GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
-/* ë°©í–¥?¤ì— ?°ë¥¸ 8ë°©í–¥ êµ¬ë¥´ê¸?*/
+/* ë°©í–¥?ï¿½ì— ?ï¿½ë¥¸ 8ë°©í–¥ êµ¬ë¥´ï¿½?*/
 float APlayerCharacter::GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed)
 {
 	float Yaw = 0.0f;
@@ -1656,6 +1682,11 @@ UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString 
 
 	check(false);
 	return nullptr;
+}
+
+UNickNameWidget * APlayerCharacter::GetNickNameWidget()
+{
+	return NickNameWidget;
 }
 
 FComboSocket APlayerCharacter::GetComboSocket()

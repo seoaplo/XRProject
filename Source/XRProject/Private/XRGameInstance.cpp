@@ -465,6 +465,10 @@ void UXRGameInstance::CharacterSprint(InputStream& input)
 
 	if (TargetPlayer != MapManager->GetPlayer())
 	{
+		TargetPlayer->ForceRollStop();
+		TargetPlayer->ForceAttackStop();
+		TargetPlayer->ForceKnockbackStop();
+
 		TargetPlayer->bIsSprint = true;
 		TargetPlayer->GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
 		UE_LOG(LogTemp, Warning, TEXT("CharacterSprint Received"));
@@ -526,8 +530,9 @@ void UXRGameInstance::CharacterStatChange(InputStream & input)
 	int64 flag = input.ReadInt64();
 	int32 val = 0;
 
-	if (!TargetPlayer)
+	if (!TargetPlayer || !(MapManager->GetPlayer()))
 		return;
+
 	if (TargetPlayer == MapManager->GetPlayer())
 	{
 		if (flag & ToINT64(StatBit::kHP))
