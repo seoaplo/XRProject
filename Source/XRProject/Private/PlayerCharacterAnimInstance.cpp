@@ -153,29 +153,29 @@ void UPlayerCharacterAnimInstance::AnimNotify_RemoteRollingAllEnd()
 }
 void UPlayerCharacterAnimInstance::PlayAttackMontage()
 {
-	float ret = Montage_Play(AttackMontage, 1.f);
+	float ret = Montage_Play(AttackMontage, 1.0f);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
 }
 
 void UPlayerCharacterAnimInstance::PlayAttackOnlyPlayMontage()
 {
-	float ret = Montage_Play(AttackMontageOnlyPlay, 1.f);
+	float ret = Montage_Play(AttackMontageOnlyPlay, 1.0f);
 }
 
 void UPlayerCharacterAnimInstance::PlayMoveOnlyPlayMontage()
 {
-	float ret = Montage_Play(MoveMontageOnlyPlay, 1.f);
+	float ret = Montage_Play(MoveMontageOnlyPlay, 1.0f);
 }
 
 void UPlayerCharacterAnimInstance::PlayHitMontage()
 {
-	float ret = Montage_Play(HitMontage, 1.f);
+	float ret = Montage_Play(HitMontage, 1.0f);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
 }
 
 void UPlayerCharacterAnimInstance::PlayRollMontage()
 {
-	float ret = Montage_Play(RollMontage, 1.f);
+	float ret = Montage_Play(RollMontage, 1.0f);
 	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
 }
 
@@ -197,7 +197,7 @@ void UPlayerCharacterAnimInstance::JumpToMoveMontageSection(FString Section)
 
 void UPlayerCharacterAnimInstance::PlaySkillMontage()
 {
-	float ret = Montage_Play(SkillMontage, 1.f);
+	float ret = Montage_Play(SkillMontage, 1.0f);
 }
 
 void UPlayerCharacterAnimInstance::JumpToSkillMonatgeSection(FString Section)

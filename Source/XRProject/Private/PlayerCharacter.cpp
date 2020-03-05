@@ -337,7 +337,7 @@ void APlayerCharacter::Tick(float deltatime)
 				out << GetActorRotation();
 				out.CompletePacketBuild();
 				GetNetMgr().SendPacket(out);
-
+				
 				bIsMove = true;
 			}
 			else
@@ -373,6 +373,8 @@ void APlayerCharacter::Tick(float deltatime)
 	{
 		FVector vVec = KnockBackVector;
 		AddMovementInput(vVec, 1.0f, false);
+		XRLOG(Warning, TEXT("Kn : %d  / Hit : %d / AttMov : %d // KnockbackMvoe : %d"), bIsKnockBackMoving, bIsHit, bIsAttackMoving,
+			bIsKnockBackMoving);
 	}
 
 	if (bIsAttackMoving)
@@ -462,6 +464,7 @@ void APlayerCharacter::MoveForward(float Value)
 		if (bInitialized == false)
 			check(false);
 
+		XRLOG(Warning, TEXT("ForwardMove : Kn : %d  Hit : %d"), bIsKnockBackMoving, bIsHit);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
@@ -479,6 +482,8 @@ void APlayerCharacter::MoveRight(float Value)
 
 	if ((Controller != NULL) && (Value != 0.0f))
 	{
+
+		XRLOG(Warning, TEXT("RightMove : Kn : %d  Hit : %d"), bIsKnockBackMoving, bIsHit);
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
@@ -685,7 +690,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		return -1.0f;
 
 	PlayerStatComp->SetCurrentHP(Damage);
-	bIsHit = true;
+
 	
 	
 	int32 Rand = FMath::RandRange(0, 1);
@@ -705,26 +710,36 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundComp->Sound, GetActorLocation(),
 		1.0f, 1.0f, 0.0f, Attenuation);
 	
+	DamageEvent.bIntensity = true;
+
+	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Equipments.WeaponComponent->SetGenerateOverlapEvents(false);
+
 	if (DamageEvent.bIntensity == true)
 	{
-		SetbIsInvisible(true);  
+		SetbIsInvisible(true);
+		bIsAttackMoving = false;
+		SetbIsKnockBackMoving(true);
 		ForceSkillStop();
 		ForceAttackStop();
 		ForceRollStop();
-		ForceKnockbackStop();
+
+		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
+		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
+
+
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
 		ComboCount = 1;
 		bSavedCombo = false;
-		SetbIsKnockBackMoving(true);
 		
-		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
-		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
-		
+		//위치(Play Montage 뒤에 위치해야, Hit이 안 꼬임)
+		bIsHit = true;
+
 		FVector VecToTarget = NPC->GetActorLocation() - GetActorLocation();
 		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
-		AgainstMonster = FRotator(0.0f, (FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+		AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
 		SetActorRotation(AgainstMonster);
 		KnockBackVector = -VecToTarget;
 	}
@@ -734,16 +749,17 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		ForceSkillStop();
 		ForceAttackStop();
 		ForceRollStop();
-		ForceKnockbackStop();
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("SmallHit")));
+		bIsHit = true;
 		ComboCount = 1;
 		bSavedCombo = false;
 	}
-	else //공격 중, 스킬 중...
+	else // 스킬 중...
 	{
 		bIsHit = false;
 	}
+
 
 
 	if (MyShake)
@@ -774,25 +790,21 @@ FVector2D APlayerCharacter::GetRollingCapsuleSize()
 
 void APlayerCharacter::Attack()
 {	
-	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit || bIsSkillPlaying)
+	if (bIsOverallRollAnimPlaying|| bIsRolling || bIsHit || bIsSkillPlaying || bIsKnockBackMoving)
 		return;
 
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
 
-	ForceKnockbackStop();
-	ForceSkillStop();
-
 	//first
+	//XRLOG(Error, TEXT("BisHit : %d // KnoMov : %d "), bIsHit, bIsKnockBackMoving);
 	if (bIsAttack == false)
 	{
 		AttackNextRotation = GetActorRotation(); //공격 시작시에, 액터로케이션과 Next로테이션을 동일하게 맞춤
 
 		bIsAttack = true;
-		ForceKnockbackStop();
-		ForceSkillStop();
+		XRLOG(Error, TEXT("ATTACK STARTTTTTT"));
 		MyAnimInstance->PlayAttackMontage();
-
 		OutputStream out;
 		out.WriteOpcode(ENetworkCSOpcode::kCharacterAction);
 		out << ComboCount;
@@ -801,7 +813,6 @@ void APlayerCharacter::Attack()
 		out.CompletePacketBuild();
 		GetNetMgr().SendPacket(out);
 		CurrentAttackID = ComboCount;
-
 	}
 	else
 		bSavedCombo = true;
@@ -814,7 +825,7 @@ void APlayerCharacter::Roll()
 {
 	if (GetCharacterLifeState() == ECharacterLifeState::DEAD)
 		return;
-	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit)
+	if (bIsOverallRollAnimPlaying || bIsSkillPlaying || bIsHit || bIsKnockBackMoving)
 		return;
 
 	if (PlayerStatComp->GetCurrentStamina() < kRollStamina)
@@ -837,8 +848,6 @@ void APlayerCharacter::Roll()
 		bIsAttack = false;
 	}
 
-	ForceSkillStop();
-	ForceKnockbackStop();
 	ForceAttackStop();
 	bIsSprint = false;
 
@@ -1145,7 +1154,9 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	}
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
+		XRLOG(Error, TEXT("MONTAGE _HIT ENDEDDDDDD"));
 		bIsHit = false;
+		SetbIsInvisible(false);
 
 		if (bIsSprint)
 			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
@@ -1305,24 +1316,26 @@ void APlayerCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 					int32 Rand = FMath::RandRange(0, 4);
 					FString HitSound;
 
-
-
-					UAnimMontage* CurrentAttackMontage = MyAnimInstance->GetCurrentActiveMontage();
-					MyAnimInstance->Montage_Pause(CurrentAttackMontage);
-					FTimerHandle thandle;
-					FTimerDelegate lamb;
-					lamb.BindLambda([this, CurrentAttackMontage](){
-						MyAnimInstance->Montage_Resume(CurrentAttackMontage);
-						bIsAttackMoving = true;
-					});
-					GetWorld()->GetTimerManager().SetTimer(thandle, lamb, 0.3f,false);
-					bIsAttackMoving = false;
+					if (!bIsHit)
+					{
+						UAnimMontage* CurrentAttackMontage = MyAnimInstance->GetCurrentActiveMontage();
+						MyAnimInstance->Montage_Pause(CurrentAttackMontage);
+						FTimerHandle thandle;
+						FTimerDelegate lamb;
+						lamb.BindLambda([this, CurrentAttackMontage]() {
+							MyAnimInstance->Montage_Resume(CurrentAttackMontage);
+							bIsAttackMoving = true;
+						});
+						GetWorld()->GetTimerManager().SetTimer(thandle, lamb, 0.3f, false);
+						bIsAttackMoving = false;
+					}
 
 					if (MyShake)
 					{
 						auto CameraShake = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->PlayCameraShake(MyShake, 1.0f);
 						Cast<UPlayerCameraShake>(CameraShake)->SetSmallShakeMode();
 					}
+
 					
 
 					switch (Rand)
@@ -1613,7 +1626,7 @@ void APlayerCharacter::ForceAttackStop()
 {
 	bIsAttack = false;
 	bIsAttackMoving = false;
-	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->AttackMontage);
+	MyAnimInstance->Montage_Stop(0.0f, MyAnimInstance->AttackMontage);
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
@@ -1621,7 +1634,7 @@ void APlayerCharacter::ForceRollStop()
 {
 	bIsRolling = false;
 	bIsOverallRollAnimPlaying = false;
-	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->RollMontage);
+	MyAnimInstance->Montage_Stop(0.0f, MyAnimInstance->RollMontage);
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
@@ -1629,14 +1642,14 @@ void APlayerCharacter::ForceSkillStop()
 {
 	bIsSkillMove = false;
 	bIsSkillPlaying = false;
-	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->SkillMontage);
+	MyAnimInstance->Montage_Stop(0.0f, MyAnimInstance->SkillMontage);
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
 void APlayerCharacter::ForceKnockbackStop()
 {
 	bIsKnockBackMoving = false;
-	MyAnimInstance->Montage_Stop(0.1f, MyAnimInstance->HitMontage);
+	MyAnimInstance->Montage_Stop(0.0f, MyAnimInstance->HitMontage);
 	GetCharacterMovement()->MaxWalkSpeed = kNormalMovementSpeed;
 }
 
@@ -1687,6 +1700,11 @@ UParticleSystemComponent * APlayerCharacter::GetParticleComponentByName(FString 
 UNickNameWidget * APlayerCharacter::GetNickNameWidget()
 {
 	return NickNameWidget;
+}
+
+UCameraComponent * APlayerCharacter::GetCameraComponent()
+{
+	return CameraComponent;
 }
 
 FComboSocket APlayerCharacter::GetComboSocket()

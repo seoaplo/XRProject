@@ -279,7 +279,8 @@ public:
 	void SetRollingCapsuleMode(); //구를때 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	void SetNormalCapsuleMode(); //구른 뒤에 모드 설정. 캡슐뿐아니라 이동속도도 관장함
 	float GetYawFromArrowKeys(float ForwardValue, float RightValue, bool& Out_ArrowKeyPressed);
-	
+	void ToggleMouseCursor();
+
 	/*Setter*/
 	void SetbIsSkillMove(bool b);
 	void SetbIsSkillPlaying(bool b);
@@ -306,6 +307,7 @@ public:
 	bool GetbIsPathFinding();
 	UParticleSystemComponent* GetParticleComponentByName(FString FindStr); //ParticleArray에서 이름으로 호출
 	UNickNameWidget* GetNickNameWidget();
+	UCameraComponent* GetCameraComponent();
 
 
 	/*Force(해당 동작 바로 정지, 모든 관련 변수 초기화)*/
@@ -349,6 +351,7 @@ public:
 		void TestInitialize();
 
 		virtual	void OnDead() override;
+	
 
 private:
 	void MoveForward(float Value);
@@ -359,7 +362,6 @@ private:
 	void Roll();
 	void Sprint();
 	void SprintEnd();
-	void ToggleMouseCursor();
 	void WheelUp();
 	void WheelDown();
 

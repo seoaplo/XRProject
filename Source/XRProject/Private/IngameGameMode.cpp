@@ -58,7 +58,7 @@ void AIngameGameMode::BeginPlay()
 		GetMapMgr().PossessPlayer(GetWorld());
 
 		GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
-
+		GetMapMgr().GetPlayer()->ToggleMouseCursor();
 		CurrentWidget->CharacterInfo->SetSlotInfo();
 
 		if (CurrentWidget->MiniMap != nullptr)
@@ -91,6 +91,8 @@ void AIngameGameMode::BeginPlay()
 		GetWorld()->GetFirstPlayerController()->GetViewportSize(SizeX, SizeY);
 		GetMapMgr().DeleteWidget();
 	}
+
+	
 }
 
 
@@ -178,6 +180,10 @@ void AIngameGameMode::NotifyStartLevel(class InputStream& input)
 	GetMapMgr().PossessPlayer(GetWorld());
 
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+
+	GetMapMgr().GetPlayer()->AddControllerYawInput(105.0f);
+	GetMapMgr().GetPlayer()->SetActorRotation(FRotator(0.0f, -90.0f, 0.0f));
+	GetMapMgr().GetPlayer()->ToggleMouseCursor();
 
 	CurrentWidget->CharacterInfo->SetSlotInfo();
 
