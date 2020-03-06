@@ -120,7 +120,7 @@ void UPlayerSkillManager::AddSkill(UPlayerSkill* Skill, bool bNeedCheckDuplicati
 	{
 		for (UPlayerSkill* CurSkill : SkillListForPlalyer)
 		{
-			if (CurSkill == Skill)
+			if (CurSkill->GetID() == Skill->GetID())
 				return;
 		}
 	}
@@ -129,7 +129,6 @@ void UPlayerSkillManager::AddSkill(UPlayerSkill* Skill, bool bNeedCheckDuplicati
 		return;
 
 	SkillListForPlalyer.Add(Skill);
-
 }
 
 UDataTable* UPlayerSkillManager::GetSkillDataTable()
