@@ -170,7 +170,6 @@ void UPlayerCharacterAnimInstance::PlayMoveOnlyPlayMontage()
 void UPlayerCharacterAnimInstance::PlayHitMontage()
 {
 	float ret = Montage_Play(HitMontage, 1.0f);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), ret);
 }
 
 void UPlayerCharacterAnimInstance::PlayRollMontage()
@@ -401,4 +400,9 @@ void UPlayerCharacterAnimInstance::AnimNotify_GargiSound()
 	UAudioComponent* SoundComp = MyCharacter->CurGameInstance->GetAudioComponentByIdx(idx);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundComp->Sound, MyCharacter->GetActorLocation(),
 		1.0f, 1.0f, 0.0f, MyCharacter->Attenuation);
+}
+
+void UPlayerCharacterAnimInstance::AnimNotify_TestNotify()
+{
+	XRLOG(Warning, TEXT("OH NOOOO"));
 }

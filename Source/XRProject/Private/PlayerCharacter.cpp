@@ -734,7 +734,6 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		GetCharacterMovement()->MaxWalkSpeed = kKnockBackSpeed;
 		GetCharacterMovement()->MaxAcceleration = kMaxMovementAcceleration;
 
-
 		MyAnimInstance->PlayHitMontage();
 		MyAnimInstance->Montage_JumpToSection(FName(TEXT("BigHit")));
 		ComboCount = 1;
@@ -1230,14 +1229,10 @@ void APlayerCharacter::ContinueCombo()
 
 void APlayerCharacter::StartMoveAttack()
 {
-	
-
 	bIsAttackMoving = true;
 	GetCharacterMovement()->MaxWalkSpeed = kAttackMovementSpeed;
 	Equipments.WeaponComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	Equipments.WeaponComponent->SetGenerateOverlapEvents(true);
-
-
 }
 void APlayerCharacter::EndMoveAttack()
 {
