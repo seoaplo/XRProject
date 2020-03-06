@@ -38,6 +38,7 @@ public:
 
 	void SpawnRemotePlayer();
 
+	void StartLevelFromVillage();
 	void AddRemotePlayerForMinimap(APlayerCharacter* RemotePlayer);
 	void DeleteRemotePlayer(int64_t ObjectID);
 	void DeathMonster(int64_t ObjectID);

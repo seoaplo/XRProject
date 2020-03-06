@@ -73,8 +73,8 @@ void UMapManager::ReadMapDataFromServer(InputStream& Input)
 	Input >> LevelID;
 
 	Input >> characterlistsize;
-	CharacterDataList.resize(characterlistsize + 1);
-	ReadPlayerFromServer(Input);
+	CharacterDataList.resize(characterlistsize);
+	ReadRemotePlayerListFromServer(Input);
 
 	Input >> monsterlistsize;
 	MonsterDataList.resize(monsterlistsize);
@@ -103,11 +103,10 @@ void UMapManager::ReadMosnterFromServer(InputStream& Input)
 	}
 }
 
-void UMapManager::ReadPlayerFromServer(InputStream& Input)
+void UMapManager::ReadRemotePlayerListFromServer(InputStream& Input)
 {
-	for (int iCount = 0; iCount < CharacterDataList.size() - 1; iCount++)
+	for (auto& CurrentData : CharacterDataList)
 	{
-		CharacterData& CurrentData = CharacterDataList[iCount];
 
 		Input >> CurrentData.ObjectID;
 		Input >> CurrentData.Location;
@@ -154,15 +153,13 @@ void UMapManager::ReadPlayerFromServer(InputStream& Input)
 				CurrentEquip.Count = Input.ReadInt32();
 			}
 		}
-
-
 	}
 }
 
 
 void UMapManager::ReadPossesPlayerFromServer(InputStream& Input)
 {
-	CharacterData& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
+	CharacterData& CurrentData = PlayerData;
 
 	Input >> CurrentData.ObjectID;
 	Input >> CurrentData.Location;
@@ -221,7 +218,7 @@ ANonePlayerCharacter* UMapManager::FindMonster(int64_t ObjectID)
 	ANonePlayerCharacter* FindedMonster = MonsterList.FindRef(ObjectID);
 	return FindedMonster;
 }
-bool UMapManager::ReadPlayerSpawnFromServer(InputStream& Input)
+bool UMapManager::ReadRemotePlayerSpawnFromServer(InputStream& Input)
 {
 	CharacterData CurrentData;
 	Input >> CurrentData.ObjectID;
@@ -312,7 +309,7 @@ bool UMapManager::DeleteWidget()
 	BP_LoadingWidget = nullptr;
 	return true;
 }
-bool UMapManager::PlayerListSpawn(UWorld* World)
+bool UMapManager::RemotePlayerListSpawn(UWorld* World)
 {
 	if (World == nullptr) return false;
 	if (CheckLoad == false) return false;
@@ -343,38 +340,53 @@ bool UMapManager::PlayerListSpawn(UWorld* World)
 			if (Player->PlayerStatComp == nullptr) continue;
 			CharacterList.Add(CurrentData.ObjectID, Player);
 		}
-
-		if (CurrentData.ObjectID != PlayerID)
-		{
-			Player->InitializeCharacter(false, CurrentData);
-		}
-		else
-		{
-			for (int ii = 0; ii < CharacterSkillIDList.Num(); ii++)
-			{
-				UPlayerSkillManager* SkillManager = GI->GetPlayerSkillManager();
-				SkillManager->AddSkill(SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
-
-				GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
-					CharacterSkillIDList[ii]), false);
-				GI->GetPlayerSkillManager()->AddSkillToTimeDurationList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
-					CharacterSkillIDList[ii]), false);
-			}
-
-			Player->InitializeCharacter(true, CurrentData);
-			PossessPlayer(World);
-		}
+		Player->InitializeCharacter(false, CurrentData);
 	}
 	CharacterDataList.clear();
 	return true;
 }
-bool UMapManager::PossessPlayer(UWorld* World)
+bool UMapManager::PossessPlayerSpawn(UWorld* World)
 {
-	if (CheckLoad == false) return false;
-	APlayerCharacter* Player = CharacterList.FindRef(PlayerID);
+	if (World == nullptr) return false;
+
+	FActorSpawnParameters Param;
+	Param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	AActor* actor =
+		World->SpawnActor
+		(APlayerCharacter::StaticClass(), &PlayerData.Location, &PlayerData.Rotator, Param);
+
+	if (actor == nullptr) return false;
+
+	XRLOG(Warning, TEXT("%s"), *actor->GetActorLocation().ToString());
+	APlayerCharacter* Player = Cast<APlayerCharacter>(actor);
+	UXRGameInstance* GI = Cast<UXRGameInstance>(Player->GetWorld()->GetGameInstance());
 	if (Player == nullptr) return false;
+	if (GI == nullptr) return false;
+	
+	APlayerCharacter** CheckPlayer = CharacterList.Find(PlayerData.ObjectID);
+	if (CheckPlayer != nullptr)
+	{
+		Player->Destroy();
+	}
+	if (Player->PlayerStatComp == nullptr) return false;
+	CharacterList.Add(PlayerData.ObjectID, Player);
+
+	for (int ii = 0; ii < CharacterSkillIDList.Num(); ii++)
+	{
+		UPlayerSkillManager* SkillManager = GI->GetPlayerSkillManager();
+		SkillManager->AddSkill(SkillManager->CreateSkillFromID(CharacterSkillIDList[ii]), true);
+
+		GI->GetPlayerSkillManager()->AddSkillToCooldownList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
+			CharacterSkillIDList[ii]), false);
+		GI->GetPlayerSkillManager()->AddSkillToTimeDurationList(SkillManager->FindSkillFromList(SkillManager->SkillListForPlalyer,
+			CharacterSkillIDList[ii]), false);
+	}
+	Player->InitializeCharacter(true, PlayerData);
+
 	AXRPlayerController* MyPlayerController = Cast<AXRPlayerController>(World->GetPlayerControllerIterator()->Get());
 	if (MyPlayerController == nullptr) return false;
+
 	MyPlayerController->Possess(Player);
 	PlayerCharacter = Player;
 	return true;
@@ -436,7 +448,7 @@ bool UMapManager::MonsterListSpawn(UWorld* World)
 
 bool UMapManager::RemotePlayerSpawn(UWorld* world)
 {
-	return PlayerListSpawn(world);
+	return RemotePlayerListSpawn(world);
 }
 bool UMapManager::DeleteRemotePlayer(int64_t ObjectID)
 {
@@ -472,7 +484,7 @@ void UMapManager::SendChangeZoneFromClient()
 }
 void UMapManager::InputExpData(class InputStream& input)
 {
-	CharacterData& CurrentData = CharacterDataList[CharacterDataList.size() - 1];
+	CharacterData& CurrentData = PlayerData;
 	CurrentData.Current_Exp	 = input.ReadInt32();
 	CurrentData.Max_Exp		 = input.ReadInt32();
 }

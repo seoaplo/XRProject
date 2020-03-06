@@ -55,10 +55,10 @@ public:
 	bool IsDungeon() { if ((LevelID % 100) > 0) return true; else return false;}
 	// 맵에 입장
 	void ReadMapDataFromServer(InputStream& Input);
-	void ReadPlayerFromServer(InputStream& Input);
+	void ReadRemotePlayerListFromServer(InputStream& Input);
 	void ReadPossesPlayerFromServer(InputStream& Input);
 	void ReadMosnterFromServer(InputStream& Input);
-	bool ReadPlayerSpawnFromServer(InputStream& Input);
+	bool ReadRemotePlayerSpawnFromServer(InputStream& Input);
 
 	// 서버로 데이터 송신
 	void SendChangeZoneFromClient();
@@ -69,10 +69,10 @@ public:
 	
 	// 오픈 레벨
 	bool OpenMap(UWorld* World);
-	bool PlayerListSpawn(UWorld* world);
+	bool RemotePlayerListSpawn(UWorld* world);
 	bool MonsterListSpawn(UWorld* world);
 	bool RemotePlayerSpawn(UWorld* world);
-	bool PossessPlayer(UWorld* World);
+	bool PossessPlayerSpawn(UWorld* World);
 
 	bool CreateLoadingWidget(UWorld* World, float Percent);
 	bool DeleteWidget();
@@ -101,6 +101,7 @@ private:
 	float	LoadingPercent;
 	bool	CheckLoad;
 
+	CharacterData PlayerData;
 	std::vector<CharacterData> CharacterDataList;
 	std::vector<MonsterData> MonsterDataList;
 
