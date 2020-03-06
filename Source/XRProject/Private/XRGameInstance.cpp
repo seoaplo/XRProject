@@ -219,7 +219,7 @@ void UXRGameInstance::ReadSkillData(InputStream & input)
 
 void UXRGameInstance::SpawnCharacterFromServer(class InputStream& input)
 {
-	MapManager->ReadPlayerSpawnFromServer(input);
+	MapManager->ReadRemotePlayerSpawnFromServer(input);
 }
 void UXRGameInstance::UpdateCharacterPosition(class InputStream& input)
 {
