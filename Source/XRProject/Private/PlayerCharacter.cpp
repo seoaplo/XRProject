@@ -745,7 +745,7 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		FVector VecToTarget = NPC->GetActorLocation() - GetActorLocation();
 		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
-		AgainstMonster = FRotator(0.0f, -(FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw), 0.0f);
+		AgainstMonster = FRotator(0.0f, (FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw) + 180.0f, 0.0f);
 		SetActorRotation(AgainstMonster);
 		KnockBackVector = -VecToTarget;
 	}
