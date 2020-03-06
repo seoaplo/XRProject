@@ -351,6 +351,7 @@ void UPlayerCharacterAnimInstance::AnimNotify_KnockBackMoveEnd()
 	if (IsValid(MyCharacter))
 	{
 		MyCharacter->SetbIsKnockBackMoving(false);
+		MyCharacter->GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
 }
 
@@ -400,9 +401,4 @@ void UPlayerCharacterAnimInstance::AnimNotify_GargiSound()
 	UAudioComponent* SoundComp = MyCharacter->CurGameInstance->GetAudioComponentByIdx(idx);
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundComp->Sound, MyCharacter->GetActorLocation(),
 		1.0f, 1.0f, 0.0f, MyCharacter->Attenuation);
-}
-
-void UPlayerCharacterAnimInstance::AnimNotify_TestNotify()
-{
-	XRLOG(Warning, TEXT("OH NOOOO"));
 }

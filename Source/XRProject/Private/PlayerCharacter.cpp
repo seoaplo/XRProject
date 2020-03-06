@@ -745,6 +745,8 @@ float APlayerCharacter::TakeDamage(float Damage, FXRDamageEvent& DamageEvent, AC
 		FVector VecToTarget = NPC->GetActorLocation() - GetActorLocation();
 		FRotator AgainstMonster = FRotator(0.0f, 0.0f, 0.0f);
 
+
+		GetCharacterMovement()->bOrientRotationToMovement = false;
 		AgainstMonster = FRotator(0.0f, (FRotationMatrix::MakeFromY(VecToTarget).Rotator().Yaw) + 180.0f, 0.0f);
 		SetActorRotation(AgainstMonster);
 		KnockBackVector = -VecToTarget;
@@ -1160,8 +1162,9 @@ void APlayerCharacter::OnMyMontageEnded(UAnimMontage* Montage, bool bInterrupted
 	}
 	else if (MyAnimInstance->HitMontage == Montage)
 	{
-		bIsHit = false;
+		//bIsHit = false;
 		SetbIsInvisible(false);
+		GetCharacterMovement()->bOrientRotationToMovement = true;
 
 		if (bIsSprint)
 			GetCharacterMovement()->MaxWalkSpeed = kSprintMovementSpeed;
